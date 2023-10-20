@@ -1,0 +1,91 @@
+#page-mod-ogte-view .feedbackbox {
+    width: 75%;
+    border-collapse: separate;
+}
+#page-mod-ogte-view .entrycontent {
+    padding: 3px;
+}
+#page-mod-ogte-view .picture {
+    width: 35px;
+}
+#page-mod-ogte-view .info {
+    margin-bottom: 5px;
+    text-align: right;
+}
+#page-mod-ogte-view .ogtestart,
+#page-mod-ogte-report .feedbacksave {
+    text-align: center;
+}
+/* #page-mod-ogte-view .lastedit, */
+/* #page-mod-ogte-view .editend { */
+    /* font-size: 0.7em; */
+    /* margin: 5px; */
+    /* text-align: center; */
+/* } */
+#page-mod-ogte-view .author {
+    font-size: 1em;
+    font-weight: bold;
+}
+#page-mod-ogte-view .time {
+    font-size: 0.7em;
+    font-style: italic;
+}
+#page-mod-ogte-view .grade {
+    font-weight: bold;
+    font-style: italic;
+    text-align: right;
+}
+
+#page-mod-ogte-index .cell {
+    font-size: 0.8em;
+}
+#page-mod-ogte-view .feedbackbox .left,
+#page-mod-ogte-view .feedbackbox .entryheader {
+    background-color: #ddd;
+}
+
+#page-mod-ogte-view .feedbackbox {
+    -moz-border-radius-bottomleft: 15px;
+    -moz-border-radius-bottomright: 15px;
+    border-spacing: 0;
+    margin: 0 auto;
+}
+#page-mod-ogte-view .feedbackbox .side {
+    -moz-border-radius-bottomleft: 15px;
+}
+#page-mod-ogte-view .feedbackbox .entrycontent {
+    -moz-border-radius-bottomright: 15px;
+}
+
+#page-mod-ogte-report .ogteuserentry {
+    border: 1px solid #dee2e6;
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+#page-mod-ogte-report .ogteuserentry td {
+    padding: 10px;
+    vertical-align: top;
+    width: 100%;
+}
+#page-mod-ogte-report .ogteuserentry td.userpix {
+    width: 35px;
+}
+#page-mod-ogte-report .ogteuserentry td.userfullname {
+    white-space: nowrap;
+}
+/* #page-mod-ogte-report .ogteuserentry td .lastedit { */
+    /* font-size: 0.76em; */
+    /* margin-left: 10px; */
+/* } */
+#page-mod-ogte-report .mediaplugin {
+    width: auto;
+}
+#page-mod-ogte-view table, th, td {
+    padding: 5px;
+}
+#page-mod-ogte-edit table, th, td {
+    padding: 5px;
+}
+#page-mod-ogte-view td {
+    vertical-align: top;
+}
