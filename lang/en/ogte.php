@@ -145,4 +145,28 @@ $string['freetrial'] = "Get Cloud Poodll API Credentials and a Free Trial";
 $string['freetrial_desc'] = "A dialog should appear that allows you to register for a free trial with Poodll. After registering you should login to the members dashboard to get your API user and secret. And to register your site URL.";
 $string['fillcredentials']="Set API user and secret with existing credentials";
 
+$string['nolists']="No Lists!!";
+$string['managelists']="Manage lists";
+$string['listinstructions']="Add or edit lists below";
+$string['editlist']="Edit";
+$string['deletelist']="Delete";
+$string['listname']="Name";
+$string['listprops']="Props";
+$string['listdescription']="Description";
+$string['liststatus']="Status";
+$string['timecreated']="Created";
+$string['actions']="Actions";
+$string['liststatusempty']="Empty";
+$string['liststatusready']="Ready";
+$string['editinglist']="";
+$string['listformtitle']="";
+$string['']="";
+$string['']="";
+$string['']="";
+$string['']="";
+
+
+
+
+
 

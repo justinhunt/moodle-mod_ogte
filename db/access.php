@@ -27,6 +27,16 @@ defined('MOODLE_INTERNAL') || die();
 
 $capabilities = array(
 
+    'mod/ogte:manage' => array(
+
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => array(
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_ALLOW
+        )
+    ),
+
     'mod/ogte:manageentries' => array(
 
         'captype' => 'write',
