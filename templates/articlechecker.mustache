@@ -1,0 +1,136 @@
+<div class="container">
+    <div class="row">
+        <div class="col-lg">
+
+            <h4>{{#str}}original-passage, mod_ogte{{/str}}</h4>
+            <textarea id="{{uniqid}}_ac_originaltext" class="mod-ogte-textarea" placeholder="{{#str}}paste-text-here, mod_ogte{{/str}}"></textarea><br>
+            <div id="{{uniqid}}_ac_originalstats" class="mod-ogte-stats"></div>
+            <fieldset>
+                <legend>{{#str}}passage-language, mod_ogte{{/str}}</legend>
+                <select name="language" id="{{uniqid}}_ac_language" data-initial-value="en-US">
+                    <option value="ar-AE">Arabic (Gulf)</option>
+                    <option value="ar-SA">Arabic (Modern Standard)</option>
+                    <option value="da-DK">Danish (DK)</option>
+                    <option value="de-DE">German (DE)</option>
+                    <option value="de-CH">German (CH)</option>
+                    <option value="de-AT">German (AT)</option>
+                    <option value="en-US" selected="">English (US)</option>
+                    <option value="en-GB">English (GB)</option>
+                    <option value="en-AU">English (Aus.)</option>
+                    <option value="en-PH">English (Phil.)</option>
+                    <option value="en-NZ">English (New Zealand)</option>
+                    <option value="en-ZA">English (South Africa)</option>
+                    <option value="en-IN">English (IN)</option>
+                    <option value="en-IE">English (Ireland)</option>
+                    <option value="en-WL">English (Wales)</option>
+                    <option value="en-AB">English (Scotland)</option>
+                    <option value="es-US">Spanish (US)</option>
+                    <option value="es-ES">Spanish (ES)</option>
+                    <option value="fa-IR">Farsi</option>
+                    <option value="fil-PH">Filipino</option>
+                    <option value="fr-CA">French (Can.)</option>
+                    <option value="fr-FR">French (FR)</option>
+                    <option value="hi-IN">Hindi</option>
+                    <option value="he-IL">Hebrew</option>
+                    <option value="id-ID">Indonesian</option>
+                    <option value="it-IT">Italian (IT)</option>
+                    <option value="ja-JP">Japanese</option>
+                    <option value="ko-KR">Korean</option>
+                    <option value="ms-MY">Malay</option>
+                    <option value="nl-NL">Dutch (NL)</option>
+                    <option value="nl-BE">Dutch (BE)</option>
+                    <option value="pt-BR">Portuguese (BR)</option>
+                    <option value="pt-PT">Portuguese (PT)</option>
+                    <option value="ru-RU">Russian</option>
+                    <option value="ta-IN">Tamil</option>
+                    <option value="te-IN">Telugu</option>
+                    <option value="tr-TR">Turkish</option>
+                    <option value="zh-CN">Chinese (Mandarin-Mainland)</option>
+                    <option value="nb-NO">Norwegian</option>
+                    <option value="pl-PL">Polish</option>
+                    <option value="ro-RO">Romanian</option>
+                    <option value="sv-SE">Swedish</option>
+                    <option value="uk-UA">Ukranian</option>
+                    <option value="eu-ES">Basque</option>
+                    <option value="fi-FI">Finnish</option>
+                    <option value="hu-HU">Hungarian</option>
+                </select>
+            </fieldset>
+            <button id="{{uniqid}}_ac_button" type="button" style="width: 100%; max-width: 800px; margin-top: 8px;">{{#str}}correct-grammar, mod_ogte{{/str}}</button>
+
+        </div>
+        <div class="col-lg">
+
+            <div id="{{uniqid}}_ac_rewritten"  style="display: none">
+                <h4>{{#str}}corrected-passage, mod_ogte{{/str}}</h4>
+                <div id="{{uniqid}}_ac_spinner" style="text-align: center; width: 100%; display: none;"><i class="fa fa-spinner fa-spin fa-lg"></i></div>
+                <textarea id="{{uniqid}}_ac_result" class="mod-ogte-textarea" style="display: none;"></textarea>
+                <div id="{{uniqid}}_ac_resultstats" class="mod-ogte-stats" style="display: none;"></div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- @@CLOUDPOODLLTOKEN@@ -->
+
+{{^element.frozen}}
+    {{#js}}
+        // <script>
+        require(['jquery', 'mod_ogte/utils'], function($, utils) {
+
+            //On click load text into the player and play it
+            var theresult= $('#{{uniqid}}_ac_result');
+            var originalstats= $('#{{uniqid}}_ac_originalstats');
+            var resultstats= $('#{{uniqid}}_ac_resultstats');
+            var rewritten= $('#{{uniqid}}_ac_rewritten');
+            var spinner= $('#{{uniqid}}_ac_spinner');
+
+            utils.setCloudPoodllToken('{{cloudpoodlltoken}}');
+
+            $('#{{uniqid}}_ac_button').on('click',function(){
+                //show a spinner and the title in results col
+                rewritten.show();
+                theresult.hide();
+                spinner.show();
+                resultstats.hide();
+
+                var usetext = $('#{{uniqid}}_ac_originaltext').val();
+                var language = $('#{{uniqid}}_ac_language').val();
+
+                //no super long readings or empty ones
+                if(!usetext || usetext.trim()==='') {
+                    theresult.val('{{#str}}enter-something, mod_ogte{{/str}}');
+                    theresult.show();
+                    spinner.hide();
+                    return;
+                }
+                if(usetext.length > 5000){
+                    theresult.val('{{#str}}text-too-long-5000, mod_ogte{{/str}}');
+                    theresult.show();
+                    spinner.hide();
+                    return;
+                }
+
+                //add stats to original 
+                var originalStatsTable = utils.analyzeText(usetext);
+                originalstats.html(originalStatsTable );
+                originalstats.show();
+
+                utils.call_ai(usetext,language,'','request_grammar_correction',function(correction){
+                    theresult.val(correction);
+                    theresult.show();
+
+                    //add stats to result
+                    var resultStatsTable = utils.analyzeText(correction);
+                    resultstats.html(resultStatsTable );
+                    //hide a spinner and show results
+                    theresult.show();
+                    resultstats.show();
+                    spinner.hide();
+
+                });
+            });
+        });
+    {{/js}}
+{{/element.frozen}}

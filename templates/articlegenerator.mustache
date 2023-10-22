@@ -1,0 +1,54 @@
+<div>
+    <input type="text" id="{{uniqid}}_ag_prompt" style="width: 80%; max-width: 800px;" placeholder="{{#str}}article-topic-here, mod_ogte{{/str}}"></textarea>
+    <div id="{{uniqid}}_ag_message" style="width: 80%; max-width: 800px; text-align: center"></div>
+    <button id="{{uniqid}}_ag_button" type="button" style="width: 80%; max-width: 800px">{{#str}}generate-article, mod_ogte{{/str}}</button>
+    <div><textarea id="{{uniqid}}_ag_article" style="overflow: auto; resize: auto; height: 150px; width: 80%; max-width: 800px; display: none"></textarea><br></div>
+    <div id="{{uniqid}}_ag_articlestats" style="display: none" class="mod-ogte-stats"></div>
+</div>
+<!-- @@CLOUDPOODLLTOKEN@@ -->
+{{^element.frozen}}
+    {{#js}}
+        // <script>
+            require(['jquery', 'mod_ogte/utils'], function($, utils) {
+
+                var promptbox= $('#{{uniqid}}_ag_prompt');
+                var articlebox= $('#{{uniqid}}_ag_article');
+                var articlestats= $('#{{uniqid}}_ag_articlestats');
+                var themessage= $('#{{uniqid}}_ag_message');
+
+                utils.setCloudPoodllToken('{{cloudpoodlltoken}}');
+
+                $('#{{uniqid}}_ag_button').on('click',function(){
+                    //show a spinner
+                    themessage.html('<i class="fa fa-spinner fa-spin fa-sm"></i>');
+
+
+                    var theprompt = promptbox.val();
+                    //no super long readings or empty ones
+                    if(!theprompt || theprompt.trim()==='') {
+                        themessage.text('{{#str}}enter-something, mod_ogte{{/str}}');
+                        return;
+                    }
+                    if(theprompt.length > 200){
+                        themessage.text('{{#str}}text-too-long-200, mod_ogte{{/str}}');
+                        return;
+                    }
+                    var language = 'en-US';
+                    utils.call_ai(theprompt,language,'','generate_article',function(thearticle){
+                        themessage.text('');
+                        articlebox.val(thearticle);
+                        articlebox.show();
+                        var articleStatsTable = utils.analyzeText(thearticle);
+                        articlestats.html(articleStatsTable );
+                        articlestats.show();
+                    });
+                });
+
+
+
+
+
+
+            });
+    {{/js}}
+{{/element.frozen}}

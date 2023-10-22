@@ -27,6 +27,9 @@ require_once("../../config.php");
 require_once('./edit_form.php');
 require_once($CFG->dirroot.'/lib/completionlib.php');
 
+use \mod_ogte\constants;
+use \mod_ogte\utils;
+
 $id = required_param('id', PARAM_INT);    // Course Module ID.
 
 if (!$cm = get_coursemodule_from_id('ogte', $id)) {
@@ -68,8 +71,27 @@ if ($entry) {
 }
 
 $data->id = $cm->id;
-$abovetextarea = $OUTPUT->render_from_template('mod_ogte/abovetextarea', []);
-$belowtextarea = $OUTPUT->render_from_template('mod_ogte/belowtextarea', []);
+//get token
+//first confirm we are authorised before we try to get the token
+$config = get_config(constants::M_COMPONENT);
+if(empty($config->apiuser) || empty($config->apisecret)){
+    $errormessage = get_string('nocredentials',constants::M_COMPONENT,
+        $CFG->wwwroot . constants::M_PLUGINSETTINGS);
+    return $this->show_problembox($errormessage);
+}else {
+    //fetch token
+    $token = utils::fetch_token($config->apiuser,$config->apisecret);
+
+    //check token authenticated and no errors in it
+    $errormessage = utils::fetch_token_error($token);
+    if(!empty($errormessage)){
+        return $this->show_problembox($errormessage);
+    }
+}
+
+$params =['cloudpoodlltoken'=>$token];
+$abovetextarea = '';
+$belowtextarea = $OUTPUT->render_from_template('mod_ogte/belowtextarea', $params) ;
 
 $form = new mod_ogte_entry_form(null, array('entryid' => $data->entryid,'abovetextarea'=>$abovetextarea,'belowtextarea'=>$belowtextarea));
 $form->set_data($data);

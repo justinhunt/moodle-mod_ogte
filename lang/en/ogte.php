@@ -106,3 +106,43 @@ $string['privacy:metadata:ogte_entries:modified'] = 'The start time of the ogte 
 $string['privacy:metadata:ogte_entries:text'] = 'The text written by user';
 $string['privacy:metadata:ogte_entries:rating'] = 'The rating received by user to journl';
 $string['privacy:metadata:ogte_entries:entrycomment'] = 'The comment received by user to ogte';
+
+$string['correct-grammar'] = 'Correct Grammar';
+$string['corrected-passage'] = 'Corrected Passage';
+$string['generate-article'] = 'Generate article';
+$string['rewrite-article'] = 'Rewrite article';
+$string['rewritten-article'] = 'Rewritten article';
+$string['original-article'] = 'Original article';
+$string['original-passage'] = 'Original passage';
+$string['passage-language'] = 'Passage language';
+$string['article-topic-here'] = 'Article topic here';
+$string['paste-text-here'] = 'Paste text here';
+$string['enter-something'] = 'Please enter something in the text area.';
+$string['text-too-long-5000'] = 'The text is too long. Passages must be 5000 characters are shorter.';
+$string['text-too-long-200'] = 'The prompt is too long. Prompts must be 200 characters are shorter.';
+$string['articlegenerator'] = 'Article Generator';
+$string['articlerewriter'] = 'Article Rewriter';
+$string['articlechecker'] = 'Article Checker';
+
+$string['displaysubs'] = '{$a->subscriptionname} : expires {$a->expiredate}';
+$string['noapiuser'] = "No API user entered. OGTE will not work correctly.";
+$string['noapisecret'] = "No API secret entered. OGTE will not work correctly.";
+$string['credentialsinvalid'] = "The API user and secret entered could not be used to get access. Please check them.";
+$string['appauthorised']= "Poodll OGTE is authorised for this site.";
+$string['appnotauthorised']= "Poodll OGTE is NOT authorised for this site.";
+$string['refreshtoken']= "Refresh license information";
+$string['notokenincache']= "Refresh to see license information. Contact Poodll support if there is a problem.";
+//these errors are displayed on activity page
+$string['nocredentials'] = 'API user and secret not entered. Please enter them on <a href="{$a}">the settings page.</a> You can get them from <a href="https://poodll.com/member">Poodll.com.</a>';
+$string['novalidcredentials'] = 'API user and secret were rejected and could not gain access. Please check them on <a href="{$a}">the settings page.</a> You can get them from <a href="https://poodll.com/member">Poodll.com.</a>';
+$string['nosubscriptions'] = "There is no current subscription for this site/plugin.";
+$string['apiuser']='Poodll API User ';
+$string['apiuser_details']='The Poodll account username that authorises Poodll on this site.';
+$string['apisecret']='Poodll API Secret ';
+$string['apisecret_details']='The Poodll API secret. See <a href= "https://support.poodll.com/support/solutions/articles/19000083076-cloud-poodll-api-secret">here</a> for more details';
+
+$string['freetrial'] = "Get Cloud Poodll API Credentials and a Free Trial";
+$string['freetrial_desc'] = "A dialog should appear that allows you to register for a free trial with Poodll. After registering you should login to the members dashboard to get your API user and secret. And to register your site URL.";
+$string['fillcredentials']="Set API user and secret with existing credentials";
+
+

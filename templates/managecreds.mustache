@@ -1,0 +1,21 @@
+<div class="mod_ogte_credsmanager">
+    <!-- If API user then show a link + js to poke creds in -->
+    {{#apiuser}}<a href="#" class="cloudpoodll_poke_creds">{{#str}}fillcredentials, mod_ogte{{/str}}</a>{{/apiuser}}
+    {{^apiuser}}
+        <a href="https://poodll.com/try-poodll" target="_blank">{{#str}}freetrial, mod_ogte{{/str}} [&#x2197;]</a>
+    {{/apiuser}}
+</div>
+{{^element.frozen}}
+    {{#js}}
+        require(['jquery'],function($) {
+            //set up fetch from elsewhere
+            $(".mod_ogte_credsmanager .cloudpoodll_poke_creds").on("click", function() {
+                event.preventDefault();
+                var apiuser = document.getElementById('id_s_mod_ogte_apiuser');
+                var apisecret = document.getElementById('id_s_mod_ogte_apisecret');
+                apiuser.value='{{{apiuser}}}';
+                apisecret.value='{{{apisecret}}}';
+            });
+        });
+    {{/js}}
+{{/element.frozen}}

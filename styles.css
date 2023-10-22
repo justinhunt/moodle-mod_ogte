@@ -89,3 +89,25 @@
 #page-mod-ogte-view td {
     vertical-align: top;
 }
+
+.mod-ogte-textarea {
+    overflow: auto;
+    resize: vertical;
+    height: 300px;
+    width: 100%;
+    max-width: 800px;
+}
+
+.mod-ogte-stats table {
+    border-collapse: collapse;
+    table-layout: fixed;
+    width: 100%;
+    max-width: 800px;
+}
+
+.mod-ogte-stats th, td {
+    border: 1px solid black;
+    width: 20%; /* or width: 100px; */
+    padding: 10px;
+    text-align: left;
+}

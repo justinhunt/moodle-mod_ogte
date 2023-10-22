@@ -1,0 +1,99 @@
+<div class="container">
+    <div class="row">
+        <div class="col-lg">
+
+            <h4>{{#str}}original-article, mod_ogte{{/str}}</h4>
+            <textarea id="{{uniqid}}_ar_originaltext" class="mod-ogte-textarea" placeholder="{{#str}}paste-text-here, mod_ogte{{/str}}"></textarea><br>
+            <div id="{{uniqid}}_ar_originalstats" class="mod-ogte-stats"></div>
+            <fieldset>
+                <legend>Rewritten Article Difficulty</legend>
+                <input type="radio" id="one" name="difficulty" value="1">
+                <label for="one">One (simplest)</label>
+                <input type="radio" id="two" name="difficulty" value="2">
+                <label for="two">Two</label>
+
+                <input type="radio" id="three" name="difficulty" value="3" checked>
+                <label for="three">Three</label>
+                <input type="radio" id="four" name="difficulty" value="4">
+                <label for="four">Four</label>
+                <input type="radio" id="five" name="difficulty" value="5">
+                <label for="five">Five</label>
+            </fieldset>
+            <button id="{{uniqid}}_ar_button" type="button" style="width: 100%; max-width: 800px">{{#str}}rewrite-article, mod_ogte{{/str}}</button>
+
+        </div>
+        <div class="col-lg">
+
+            <div id="{{uniqid}}_ar_rewritten"  style="display: none">
+                <h4>{{#str}}rewritten-article, mod_ogte{{/str}}</h4>
+                <div id="{{uniqid}}_ar_spinner" style="text-align: center; width: 100%; display: none;"><i class="fa fa-spinner fa-spin fa-lg"></i></div>
+                <textarea id="{{uniqid}}_ar_result" class="mod-ogte-textarea" style="display: none;"></textarea>
+                <div id="{{uniqid}}_ar_resultstats" class="mod-ogte-stats" style="display: none;"></div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{{^element.frozen}}
+    {{#js}}
+        // <script>
+            require(['jquery', 'mod_ogte/utils'], function($, utils) {
+
+                var theresult= $('#{{uniqid}}_ar_result');
+                var originalstats= $('#{{uniqid}}_ar_originalstats');
+                var resultstats= $('#{{uniqid}}_ar_resultstats');
+                var rewritten= $('#{{uniqid}}_ar_rewritten');
+                var spinner= $('#{{uniqid}}_ar_spinner');
+
+                utils.setCloudPoodllToken('{{cloudpoodlltoken}}');
+
+                $('#{{uniqid}}_ar_button').on('click',function(){
+                    //show a spinner and the title in results col
+                    rewritten.show();
+                    theresult.hide();
+                    spinner.show();
+                    resultstats.hide();
+
+                    var usetext = $('#{{uniqid}}_ar_originaltext').val();
+                    var difficulty = $('input[name="difficulty"]:checked').val();
+
+                    //no super long readings or empty ones
+                    if(!usetext || usetext.trim()==='') {
+                        theresult.val('{{#str}}enter-something, mod_ogte{{/str}}');
+                        theresult.show();
+                        spinner.hide();
+                        return;
+                    }
+                    if(usetext.length > 5000){
+                        theresult.val('{{#str}}text-too-long-5000, mod_ogte{{/str}}');
+                        theresult.show();
+                        spinner.hide();
+                        return;
+                    }
+
+                    //add stats to original
+                    var originalStatsTable = utils.analyzeText(usetext);
+                    originalstats.html(originalStatsTable );
+                    originalstats.show();
+
+                    utils.call_ai(usetext,'en-US',difficulty,'rewrite_article',function(newarticle){
+                        theresult.val(newarticle);
+                        theresult.show();
+
+                        //add stats to result
+                        var resultStatsTable = utils.analyzeText(newarticle);
+                        resultstats.html(resultStatsTable );
+                        //hide a spinner and show results
+                        theresult.show();
+                        resultstats.show();
+                        spinner.hide();
+
+                    });
+                });
+
+
+
+            });
+    {{/js}}
+{{/element.frozen}}
