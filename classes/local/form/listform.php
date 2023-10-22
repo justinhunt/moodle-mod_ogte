@@ -121,7 +121,7 @@ class listform extends \moodleform {
 
         //status
         $liststatus_opts = [constants::M_LISTSTATUS_EMPTY=>'empty',constants::M_LISTSTATUS_READY=>'ready'];
-        $mform->addElement('select', 'status', get_string('liststatus', constants::M_COMPONENT),'',$liststatus_opts);
+        $mform->addElement('select', 'status', get_string('liststatus', constants::M_COMPONENT),$liststatus_opts);
         $mform->setType('status', PARAM_INT);
         $mform->addRule('status', get_string('required'), 'required', null, 'client');
 

@@ -71,9 +71,8 @@ $redirecturl = new moodle_url('/mod/ogte/list/lists.php', array('id'=>$cm->id));
 //handle delete actions
 if($action == 'confirmdelete'){
     $renderer = $PAGE->get_renderer(constants::M_COMPONENT);
-    $list_renderer = $PAGE->get_renderer(constants::M_COMPONENT,'list');
     echo $renderer->header($moduleinstance, $cm, 'lists', null, get_string('confirmlistdeletetitle', constants::M_COMPONENT));
-    echo $list_renderer->confirm(get_string("confirmlistdelete",constants::M_COMPONENT,$list->name),
+    echo $renderer->confirm(get_string("confirmlistdelete",constants::M_COMPONENT,$list->name),
             new moodle_url('/mod/ogte/list/managelists.php', array('action'=>'delete','moduleid'=>$moduleid,'id'=>$id)),
             $redirecturl);
     echo $renderer->footer();
@@ -82,15 +81,18 @@ if($action == 'confirmdelete'){
     /////// Delete list NOW////////
 }elseif ($action == 'delete'){
     require_sesskey();
-    //do some deleting
-    // $success = \mod_ogte\list\helper::delete_list($moduleinstance,$id,$context);
+    //delete the list words
+    $DB->delete_records(constants::M_WORDSTABLE, array('list'=>$id));
+    //delete the list
+    $DB->delete_records(constants::M_LISTSTABLE, array('id'=>$id));
+
     redirect($redirecturl);
 }
 
 $siteconfig = get_config(constants::M_COMPONENT);
 
 //get the mform for our list
-$mform = new \mod_ogte\list\listform(null, array('moduleinstance'=>$moduleinstance));
+$mform = new \mod_ogte\local\form\listform(null, array('moduleinstance'=>$moduleinstance));
 
 //if the cancel button was pressed, we are out of here
 if ($mform->is_cancelled()) {
@@ -145,18 +147,17 @@ if ($edit) {
 }else{
     $data=new stdClass;
     $data->id = null;
-    $data->courseid=$course->id;
-    $data->moduleid = $moduleid;
 }
+$data->courseid=$course->id;
+$data->moduleid = $moduleid;
 
 
 //Set up the list type specific parts of the form data
-$listrenderer = $PAGE->get_renderer('mod_ogte','list');
+$renderer = $PAGE->get_renderer('mod_ogte');
 $mform->set_data($data);
 $PAGE->navbar->add(get_string('edit'), new moodle_url('/mod/ogte/list/lists.php', array('id'=>$moduleid)));
 $PAGE->navbar->add(get_string('editinglist', constants::M_COMPONENT));
-$renderer = $PAGE->get_renderer('mod_ogte');
 $mode='lists';
-echo $renderer->header($moduleinstance, $cm,$mode, null, get_string('edit', constants::M_COMPONENT));
+echo $renderer->header($moduleinstance, $cm,$mode, null, get_string('editlist', constants::M_COMPONENT));
 $mform->display();
 echo $renderer->footer();

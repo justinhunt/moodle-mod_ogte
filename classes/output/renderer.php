@@ -48,7 +48,7 @@ class renderer extends \plugin_renderer_base {
 		$addurl = new \moodle_url(constants::M_URL . '/list/managelists.php',
 			array('moduleid'=>$this->page->cm->instance, 'id'=>$listid));
         $links[] = \html_writer::link($addurl,  get_string('addlist', constants::M_COMPONENT),
-            array('class'=>'btn ' . constants::M_COMPONENT .'_menubutton ' . constants::M_COMPONENT .'_activemenubutton'));
+            array('class'=>'btn btn-secondary ' . constants::M_COMPONENT .'_menubutton ' . constants::M_COMPONENT .'_activemenubutton'));
 
 
 
@@ -81,12 +81,10 @@ class renderer extends \plugin_renderer_base {
 		$table->head = array(
          //    get_string('listselected', constants::M_COMPONENT),
 			get_string('listname', constants::M_COMPONENT),
-			get_string('listprops', constants::M_COMPONENT),
             get_string('listdescription', constants::M_COMPONENT),
             get_string('liststatus', constants::M_COMPONENT),
             get_string('timecreated', constants::M_COMPONENT),
-			get_string('actions', constants::M_COMPONENT),
-            ''
+			get_string('actions', constants::M_COMPONENT)
 		);
 		$table->headspan = array(1,1,1,1,3);
 		$table->colclasses = array(
@@ -105,7 +103,7 @@ class renderer extends \plugin_renderer_base {
             //list description
             $listdescriptioncell = new \html_table_cell($list->description);
             //list status
-            switch($list->liststatus) {
+            switch($list->status) {
                 case constants::M_LISTSTATUS_EMPTY:
                     $liststatus = get_string('liststatusempty',constants::M_COMPONENT);
                     break;
@@ -122,13 +120,13 @@ class renderer extends \plugin_renderer_base {
 
             //import edit
             $importurl = '/mod/ogte/list/importlist.php';
-            $importurl = new \moodle_url($importurl, array('id' => $list->moduleid, 'listid' => $list->id));
+            $importurl = new \moodle_url($importurl, array('id' => $cm->instance, 'listid' => $list->id));
             $importlink = \html_writer::link($importurl, get_string('importlist', constants::M_COMPONENT));
             $importcell = new \html_table_cell($importlink);
 
             //list edit
             $actionurl = '/mod/ogte/list/managelists.php';
-            $editurl = new \moodle_url($actionurl, array('moduleid' => $list->moduleid, 'id' => $list->id));
+            $editurl = new \moodle_url($actionurl, array('moduleid' => $cm->instance, 'id' => $list->id));
             $editlink = \html_writer::link($editurl, get_string('editlist', constants::M_COMPONENT));
             $editcell = new \html_table_cell($editlink);
 

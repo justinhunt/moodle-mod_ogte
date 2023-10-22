@@ -58,6 +58,9 @@ $string['gradeingradebook'] = 'Current grade in gradebook';
 $string['ogte:addentries'] = 'Add ogte entries';
 $string['ogte:addinstance'] = 'Add a new ogte';
 $string['ogte:manageentries'] = 'Manage ogte entries';
+$string['ogte:use'] = 'Use ogte';
+$string['ogte:manage'] = 'Manage ogte';
+
 $string['ogtemail'] = '{$a->teacher} has posted some feedback on your
 ogte entry for \'{$a->ogte}\'
 
@@ -160,10 +163,14 @@ $string['liststatusempty']="Empty";
 $string['liststatusready']="Ready";
 $string['editinglist']="";
 $string['listformtitle']="";
-$string['']="";
-$string['']="";
-$string['']="";
-$string['']="";
+$string['lists']="Lists";
+$string['savelist']="Save List";
+$string['addlist']="Add WordList";
+$string['importlist']="Import";
+$string['confirmlistdelete']="Are you sure you want to delete this list?";
+$string['confirmlistdeletetitle']="Deleting Word List";
+
+
 
 
 
