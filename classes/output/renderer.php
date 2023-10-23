@@ -82,13 +82,16 @@ class renderer extends \plugin_renderer_base {
          //    get_string('listselected', constants::M_COMPONENT),
 			get_string('listname', constants::M_COMPONENT),
             get_string('listdescription', constants::M_COMPONENT),
-            get_string('liststatus', constants::M_COMPONENT),
+            get_string('listlang', constants::M_COMPONENT),
+            get_string('listheadwords', constants::M_COMPONENT),
+            get_string('listallwords', constants::M_COMPONENT),
+           // get_string('liststatus', constants::M_COMPONENT),
             get_string('timecreated', constants::M_COMPONENT),
 			get_string('actions', constants::M_COMPONENT)
 		);
-		$table->headspan = array(1,1,1,1,3);
+		$table->headspan = array(1,1,1,1,1,1,3);
 		$table->colclasses = array(
-			'listname', 'listdescription', 'liststatus','timecreated','upload', 'edit','delete'
+			'listname', 'listdescription','listlang','listheadwords','listallwords', 'timecreated','upload', 'edit','delete'
 		);
 
 
@@ -102,7 +105,14 @@ class renderer extends \plugin_renderer_base {
             $listnamecell = new \html_table_cell($list->name);
             //list description
             $listdescriptioncell = new \html_table_cell($list->description);
+            //list lang
+            $listlangcell = new \html_table_cell($list->lang);
+            //list words
+            $listheadwordscell = new \html_table_cell($list->headwords);
+            $listallwordscell = new \html_table_cell($list->allwords);
+
             //list status
+            /*
             switch($list->status) {
                 case constants::M_LISTSTATUS_EMPTY:
                     $liststatus = get_string('liststatusempty',constants::M_COMPONENT);
@@ -113,19 +123,30 @@ class renderer extends \plugin_renderer_base {
                     break;
             }
             $liststatuscell = new \html_table_cell($liststatus);
+*/
 
             //created date
             $listtimecreated_content = date("Y-m-d H:i:s",$list->timecreated);
             $listtimecreatedcell = new \html_table_cell($listtimecreated_content);
 
-            //import edit
+
+
+            //action url
+            $actionurl = '/mod/ogte/list/managelists.php';
+
+            //import words
             $importurl = '/mod/ogte/list/importlist.php';
-            $importurl = new \moodle_url($importurl, array('id' => $cm->instance, 'listid' => $list->id));
+            $importurl = new \moodle_url($importurl, array('id' => $cm->id, 'listid' => $list->id));
             $importlink = \html_writer::link($importurl, get_string('importlist', constants::M_COMPONENT));
             $importcell = new \html_table_cell($importlink);
 
+            //clearwords
+            $clearwordsurl = new \moodle_url($actionurl,
+                array('moduleid' => $cm->instance, 'id' => $list->id, 'action' => 'confirmclearwords'));
+            $clearwordslink = \html_writer::link($clearwordsurl, get_string('clearwordslist', constants::M_COMPONENT));
+            $clearwordscell = new \html_table_cell($clearwordslink);
+
             //list edit
-            $actionurl = '/mod/ogte/list/managelists.php';
             $editurl = new \moodle_url($actionurl, array('moduleid' => $cm->instance, 'id' => $list->id));
             $editlink = \html_writer::link($editurl, get_string('editlist', constants::M_COMPONENT));
             $editcell = new \html_table_cell($editlink);
@@ -137,7 +158,10 @@ class renderer extends \plugin_renderer_base {
 			$deletecell = new \html_table_cell($deletelink);
 
 			$row->cells = array(
-                    $listnamecell, $listdescriptioncell,$liststatuscell, $listtimecreatedcell,$importcell, $editcell, $deletecell
+                    $listnamecell, $listdescriptioncell,$listlangcell,$listheadwordscell,$listallwordscell,
+                 $listtimecreatedcell,
+                $list->headwords > 0? $clearwordscell : $importcell,
+                $editcell, $deletecell
 			);
 			$table->data[] = $row;
 		}
@@ -145,13 +169,21 @@ class renderer extends \plugin_renderer_base {
 
 	}
 
+    public function back_to_lists_button($cm, $caption){
+        $button = $this->output->single_button(new \moodle_url( constants::M_PATH . '/list/lists.php',
+            array('id'=>$cm->id)),$caption);
+
+        $ret = \html_writer::div($button ,constants::M_CLASS  . '_backtolists_cont');
+        return $ret;
+    }
+
     function setup_datatables($tableid){
         global $USER;
 
         $tableprops = array();
-        $notorderable = array('orderable'=>false);
-        $columns = [$notorderable,null,null,$notorderable,$notorderable,null,$notorderable,$notorderable];
-        $tableprops['columns']=$columns;
+       // $notorderable = array('orderable'=>false);
+      //  $columns = [$notorderable,null,null,$notorderable,$notorderable,null,$notorderable,$notorderable];
+      //  $tableprops['columns']=$columns;
 
         //default ordering
         $order = array();

@@ -26,7 +26,7 @@
 namespace mod_ogte;
 
 /**
- * Class for importing items into a ogte
+ * Class for importing a word list into an ogte
  *
  * @copyright 2023 Justin Hunt <justin@poodll.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -40,16 +40,23 @@ class import  {
      * @param string|null $progresstrackerclass
      * @throws \coding_exception
      */
-    public function __construct(\csv_import_reader $cir,$moduleinstance, $modulecontext, $course,$cm) {
+    public function __construct(import_csv_reader $cir,$moduleinstance, $modulecontext, $course,$cm, $listid) {
         $this->cir = $cir;
         $this->moduleinstance = $moduleinstance;
         $this->modulecontext = $modulecontext;
         $this->course = $course;
-        $this->allvoices=[];
         $this->cm = $cm;
         $this->errors = 0;
-        $this->currentheader =  [];
-        $this->keycolumns = local\itemtype\item::get_keycolumns();
+        $this->listid=$listid;
+
+
+        //set the keycols
+        //the keycol details are not needs, just legacy  TO DO remove them. We just need a field to report back with
+        $keycols = [];
+        $keycols['listrank']=['type'=>'int','optional'=>false,'default'=>null,'dbname'=>'listrank'];
+        $keycols['headword']=['type'=>'string','optional'=>false,'default'=>null,'dbname'=>'headword'];
+        $keycols['words']=['type'=>'string','optional'=>false,'default'=>null,'dbname'=>'word'];
+        $this->keycolumns = $keycols;
 
         // Keep timestamp consistent.
         $today = time();
@@ -58,27 +65,38 @@ class import  {
     }
 
     public function import_process() {
+        global $DB;
+
+        $allwords=0;
+        $headwords=0;
         $this->errors = 0;
         $this->upt = new import_tracker($this->keycolumns);
         $this->upt->start(); // Start table.
 
         // Init csv import helper.
         $this->cir->init();
-        
-        //get the header line
-        $this->currentheader = $this->cir->get_columns();
-        
-        $linenum = 1; // Column header is first line.
+
+        $linenum = 0; // lines start at 1
         while ($line = $this->cir->next()) {
             $linenum++;
             $this->upt->flush();
             $this->upt->track('line', $linenum);
-            $this->import_process_line($line);
+            $wordsadded=$this->import_process_line($line);
+            $this->upt->track('words', $wordsadded);
+            $allwords+=$wordsadded;
+            $headwords++;
         }
 
         $this->upt->close(); // Close table.
         $this->cir->close();
         $this->cir->cleanup(true);
+
+        //update list table entry
+        list($trueheadwords,$trueallwords) = utils::count_list_words($this->listid);
+        if($allwords != $trueallwords || $headwords !=$trueheadwords){
+            //something is wrong
+        }
+        $DB->update_record(constants::M_LISTSTABLE,['id'=>$this->listid,'headwords'=>$trueheadwords,'allwords'=>$trueallwords]);
     }
 
 
@@ -94,199 +112,84 @@ class import  {
     {
         global $DB, $CFG, $SESSION;
 
-        //set up the voices array, it only needs to be done once, and probably should be done elsewhere
-        //but here works too
-        if(count($this->allvoices) == 0){
-            foreach (constants::ALL_VOICES as $lang => $langvoices) {
-                foreach ($langvoices as $voicecode=>$voicename) {
-                    $this->allvoices[strtolower($voicename)] = $voicecode;
-                }
-            }
-        }
 
-        //here we get the item specific keycolumns (its the same columns, but with item specific col info for validation and data preprocessing)
-        //eg multiaudio needs customtext5 to be voice and customint4 to be voice options
-        $itemtype = $line[0]; //for now we force this to be at index 0
-        $itemtypeclass = local\itemtype\item::get_itemtype_class($itemtype);
-        //if the item type is invalid, we can't continue, just exit
-        if(!$itemtypeclass){
-            $this->upt->track('status',get_string('error:failed',constants::M_COMPONENT), 'error',true);
-            $this->upt->track('type',get_string('error:invaliditemtype',constants::M_COMPONENT), 'error');
+        $listrank = $line[0]; //for now we force this to be at index 0
+        if(!$listrank){
+            $this->upt->track('status',get_string('error:listrank',constants::M_COMPONENT), 'error',true);
             return false;
         }
-        $keycolumns = $itemtypeclass::get_keycolumns();
-        
+
+        if(count($line)<2){
+            $this->upt->track('status',get_string('error:toofewcols',constants::M_COMPONENT), 'error',true);
+            return false;
+        }
+
         // Pre-Process Import Data, and turn into DB Ready data.
-        $newrecord = $this->preprocess_import_data($line, $keycolumns);
-
-        //set the defaults
-        foreach($keycolumns as $colname=>$coldef){
-            if(!isset($newrecord[$coldef['dbname']])){
-                $newrecord[$coldef['dbname']]=$coldef['default'];
-            }
-        }
-        //turn array into object
-        $newrecord = (object)$newrecord;
-
-        //fix up json fields which need to be packed into json
-        //tts dialog opts
-        if(!empty($newrecord->{constants::TTSDIALOG})){
-           $newrecord->{constants::TTSDIALOGOPTS} = utils::pack_ttsdialogopts($newrecord);
-        }
-        //tts passage opts
-        if(!empty($newrecord->{constants::TTSPASSAGE})){
-            $newrecord->{constants::TTSPASSAGEOPTS} = utils::pack_ttspassageopts($newrecord);
-        }
-
-        // call the itemtype specific import validation function
-        $error = $this->perform_import_validation($newrecord,$this->cm);
-        if($error) {
-            $this->upt->track('status',get_string('error:failed',constants::M_COMPONENT), 'error',true);
-            $this->upt->track($error->col, $error->message, 'error');
+        $newrecords = $this->preprocess_import_data($line);
+        if(!$newrecords || !is_array($newrecords) || count($newrecords)==0){
+            $this->upt->track('status','Error - Failed', 'error');
             return false;
         }
 
-        //get itemorder
-        $newrecord->itemorder = local\itemform\helper::get_new_itemorder($this->cm);
 
-        //create a rsquestionkey
-        $newrecord->rsquestionkey = local\itemtype\item::create_itemkey();
-        $theitem= utils::fetch_item_from_itemrecord($newrecord,$this->moduleinstance);
-        //remove bad accents and things that mess up transcription (kind of like clear but permanent)
-        $theitem->deaccent();
+        //turn array into object
+        $successes=0;
+        foreach($newrecords as $newrec) {
+            $newrecord = (object)$newrec;
+            $result = $DB->insert_record(constants::M_WORDSTABLE, $newrecord);
+            if($result){$successes++;}
+        }
 
-        //xreate passage hash
-        $olditem=false;
-        $theitem->update_create_langmodel($olditem);
-
-        //lets update the phonetics
-        $theitem->update_create_phonetic($olditem);
-
-        $result = $theitem->update_insert_item();
-        if($result){
+        if($successes==count($newrecords)){
             $this->upt->track('status','Success', 'normal');
         }else{
-            $this->upt->track('status','Failed', 'error');
+            $this->upt->track('status','Incomplete', 'error');
         }
 
-        return true;
+        return $successes;
         //Do what we have to do
 
     }
 
-    public function perform_import_validation($newrecord,$cm){
-        global $DB;
-        $itemtype = $newrecord->type;
-        $itemtypeclass = local\itemtype\item::get_itemtype_class($itemtype);
-        if($itemtypeclass) {
-            $error = $itemtypeclass::validate_import($newrecord, $cm);
-            if ($error) {
-                return $error;
-            }
-        }
-        return false;
-    }
 
-    public function preprocess_import_data($line, $keycolumns){
+    public function preprocess_import_data($line){
 
         //return value init
-        $newrecord = [];
-
+        $newrecords = [];
+        $listrank=0;
+        $headword='';
         foreach ($line as $keynum => $value) {
-
-            if (!isset($this->currentheader[$keynum])) {
-                // This should not happen.
-                continue;
-            }
-            $colname = $this->currentheader[$keynum];
-            if (!isset($keycolumns[$colname])) {
-                // This should not happen.
-
-                $this->upt->track('status','unknown column ' . $colname, 'error');
-                $this->errors++;
-                return false;
-            }
-            $coldef = $keycolumns[$colname];
-
-            switch($coldef['type']){
-                case 'int':
-                    $value = intval($value);
+            switch($keynum){
+                case 0:
+                    $listrank = intval($value);
+                    if($listrank==0) {
+                        $this->upt->track('listrank', 'invalid rank:' . s($value), 'error');
+                        return false;
+                    }
+                    $this->upt->track('listrank', s($value), 'normal');
                     break;
-                case 'string':
-                    $value = strval($value);
-                    break;
-                case 'voice':
-                    if(empty($value) || $value == 'auto'){
-                        $value = utils::fetch_auto_voice($this->moduleinstance->ttslanguage);
+                case 1:
+                    $headword=trim(strval($value));
+                    if(empty( $headword)){
+                        $this->upt->track('headword', 'empty headword:' . s($value), 'error');
+                        return false;
                     }else{
-                        if(array_key_exists(strtolower($value), $this->allvoices)){
-                            $value = $this->allvoices[strtolower($value)];
-                        }elseif(in_array(strtolower($value) . '_g', $this->allvoices)){
-                            $value = $this->allvoices[strtolower($value) . '_g'];
-                        }else{
-                            //not sure how to get this to user
-                            $this->upt->track($colname,'UNKNOWN VOICE' . $value, 'warning');
-                            $value = utils::fetch_auto_voice($this->moduleinstance->ttslanguage);
-                        }
+                        $this->upt->track('headword', s($value), 'normal');
                     }
-                    break;
 
-                case 'voiceopts':
-                    switch($value){
-                        case 'slow':
-                            $value = constants::TTS_SLOW;
-                            break;
-                        case 'veryslow':
-                            $value = constants::TTS_VERYSLOW;
-                            break;
-                        case 'SSML':
-                            $value = constants::TTS_SSML;
-                            break;
-                        default:
-                            $value = constants::TTS_NORMAL;
-                            break;
+                    //NB no break here, because we want headword to be treated as a word below
+                default:
+                    $newrecord=[];
+                    $newrecord['list']=$this->listid;
+                    $newrecord['listrank']=$listrank;
+                    $newrecord['headword']=$headword;
+                    $newrecord['word']=trim(strval($value));
+                    if(!empty($newrecord['word'])){
+                        $newrecords[] = $newrecord;
                     }
-                    break;
-
-                case 'layout':
-                    switch($value){
-                        case 'horizontal':
-                            $value = constants::LAYOUT_HORIZONTAL;
-                            break;
-                        case 'vertical':
-                            $value = constants::LAYOUT_VERTICAL;
-                            break;
-                        case 'magazine':
-                            $value = constants::LAYOUT_MAGAZINE;
-                            break;
-                        default:
-                            $value = constants::LAYOUT_AUTO;
-                            break;
-                    }
-                    break;
-
-                case 'boolean':
-                    switch(strtolower($value)){
-                        case 'true':
-                            $value = 1;
-                            break;
-                        case 'false':
-                            $value = 0;
-                            break;
-                        default:
-                            $value = 1;
-                    }
-                    break;
             }
-
-            //set default values
-            if (in_array($colname, $this->upt->columns)) {
-                // Default value in progress tracking table, can be changed later.
-                $this->upt->track($colname, s($value), 'normal');
-            }
-            $newrecord[$coldef['dbname']] = $value;
         }
-        return $newrecord;
+        return $newrecords;
     }
 
 }

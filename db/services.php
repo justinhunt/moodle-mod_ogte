@@ -44,4 +44,12 @@ $functions = array(
         'ajax' => true,
         'services' => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
     ),
+    'mod_ogte_get_coverage' => array(
+        'classname'   => 'mod_ogte_external',
+        'methodname'  => 'get_coverage',
+        'description' => 'see how a passage is coverd by a list/level' ,
+        'capabilities'=> 'mod/ogte:use',
+        'type'        => 'read',
+        'ajax'        => true,
+    ),
 );

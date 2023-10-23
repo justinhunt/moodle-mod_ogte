@@ -1,4 +1,4 @@
-define(['jquery', 'core/log'], function ($, log) {
+define(['jquery', 'core/log','core/ajax'], function ($, log,ajax) {
     "use strict"; // jshint ;_;
     /*
     This file helps you get Polly URLs at runtime
@@ -23,6 +23,25 @@ define(['jquery', 'core/log'], function ($, log) {
 
             // Add 1 to get the number of words (assuming at least one space)
             return spaceCount + 1;
+        },
+
+        levelPassage: function(thepassage,listid,listlevel, ogteid){
+            var that = this;
+            return ajax.call([{
+                methodname: 'mod_ogte_get_coverage',
+                args: {
+                    'ogteid': ogteid,
+                    'passage': thepassage,
+                    'listid': listid,
+                    'listlevel': listlevel
+                },
+                async: false
+            }])[0];
+        },
+
+        levelStats: function(serverresults,thepassage){
+            //TO DO implement this
+            return JSON.encode(serverresults);
         },
 
         analyzeText: function (text) {

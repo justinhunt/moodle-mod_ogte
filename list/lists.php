@@ -29,7 +29,6 @@ require_once($CFG->dirroot.'/mod/ogte/lib.php');
 use mod_ogte\constants;
 
 $id = required_param('id', PARAM_INT);
-
 $cm = get_coursemodule_from_id(constants::M_MODNAME, $id, 0, false, MUST_EXIST);
 $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
 $ogte = $DB->get_record(constants::M_TABLE, array('id' => $cm->instance), '*', MUST_EXIST);

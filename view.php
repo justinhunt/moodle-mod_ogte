@@ -27,6 +27,8 @@ require_once("../../config.php");
 require_once("lib.php");
 require_once($CFG->dirroot.'/lib/completionlib.php');
 
+use mod_ogte\constants;
+
 $id = required_param('id', PARAM_INT);    // Course Module ID.
 
 if (! $cm = get_coursemodule_from_id('ogte', $id)) {
@@ -69,6 +71,8 @@ $PAGE->set_url('/mod/ogte/view.php', array('id' => $id));
 $PAGE->navbar->add($ogtename);
 $PAGE->set_title($ogtename);
 $PAGE->set_heading($course->fullname);
+
+$renderer = $PAGE->get_renderer(constants::M_COMPONENT);
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading($ogtename);
@@ -275,6 +279,10 @@ if ($timenow > $timestart) {
     echo '<div class="warning">'.get_string('notopenuntil', 'ogte').': ';
     echo userdate($timestart).'</div>';
 }
+
+//lists page button
+echo '<br><hr>';
+echo $renderer->back_to_lists_button($cm,get_string('addeditlists',constants::M_COMPONENT));
 
 
 // Trigger module viewed event.

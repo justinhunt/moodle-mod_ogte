@@ -166,9 +166,35 @@ $string['listformtitle']="";
 $string['lists']="Lists";
 $string['savelist']="Save List";
 $string['addlist']="Add WordList";
-$string['importlist']="Import";
+$string['importlist']="Import Words";
+$string['importresults']="Import Results";
+$string['importinstructions']="Prepare the data and import";
+$string['import']="Import";
+$string['importing']="Importing";
+$string['importlistfromfile']='Importing {$a} from File';
+$string['importitemsresult']='Import Results';
+$string['clearwordslist']='Clear Words';
+$string['confirmclearwords']="Are you sure you want to delete ALL the words from this list?";
+$string['confirmclearwordstitle']="Clearing Words from List";
+$string['listprops']="Props";
+$string['articleleveler']="Article Leveler";
+$string['level-article']="Level Passage";
+$string['article-text-here']="Passage text goes here";
+
+$string['csvdelimiter']="CSV Delimiter";
+$string['examplecsv']="Example CSV";
+$string['backtolists']='Back to Word Lists';
+$string['addeditlists']='Add / Edit Word Lists';
+
 $string['confirmlistdelete']="Are you sure you want to delete this list?";
 $string['confirmlistdeletetitle']="Deleting Word List";
+$string['lang']="Language";
+$string['listlang']="Lang";
+$string['listheadwords']="Words(head)";
+$string['listallwords']="Words(all)";
+$string['error:failed']="Error - failed";
+$string['error:toofewcols']="Error - too few cols";
+$string['error:list']="Error - list rank";
 
 
 

@@ -15,6 +15,7 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/formslib.php');
 
 use mod_ogte\constants;
+use mod_ogte\import_csv_reader;
 
 /**
  * Helper class.
@@ -30,9 +31,8 @@ class baseimportform extends \moodleform {
        $url = new \moodle_url('example.csv');
        $link = \html_writer::link($url, 'example.csv');
        $mform->addElement('static', 'examplecsv', get_string('examplecsv', constants::M_COMPONENT), $link);
-       $mform->addHelpButton('examplecsv', 'examplecsv', 'tool_uploaduser');
 
-       $choices = \csv_import_reader::get_delimiter_list();
+       $choices = import_csv_reader::get_delimiter_list();
        $mform->addElement('select', 'delimiter_name', get_string('csvdelimiter', constants::M_COMPONENT), $choices);
        if (array_key_exists('cfg', $choices)) {
            $mform->setDefault('delimiter_name', 'cfg');

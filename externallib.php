@@ -29,6 +29,53 @@ require_once("$CFG->libdir/externallib.php");
 
 class mod_ogte_external extends external_api {
 
+    public static function get_coverage_parameters() {
+        return new external_function_parameters(
+            array(
+                'ogteid' => new external_value(PARAM_INT, 'id of ogte activity'),
+                'listid' => new external_value(PARAM_INT, 'id of list to compare'),
+                'listlevel' => new external_value(PARAM_INT, 'level of list to compare'),
+                'passage' => new external_value(PARAM_TEXT, 'passage text'),
+            )
+        );
+    }
+
+    public static function get_coverage_returns() {
+        return new external_value(PARAM_RAW);
+    }
+
+
+    public static function get_coverage($ogteid,$listid,$listlevel,$passage) {
+        global $DB, $USER;
+
+        $params = self::validate_parameters(self::get_coverage_parameters(),
+            array('ogteid' => $ogteid,'listid'=>$listid,'listlevel'=>$listlevel,'passage'=>$passage));
+/*
+        if (! $cm = get_coursemodule_from_id('ogte', $params['ogteid'])) {
+            throw new invalid_parameter_exception('Course Module ID was incorrect');
+        }
+
+        if (! $course = $DB->get_record("course", array('id' => $cm->course))) {
+            throw new invalid_parameter_exception("Course is misconfigured");
+        }
+*/
+        if (! $ogte = $DB->get_record("ogte", array("id" => $ogteid))) {
+            throw new invalid_parameter_exception("OGTE id is incorrect");
+        }
+
+     //   $context = context_module::instance($cm->id);
+   //     self::validate_context($context);;
+   //     require_capability('mod/ogte:use', $context);
+
+        //here we do the list comparison
+        //if ($entry = $DB->get_record('ogte_entries', array('userid' => $USER->id, 'ogte' => $ogte->id))) {
+        if(true){
+            return json_encode('{status: 99}');
+        } else {
+            return "{}";
+        }
+    }
+
     public static function get_entry_parameters() {
         return new external_function_parameters(
             array(

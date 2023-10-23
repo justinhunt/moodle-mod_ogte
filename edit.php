@@ -89,7 +89,7 @@ if(empty($config->apiuser) || empty($config->apisecret)){
     }
 }
 
-$params =['cloudpoodlltoken'=>$token];
+$params =['cloudpoodlltoken'=>$token,'ogteid'=>$cm->instance,'listlevels'=>utils::get_list_options()];
 $abovetextarea = '';
 $belowtextarea = $OUTPUT->render_from_template('mod_ogte/belowtextarea', $params) ;
 

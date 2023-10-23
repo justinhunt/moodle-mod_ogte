@@ -3,6 +3,7 @@
 
 namespace mod_ogte;
 
+use \mod_ogte\constants;
 
 class import_tracker
 {
@@ -22,7 +23,7 @@ class import_tracker
      */
     public function __construct($keycolumns) {
 
-        $base_headers = ['id'=>'ID','line'=>'Line','status'=>'Status'];
+        $base_headers = ['line'=>'Line','status'=>'Status'];
         $headers = array_merge($base_headers,$keycolumns );
         $this->columns= array_keys($headers);
         $this->headers = array_keys($headers);
@@ -34,12 +35,15 @@ class import_tracker
      */
     public function start() {
         $ci = 0;
-        echo '<table id="iiresults" class="generaltable boxaligncenter flexible-wrap" summary="'.get_string('importitemsresult', constants::M_COMPONENT).'">';
+        echo '<table id=' . constants::M_ID_RESULTSTABLE . ' class="generaltable boxaligncenter flexible-wrap" summary="'.get_string('importitemsresult', constants::M_COMPONENT).'">';
+        echo '<thead>';
         echo '<tr class="heading r0">';
         foreach ($this->headers as $key => $header) {
             echo '<th class="header c'.$ci++.'" scope="col">'.$header.'</th>';
         }
         echo '</tr>';
+        echo '</thead>';
+        echo '<tbody>';
         $this->_row = null;
     }
 
@@ -113,6 +117,6 @@ class import_tracker
      */
     public function close() {
         $this->flush();
-        echo '</table>';
+        echo '</tbody></table>';
     }
 }//end of class

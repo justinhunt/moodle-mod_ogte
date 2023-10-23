@@ -1,0 +1,69 @@
+<div>
+    <textarea  id="{{uniqid}}_al_passage" style="width: 80%; max-width: 800px;" placeholder="{{#str}}article-text-here, mod_ogte{{/str}}"></textarea>
+    <br><br>
+    <select id="{{uniqid}}_listlevel" name="listlevel">
+        {{#listlevels}}
+            <option value="{{key}}">{{label}}</option>
+        {{/listlevels}}
+    </select
+    <br><br>
+    <div id="{{uniqid}}_al_message" style="width: 80%; max-width: 800px; text-align: center"></div>
+    <br><br>
+    <button id="{{uniqid}}_al_button" type="button" style="width: 80%; max-width: 800px">{{#str}}level-article, mod_ogte{{/str}}</button>
+    <br><br>
+    <div><textarea id="{{uniqid}}_al_response" style="overflow: auto; resize: auto; height: 150px; width: 80%; max-width: 800px; display: none"></textarea><br></div>
+    <br><br>
+    <div id="{{uniqid}}_al_levelstats" style="display: none" class="mod-ogte-stats"></div>
+</div>
+
+{{^element.frozen}}
+    {{#js}}
+        // <script>
+            require(['jquery', 'mod_ogte/utils'], function($, utils) {
+
+                var passagebox= $('#{{uniqid}}_al_passage');
+                var responsebox= $('#{{uniqid}}_al_response');
+                var levelstats= $('#{{uniqid}}_al_levelstats');
+                var themessage= $('#{{uniqid}}_al_message');
+                var listlevel_select= $('#{{uniqid}}_listlevel');
+
+
+                $('#{{uniqid}}_al_button').on('click',function(){
+                    //show a spinner
+                    themessage.html('<i class="fa fa-spinner fa-spin fa-sm"></i>');
+
+
+                    var thepassage = passagebox.val();
+                    //no super long readings or empty ones
+                    if(!thepassage || thepassage.trim()==='') {
+                        themessage.text('{{#str}}enter-something, mod_ogte{{/str}}');
+                        return;
+                    }
+                    if(thepassage.length > 5000){
+                        themessage.text('{{#str}}text-too-long-5000, mod_ogte{{/str}}');
+                        return;
+                    }
+                    var language = 'en-US';
+
+                    var listleveldata = listlevel_select.val();
+                    var listid = listleveldata.split('_')[0];
+                    var listlevel = listleveldata.split('_')[1];
+                    var ogteid={{ogteid}};
+                    utils.levelPassage(thepassage,listid,listlevel,ogteid).then(function(ajaxresult) {
+                        var theresponse = JSON.parse(ajaxresult);
+                        if (theresponse) {
+                            themessage.text('');
+                            responsebox.val(theresponse);
+                            responsebox.show();
+                            var levelStatsTable = utils.levelStats(theresponse,thepassage);
+                            levelstats.html(levelStatsTable );
+                            levelstats.show();
+                        } else {
+                            log.debug('ajax call to level coverage failed');
+                        }
+                    });//end of level passage
+                });//end of click
+
+            });
+    {{/js}}
+{{/element.frozen}}

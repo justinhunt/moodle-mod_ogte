@@ -118,16 +118,39 @@ class listform extends \moodleform {
         $mform->setType('description', PARAM_TEXT);
         $mform->addRule('description', get_string('required'), 'required', null, 'client');
 
+        //lang
+        $listlang_opts = utils::get_lang_options();
+        $mform->addElement('select', 'lang', get_string('lang', constants::M_COMPONENT),$listlang_opts);
+        $mform->setType('lang', PARAM_TEXT);
+        $mform->setDefault('lang', constants::M_LANG_ENUS);
+        $mform->addRule('lang', get_string('required'), 'required', null, 'client');
 
         //status
+        /*
         $liststatus_opts = [constants::M_LISTSTATUS_EMPTY=>'empty',constants::M_LISTSTATUS_READY=>'ready'];
         $mform->addElement('select', 'status', get_string('liststatus', constants::M_COMPONENT),$liststatus_opts);
         $mform->setType('status', PARAM_INT);
         $mform->addRule('status', get_string('required'), 'required', null, 'client');
+        */
+        //props
+        $mform->addElement('hidden', 'status');
+        $mform->setType('status', PARAM_INT);
 
-        //name
-        $mform->addElement('hidden', 'props');
+        //props
+        //$mform->addElement('hidden', 'props');
+       // $mform->setType('props', PARAM_TEXT);
+        $mform->addElement('textarea', 'props', get_string('listprops', constants::M_COMPONENT), array('size'=>70));
         $mform->setType('props', PARAM_TEXT);
+        $mform->addRule('props', get_string('required'), 'required', null, 'client');
+        $levels=[['name'=>'levelone','top'=>75,'bottom'=>1],
+            ['name'=>'leveltwo','top'=>175,'bottom'=>76],
+            ['name'=>'levelthree','top'=>275,'bottom'=>176],
+            ['name'=>'levelfour','top'=>375,'bottom'=>276],
+            ['name'=>'levelfiv','top'=>475,'bottom'=>376],
+            ['name'=>'levelsix','top'=>675,'bottom'=>476],
+            ['name'=>'levelseven','top'=>875,'bottom'=>676]
+        ];
+        $mform->setDefault('props', json_encode($levels));
 
         $this->custom_definition();
 

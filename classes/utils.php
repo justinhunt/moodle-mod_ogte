@@ -271,4 +271,91 @@ class utils{
         return $thecount;
     }
 
+    public static function count_list_words($listid){
+        global $DB;
+        $allwords =$DB->count_records(constants::M_WORDSTABLE,['list'=>$listid]);
+
+        $sql = 'SELECT COUNT(headword)
+                   FROM {'. constants::M_WORDSTABLE .'} w
+                   WHERE
+                        w.word = w.headword AND
+                        w.list = :listid';
+        $headwords=$DB->count_records_sql($sql,['listid'=>$listid]);
+        return [$headwords,$allwords];
+    }
+
+    public static function get_list_options(){
+        global $DB;
+        $listopts=[];
+        $alllists = $DB->get_records(constants::M_LISTSTABLE,[]);
+        foreach($alllists as $list){
+            if(self::is_json($list->props)){
+                $listprops = json_decode($list->props);
+                foreach($listprops as $index=>$level){
+                    $listopts[]=['key'=>$list->id . '_' . $index, 'label'=>$list->name .': ' . $level->name];
+                }
+            }
+        }
+        return $listopts;
+    }
+
+    public static function get_lang_options(){
+        return array(
+            constants::M_LANG_ARAE => constants::M_LANG_ARAE,
+            constants::M_LANG_ARSA => constants::M_LANG_ARSA,
+            constants::M_LANG_DADK => constants::M_LANG_DADK,
+            constants::M_LANG_DEDE => constants::M_LANG_DEDE,
+            constants::M_LANG_DEAT => constants::M_LANG_DEAT,
+            constants::M_LANG_DECH => constants::M_LANG_DECH,
+            constants::M_LANG_ENUS =>  constants::M_LANG_ENUS,
+            constants::M_LANG_ENGB => constants::M_LANG_ENGB,
+            constants::M_LANG_ENAU => constants::M_LANG_ENAU,
+            constants::M_LANG_ENZA =>  constants::M_LANG_ENZA,
+            constants::M_LANG_ENIN => constants::M_LANG_ENIN ,
+            constants::M_LANG_ENIE => constants::M_LANG_ENIE,
+            constants::M_LANG_ENWL =>constants::M_LANG_ENWL,
+            constants::M_LANG_ENAB => constants::M_LANG_ENAB,
+            constants::M_LANG_FAIR => constants::M_LANG_FAIR,
+            constants::M_LANG_FILPH => constants::M_LANG_FILPH ,
+            constants::M_LANG_FRCA => constants::M_LANG_FRCA ,
+            constants::M_LANG_FRFR =>constants::M_LANG_FRFR,
+            constants::M_LANG_HIIN =>constants::M_LANG_HIIN,
+            constants::M_LANG_HEIL =>constants::M_LANG_HEIL,
+            constants::M_LANG_IDID =>constants::M_LANG_IDID,
+            constants::M_LANG_ITIT =>constants::M_LANG_ITIT,
+            constants::M_LANG_JAJP =>constants::M_LANG_JAJP,
+            constants::M_LANG_KOKR =>constants::M_LANG_KOKR,
+            constants::M_LANG_MINZ =>constants::M_LANG_MINZ,
+            constants::M_LANG_MSMY =>constants::M_LANG_MSMY,
+            constants::M_LANG_NLNL =>constants::M_LANG_NLNL,
+            constants::M_LANG_NLBE =>constants::M_LANG_NLBE,
+            constants::M_LANG_PTBR =>constants::M_LANG_PTBR,
+            constants::M_LANG_PTPT =>constants::M_LANG_PTPT,
+            constants::M_LANG_RURU =>constants::M_LANG_RURU,
+            constants::M_LANG_TAIN =>constants::M_LANG_TAIN,
+            constants::M_LANG_TEIN =>constants::M_LANG_TEIN,
+            constants::M_LANG_TRTR =>constants::M_LANG_TRTR,
+            constants::M_LANG_ZHCN =>constants::M_LANG_ZHCN,
+            constants::M_LANG_NONO =>constants::M_LANG_NONO,
+            constants::M_LANG_PLPL =>constants::M_LANG_PLPL,
+            constants::M_LANG_RORO =>constants::M_LANG_RORO,
+            constants::M_LANG_SVSE =>constants::M_LANG_SVSE,
+            constants::M_LANG_UKUA =>constants::M_LANG_UKUA,
+            constants::M_LANG_EUES =>constants::M_LANG_EUES,
+            constants::M_LANG_FIFI =>constants::M_LANG_FIFI,
+            constants::M_LANG_HUHU =>constants::M_LANG_HUHU,
+            constants::M_LANG_BGBG =>constants::M_LANG_BGBG,
+            constants::M_LANG_CSCZ =>constants::M_LANG_CSCZ,
+            constants::M_LANG_ELGR =>constants::M_LANG_ELGR,
+            constants::M_LANG_HRHR =>constants::M_LANG_HRHR,
+            constants::M_LANG_LTLT =>constants::M_LANG_LTLT,
+            constants::M_LANG_LVLV =>constants::M_LANG_LVLV,
+            constants::M_LANG_SKSK =>constants::M_LANG_SKSK,
+            constants::M_LANG_SLSI =>constants::M_LANG_SLSI,
+            constants::M_LANG_ISIS =>constants::M_LANG_ISIS,
+            constants::M_LANG_MKMK =>constants::M_LANG_MKMK,
+            constants::M_LANG_SRRS =>constants::M_LANG_SRRS
+        );
+    }
+
 }

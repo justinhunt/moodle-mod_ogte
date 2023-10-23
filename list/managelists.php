@@ -78,13 +78,36 @@ if($action == 'confirmdelete'){
     echo $renderer->footer();
     return;
 
-    /////// Delete list NOW////////
+//handle clear words action
+}elseif ($action == 'confirmclearwords'){
+        $renderer = $PAGE->get_renderer(constants::M_COMPONENT);
+        echo $renderer->header($moduleinstance, $cm, 'lists', null, get_string('confirmclearwordstitle', constants::M_COMPONENT));
+        echo $renderer->confirm(get_string("confirmclearwords",constants::M_COMPONENT,$list->name),
+            new moodle_url('/mod/ogte/list/managelists.php', array('action'=>'clearwords','moduleid'=>$moduleid,'id'=>$id)),
+            $redirecturl);
+        echo $renderer->footer();
+        return;
+
+/////// Delete list NOW////////
 }elseif ($action == 'delete'){
     require_sesskey();
     //delete the list words
     $DB->delete_records(constants::M_WORDSTABLE, array('list'=>$id));
     //delete the list
     $DB->delete_records(constants::M_LISTSTABLE, array('id'=>$id));
+
+    redirect($redirecturl);
+
+/////// Clear Words NOW////////
+}elseif ($action == 'clearwords'){
+    require_sesskey();
+    //delete the list words
+    $result = $DB->delete_records(constants::M_WORDSTABLE, array('list'=>$id));
+    if($result){
+        list($headwords,$allwords) = utils::count_list_words($id);
+        $DB->update_record(constants::M_LISTSTABLE,['id'=>$id,'headwords'=>$headwords,'allwords'=>$allwords]);
+
+    }
 
     redirect($redirecturl);
 }
