@@ -1,39 +1,65 @@
 <div>
-    <textarea  id="{{uniqid}}_al_passage" style="width: 80%; max-width: 800px;" placeholder="{{#str}}article-text-here, mod_ogte{{/str}}"></textarea>
+    <div id="{{uniqid}}_al_levelstats" style="width: 80%; max-width: 800px; border: 1px black solid; padding: 2px; display: none" class="mod-ogte-stats"></div>
+    <div contentEditable="true" id="{{uniqid}}_al_passage" style=" height: auto; min-height: 150px; width: 80%; max-width: 800px; border: 1px black solid; padding: 2px;"></div>
+    <div id="{{uniqid}}_al_articlestats" style="width: 80%; max-width: 800px; border: 1px black solid; padding: 2px; display: none" class="mod-ogte-stats"></div>
     <br><br>
+    <button id="{{uniqid}}_addtoignore" type="button" style="width: 80%; max-width: 800px">{{#str}}add-to-ignore, mod_ogte{{/str}}</button>
+    <input id="{{uniqid}}_ignorelist" type="text" style="width: 80%; max-width: 800px" placeholder="{{#str}}ignore-list, mod_ogte{{/str}}">
+    <br><br>
+    {{#str}}select-list-level, mod_ogte{{/str}}<br>
     <select id="{{uniqid}}_listlevel" name="listlevel">
         {{#listlevels}}
             <option value="{{key}}">{{label}}</option>
         {{/listlevels}}
-    </select
+    </select>
     <br><br>
     <div id="{{uniqid}}_al_message" style="width: 80%; max-width: 800px; text-align: center"></div>
     <br><br>
     <button id="{{uniqid}}_al_button" type="button" style="width: 80%; max-width: 800px">{{#str}}level-article, mod_ogte{{/str}}</button>
     <br><br>
-    <div><textarea id="{{uniqid}}_al_response" style="overflow: auto; resize: auto; height: 150px; width: 80%; max-width: 800px; display: none"></textarea><br></div>
-    <br><br>
-    <div id="{{uniqid}}_al_levelstats" style="display: none" class="mod-ogte-stats"></div>
+
 </div>
 
 {{^element.frozen}}
     {{#js}}
         // <script>
-            require(['jquery', 'mod_ogte/utils'], function($, utils) {
+            require(['jquery', 'core/log','mod_ogte/utils'], function($, log, utils) {
 
                 var passagebox= $('#{{uniqid}}_al_passage');
-                var responsebox= $('#{{uniqid}}_al_response');
                 var levelstats= $('#{{uniqid}}_al_levelstats');
+                var articlestats= $('#{{uniqid}}_al_articlestats');
                 var themessage= $('#{{uniqid}}_al_message');
+                var thebutton= $('#{{uniqid}}_al_button');
                 var listlevel_select= $('#{{uniqid}}_listlevel');
+                var addtoIgnoreButton = $('#{{uniqid}}_addtoignore');
+                var ignorelist = $('#{{uniqid}}_ignorelist');
+
+                addtoIgnoreButton.on('click',function(e){
+                    var cursorPosition = window.getSelection().getRangeAt(0).startOffset;
+                    var text = passagebox.text();
+                    var word = utils.getCurrentWord(text,cursorPosition);
+                    if(word!=''){
+                        var newignorelist = ignorelist.val() + ' ' + word;
+                        ignorelist.val(newignorelist);
+                    }
+
+                });
+
+                //prevent the editable div from creating more divs on copy and paste
+                passagebox.on('paste', function (e) {
+                    e.preventDefault();
+                    var text = (e.originalEvent || e).clipboardData.getData('text/plain');
+                    // Insert plain text without additional divs
+                    $(this).text(text);
+                });
 
 
-                $('#{{uniqid}}_al_button').on('click',function(){
+                thebutton.on('click',function(){
                     //show a spinner
                     themessage.html('<i class="fa fa-spinner fa-spin fa-sm"></i>');
 
 
-                    var thepassage = passagebox.val();
+                    var thepassage = passagebox.text();
                     //no super long readings or empty ones
                     if(!thepassage || thepassage.trim()==='') {
                         themessage.text('{{#str}}enter-something, mod_ogte{{/str}}');
@@ -45,17 +71,23 @@
                     }
                     var language = 'en-US';
 
+                    var ignore = ignorelist.val();
                     var listleveldata = listlevel_select.val();
                     var listid = listleveldata.split('_')[0];
                     var listlevel = listleveldata.split('_')[1];
                     var ogteid={{ogteid}};
-                    utils.levelPassage(thepassage,listid,listlevel,ogteid).then(function(ajaxresult) {
+                    utils.levelPassage(thepassage,ignore,listid,listlevel,ogteid).then(function(ajaxresult) {
                         var theresponse = JSON.parse(ajaxresult);
                         if (theresponse) {
                             themessage.text('');
-                            responsebox.val(theresponse);
-                            responsebox.show();
-                            var levelStatsTable = utils.levelStats(theresponse,thepassage);
+                            passagebox.html(theresponse.passage);
+
+                            //add stats to original
+                            var articleStatsTable = utils.analyzeText(theresponse.passage);
+                            articlestats.html(articleStatsTable );
+                            articlestats.show();
+
+                            var levelStatsTable = utils.levelStats(theresponse);
                             levelstats.html(levelStatsTable );
                             levelstats.show();
                         } else {

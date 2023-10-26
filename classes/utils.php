@@ -27,6 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 use \mod_ogte\constants;
 
 
+
 /**
  * Functions used generally across this mod
  *
@@ -356,6 +357,70 @@ class utils{
             constants::M_LANG_MKMK =>constants::M_LANG_MKMK,
             constants::M_LANG_SRRS =>constants::M_LANG_SRRS
         );
+    }
+
+    public static function get_coverage($passage,$ignore,$listid,$listlevel){
+        global $DB;
+        $list = $DB->get_record(constants::M_LISTSTABLE,['id'=>$listid]);
+        $levels = json_decode($list->props);
+        $thelevel= $levels[$listlevel];
+        $sql = 'SELECT listrank
+                   FROM {'. constants::M_WORDSTABLE .'} w
+                   WHERE
+                        w.word = :theword AND
+                        w.list = :listid';
+
+        $words = preg_split('/[\s]+/', $passage, -1, PREG_SPLIT_NO_EMPTY);
+        $ignores = preg_split('/[\s]+/', $ignore, -1, PREG_SPLIT_NO_EMPTY);
+        if(is_array($ignores)){
+            $ignores = array_map(function($word){
+                    $word = trim(preg_replace('/[^a-zA-Z0-9]/', '', strip_tags($word)));
+                    return strtolower($word);
+                }, $ignores);
+            $ignores= array_unique($ignores);
+        }
+
+        $inlevel=0;
+        $outoflist=0;
+        $outoflevel=0;
+        $wordcount=0;
+        $ignored=0;
+        $retwords = [];
+        foreach($words as $word){
+            $cleanword = trim(preg_replace('/[^a-zA-Z0-9]/', '', strip_tags($word)));
+            $cleanword= strtolower($cleanword);
+            if(!empty($cleanword)) {
+                //check if its being ignored
+                if (is_array($ignores) && in_array($cleanword, $ignores)) {
+                    $retwords[]=\html_writer::span($word, 'mod_ogte_ignored', ['data-index'=>$wordcount]);
+                    $ignored++;
+                }else {
+                    //search for the word listrank and process depending on the level
+                    $listrank = $DB->get_field_sql($sql, ['theword' => $cleanword, 'listid' => $listid]);
+                    if (!$listrank) {
+                        $retwords[] = \html_writer::span($word, 'mod_ogte_outoflist', ['data-index' => $wordcount]);
+                        $outoflist++;
+                    } elseif ($listrank > $thelevel->top) { // $listrank > $thelevel->top|| $listrank < $thelevel->bottom)
+                        $retwords[] = \html_writer::span($word, 'mod_ogte_outoflevel', ['data-index' => $wordcount]);
+                        $outoflevel++;
+                    } else {
+                        $retwords[] = \html_writer::span($word, 'mod_ogte_inlevel', ['data-index' => $wordcount]);
+                        $inlevel++;
+                    }
+                }
+                $wordcount++;
+            }else{
+                $retwords[] = $word;
+            }
+        }
+        if($wordcount == 0){
+            return ['passage'=>$passage,'status'=>'error','message'=>'no words found','coverage'=>0];
+        }else{
+            $coverage = round(($inlevel/($wordcount-$ignored))*100);
+            return ['passage'=>implode(' ',$retwords),'status'=>'success',
+                'message'=>'coverage returned','coverage'=>$coverage,
+                'inlevel'=>$inlevel,'outoflevel'=>$outoflevel,'outoflist'=>$outoflist,'ignored'=>$ignored,'wordcount'=>$wordcount];
+        }
     }
 
 }

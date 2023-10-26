@@ -111,3 +111,31 @@
     padding: 10px;
     text-align: left;
 }
+
+span.mod_ogte_outoflist {
+    color: red;
+}
+
+span.mod_ogte_outoflevel {
+    font-style: italic;
+    position: relative;
+    text-decoration: none;
+}
+
+span.mod_ogte_ignored {
+    color: green;
+}
+
+span.mod_ogte_outoflevel:after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -2px; /* Adjust this value to change the distance between the lines */
+    width: 100%;
+    height: 2px; /* Adjust this value to change the thickness of the lines */
+    background-color: red;
+}
+
+.mod_ogte_backtolists_cont {
+    margin-bottom: 8px;
+}

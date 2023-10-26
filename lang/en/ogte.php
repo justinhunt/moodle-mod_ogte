@@ -195,6 +195,10 @@ $string['listallwords']="Words(all)";
 $string['error:failed']="Error - failed";
 $string['error:toofewcols']="Error - too few cols";
 $string['error:list']="Error - list rank";
+$string['add-to-ignore']="Add to Ignore List";
+$string['ignore-list']="Words to Ignore";
+$string['select-list-level']="Select word list and level";
+
 
 
 

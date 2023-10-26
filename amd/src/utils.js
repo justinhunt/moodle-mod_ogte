@@ -25,13 +25,14 @@ define(['jquery', 'core/log','core/ajax'], function ($, log,ajax) {
             return spaceCount + 1;
         },
 
-        levelPassage: function(thepassage,listid,listlevel, ogteid){
+        levelPassage: function(thepassage,ignore,listid,listlevel, ogteid){
             var that = this;
             return ajax.call([{
                 methodname: 'mod_ogte_get_coverage',
                 args: {
                     'ogteid': ogteid,
                     'passage': thepassage,
+                    'ignore': ignore,
                     'listid': listid,
                     'listlevel': listlevel
                 },
@@ -39,12 +40,47 @@ define(['jquery', 'core/log','core/ajax'], function ($, log,ajax) {
             }])[0];
         },
 
-        levelStats: function(serverresults,thepassage){
-            //TO DO implement this
-            return JSON.encode(serverresults);
+        levelStats: function(theresults){
+
+            var table='<table><tr>';
+            table+= '<td><span style="font-size: 11px">Total Words</span><br>' + theresults.wordcount +'</td>';
+            table+= '<td><span style="font-size: 11px">In Level</span><br>' + theresults.inlevel +'</td>';
+            table+= '<td><span style="font-size: 11px">Out of Level</span><br>' + theresults.outoflevel +'</td>';
+            table+= '<td><span style="font-size: 11px">Out of List</span><br>' + theresults.outoflist +'</td>';
+            table+= '<td><span style="font-size: 11px">Ignored</span><br>' + theresults.ignored +'</td>';
+            table+= '<td><span style="font-size: 11px">Coverage</span><br>' + theresults.coverage +'%</td>';
+            table+= '</tr></table>';
+            return table;
+        },
+
+        stripTags: function(input) {
+            return input.replace(/<[^>]*>/g, '');
+        },
+
+        getCurrentWord: function (text, cursorPosition) {
+
+            // Find the word boundaries
+            var wordBoundaryRegex = /\b\w+\b/g;
+            var words = text.match(wordBoundaryRegex);
+
+            // Find the word at the cursor position
+            var currentWord = '';
+            for (var i = 0; i < words.length; i++) {
+                if (cursorPosition >= words[i].length) {
+                    cursorPosition -= words[i].length + 1; // Add 1 for space between words
+                } else {
+                    currentWord = words[i];
+                    break;
+                }
+            }
+            return currentWord;
         },
 
         analyzeText: function (text) {
+
+            //tidy it up
+            text=this.stripTags(text);
+
             // Count the number of words
             const words = text.split(/\s+/);
             const wordCount = words.length;

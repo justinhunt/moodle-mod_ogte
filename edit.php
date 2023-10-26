@@ -89,9 +89,11 @@ if(empty($config->apiuser) || empty($config->apisecret)){
     }
 }
 
+$renderer = $PAGE->get_renderer(constants::M_COMPONENT);
 $params =['cloudpoodlltoken'=>$token,'ogteid'=>$cm->instance,'listlevels'=>utils::get_list_options()];
-$abovetextarea = '';
+$abovetextarea = $renderer->back_to_lists_button($cm,get_string('addeditlists',constants::M_COMPONENT));
 $belowtextarea = $OUTPUT->render_from_template('mod_ogte/belowtextarea', $params) ;
+
 
 $form = new mod_ogte_entry_form(null, array('entryid' => $data->entryid,'abovetextarea'=>$abovetextarea,'belowtextarea'=>$belowtextarea));
 $form->set_data($data);
