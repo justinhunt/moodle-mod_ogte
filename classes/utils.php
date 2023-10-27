@@ -246,6 +246,22 @@ class utils{
         return '';
     }
 
+    public static function clean_text($passage){
+        $passage = stripslashes($passage);
+
+        // Convert HTML entities to their corresponding characters
+        $decodedText = html_entity_decode($passage, ENT_QUOTES, 'UTF-8');
+
+        // Remove tags and convert multiple spaces into a single space
+        $cleanedText = preg_replace('/<[^>]*>/', ' ', $decodedText);
+        $cleanedText = preg_replace('/\s+/', ' ', $cleanedText);
+
+        // Trim spaces from the beginning and end of the text
+        $cleanedText = trim($cleanedText);
+
+        return $cleanedText;
+    }
+
     /*
      * Turn a passage with text "lines" into html "brs"
      *
@@ -370,6 +386,7 @@ class utils{
                         w.word = :theword AND
                         w.list = :listid';
 
+        $passage = self::clean_text($passage);
         $words = preg_split('/[\s]+/', $passage, -1, PREG_SPLIT_NO_EMPTY);
         $ignores = preg_split('/[\s]+/', $ignore, -1, PREG_SPLIT_NO_EMPTY);
         if(is_array($ignores)){
@@ -388,6 +405,7 @@ class utils{
         $retwords = [];
         foreach($words as $word){
             $cleanword = trim(preg_replace('/[^a-zA-Z0-9]/', '', strip_tags($word)));
+            //$cleanword = self::clean_text($word);
             $cleanword= strtolower($cleanword);
             if(!empty($cleanword)) {
                 //check if its being ignored
@@ -396,12 +414,14 @@ class utils{
                     $ignored++;
                 }else {
                     //search for the word listrank and process depending on the level
-                    $listrank = $DB->get_field_sql($sql, ['theword' => $cleanword, 'listid' => $listid]);
+                    //due to some lists having capitalized versions of the same word, multiple entries are not impossible
+                    //we just take the first one
+                    $listrank = $DB->get_field_sql($sql, ['theword' => $cleanword, 'listid' => $listid],IGNORE_MULTIPLE);
                     //if its not there, its not in the list
                     if (!$listrank) {
                         $retwords[] = \html_writer::span($word, 'mod_ogte_outoflist', ['data-index' => $wordcount,'data-listrank'=>0]);
                         $outoflist++;
-                    //if its in the list, tag the word withlevel data, and check if its within or outside of the selected level
+                    //if its in the list, tag the word with level data, and check if its within or outside of the selected level
                     } else {
                         //tag the word with level data
                         $atts = ['data-index' => $wordcount,'data-listrank'=>$listrank,'data-listlevel'=>'','data-listlevelname'=>''];

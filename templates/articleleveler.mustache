@@ -37,14 +37,16 @@
 
                 addtoIgnoreButton.on('click',function(e){
                     var cursorPosition = window.getSelection().getRangeAt(0).startOffset;
-                    var text = passagebox.text();
+                    var text = passagebox[0].innerText;
                     var word = utils.getCurrentWord(text,cursorPosition);
-                    if(word!=''){
+                    if(word!==''){
                         var newignorelist = ignorelist.val() + ' ' + word;
                         ignorelist.val(newignorelist);
                     }
 
                 });
+
+
 
                 //prevent the editable div from creating more divs on copy and paste
                 passagebox.on('paste', function (e) {
@@ -58,7 +60,8 @@
 
                 //Add the text to the hidden text box used to submit the form when text is edited
                 passagebox.on('input', function (e) {
-                    hiddenTextBox.val($(this).text());
+                    thetext = $(this)[0].innerText;
+                    hiddenTextBox.val(thetext);
                 });
 
 
@@ -66,8 +69,10 @@
                     //show a spinner
                     themessage.html('<i class="fa fa-spinner fa-spin fa-sm"></i>');
 
+                    //get text and clean it up
+                    //TO DO there will be more cleaning to do.
+                    var thepassage = passagebox[0].innerText;
 
-                    var thepassage = passagebox.text();
                     //no super long readings or empty ones
                     if(!thepassage || thepassage.trim()==='') {
                         themessage.text('{{#str}}enter-something, mod_ogte{{/str}}');
