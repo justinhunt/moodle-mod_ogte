@@ -57,23 +57,22 @@ define(['jquery', 'core/log','core/ajax'], function ($, log,ajax) {
             return input.replace(/<[^>]*>/g, '');
         },
 
-        getCurrentWord: function (text, cursorPosition) {
+        getSelectedWord: function () {
 
-            // Find the word boundaries
-            var wordBoundaryRegex = /\b\w+\b/g;
-            var words = text.match(wordBoundaryRegex);
-
-            // Find the word at the cursor position
-            var currentWord = '';
-            for (var i = 0; i < words.length; i++) {
-                if (cursorPosition >= words[i].length) {
-                    cursorPosition -= words[i].length + 1; // Add 1 for space between words
-                } else {
-                    currentWord = words[i];
-                    break;
+            var selectedText = "";
+            if (window.getSelection) {
+                selectedText = window.getSelection().toString();
+            } else if (document.selection && document.selection.type !== "Control") {
+                selectedText = document.selection.createRange().text;
+            }
+            if (selectedText.length > 0){
+                var words = selectedText.split(/\s+/);
+                // Get the first word
+                if (words.length > 0) {
+                    return words[0];
                 }
             }
-            return currentWord;
+            return selectedText;
         },
 
         analyzeText: function (text) {

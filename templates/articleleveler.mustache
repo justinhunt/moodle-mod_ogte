@@ -36,9 +36,7 @@
                 var ignorelist = $('#{{uniqid}}_ignorelist');
 
                 addtoIgnoreButton.on('click',function(e){
-                    var cursorPosition = window.getSelection().getRangeAt(0).startOffset;
-                    var text = passagebox[0].innerText;
-                    var word = utils.getCurrentWord(text,cursorPosition);
+                    var word = utils.getSelectedWord();
                     if(word!==''){
                         var newignorelist = ignorelist.val() + ' ' + word;
                         ignorelist.val(newignorelist);
