@@ -324,8 +324,8 @@ class utils{
             constants::M_LANG_HEIL =>constants::M_LANG_HEIL,
             constants::M_LANG_IDID =>constants::M_LANG_IDID,
             constants::M_LANG_ITIT =>constants::M_LANG_ITIT,
-            constants::M_LANG_JAJP =>constants::M_LANG_JAJP,
-            constants::M_LANG_KOKR =>constants::M_LANG_KOKR,
+           // constants::M_LANG_JAJP =>constants::M_LANG_JAJP,
+           // constants::M_LANG_KOKR =>constants::M_LANG_KOKR,
             constants::M_LANG_MINZ =>constants::M_LANG_MINZ,
             constants::M_LANG_MSMY =>constants::M_LANG_MSMY,
             constants::M_LANG_NLNL =>constants::M_LANG_NLNL,
@@ -336,7 +336,7 @@ class utils{
             constants::M_LANG_TAIN =>constants::M_LANG_TAIN,
             constants::M_LANG_TEIN =>constants::M_LANG_TEIN,
             constants::M_LANG_TRTR =>constants::M_LANG_TRTR,
-            constants::M_LANG_ZHCN =>constants::M_LANG_ZHCN,
+           // constants::M_LANG_ZHCN =>constants::M_LANG_ZHCN,
             constants::M_LANG_NONO =>constants::M_LANG_NONO,
             constants::M_LANG_PLPL =>constants::M_LANG_PLPL,
             constants::M_LANG_RORO =>constants::M_LANG_RORO,
@@ -363,7 +363,7 @@ class utils{
         global $DB;
         $list = $DB->get_record(constants::M_LISTSTABLE,['id'=>$listid]);
         $levels = json_decode($list->props);
-        $thelevel= $levels[$listlevel];
+        $selectedlevel= $levels[$listlevel];
         $sql = 'SELECT listrank
                    FROM {'. constants::M_WORDSTABLE .'} w
                    WHERE
@@ -397,15 +397,28 @@ class utils{
                 }else {
                     //search for the word listrank and process depending on the level
                     $listrank = $DB->get_field_sql($sql, ['theword' => $cleanword, 'listid' => $listid]);
+                    //if its not there, its not in the list
                     if (!$listrank) {
-                        $retwords[] = \html_writer::span($word, 'mod_ogte_outoflist', ['data-index' => $wordcount]);
+                        $retwords[] = \html_writer::span($word, 'mod_ogte_outoflist', ['data-index' => $wordcount,'data-listrank'=>0]);
                         $outoflist++;
-                    } elseif ($listrank > $thelevel->top) { // $listrank > $thelevel->top|| $listrank < $thelevel->bottom)
-                        $retwords[] = \html_writer::span($word, 'mod_ogte_outoflevel', ['data-index' => $wordcount]);
-                        $outoflevel++;
+                    //if its in the list, tag the word withlevel data, and check if its within or outside of the selected level
                     } else {
-                        $retwords[] = \html_writer::span($word, 'mod_ogte_inlevel', ['data-index' => $wordcount]);
-                        $inlevel++;
+                        //tag the word with level data
+                        $atts = ['data-index' => $wordcount,'data-listrank'=>$listrank,'data-listlevel'=>'','data-listlevelname'=>''];
+                        foreach ($levels as $levelid=>$level){
+                            if($listrank <= $level->top && $listrank >= $level->bottom){
+                                $atts['data-listlevel']=$levelid;
+                                $atts['data-listlevelname']=$level->name;
+                            }
+                        }
+                        //check if its within or outside the selected level
+                        if ($listrank > $selectedlevel->top) {
+                            $retwords[] = \html_writer::span($word, 'mod_ogte_outoflevel',$atts);
+                            $outoflevel++;
+                        }else{
+                            $retwords[] = \html_writer::span($word, 'mod_ogte_inlevel',$atts);
+                            $inlevel++;
+                        }
                     }
                 }
                 $wordcount++;

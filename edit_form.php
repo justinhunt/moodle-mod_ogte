@@ -30,7 +30,6 @@ require_once($CFG->dirroot.'/lib/formslib.php');
 class mod_ogte_entry_form extends moodleform {
 
     public function definition() {
-        $this->_form->addElement('html',$this->_customdata['abovetextarea']);
 
         $this->_form->addElement('hidden', 'text');
         // $this->_form->addElement('textarea','text', get_string("entry", "ogte"), 'wrap="virtual" rows="20" cols="50"');
@@ -40,7 +39,6 @@ class mod_ogte_entry_form extends moodleform {
 
         $this->_form->addElement('hidden', 'id');
         $this->_form->setType('id', PARAM_INT);
-        $this->_form->addElement('html',$this->_customdata['belowtextarea']);
         $this->add_action_buttons();
     }
 }

@@ -282,9 +282,10 @@ if ($timenow > $timestart) {
 }
 
 //lists page button
-echo '<br><hr>';
-echo $renderer->back_to_lists_button($cm,get_string('addeditlists',constants::M_COMPONENT));
-
+if(has_capability('mod/ogte:manage', $context)) {
+    echo '<br><hr>';
+    echo $renderer->back_to_lists_button($cm, get_string('addeditlists', constants::M_COMPONENT));
+}
 
 // Trigger module viewed event.
 $event = \mod_ogte\event\course_module_viewed::create(array(

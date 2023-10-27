@@ -77,6 +77,9 @@ class import  {
         $this->cir->init();
 
         $linenum = 0; // lines start at 1
+        $overcounts=0; // mismatch count between headwords and actual headwords
+        //this happens because lower case and capitalized versons of the same word may exist in list
+        //eg h:185 ch: 188 - 284 dad dads daddy daddies Dad Dads Daddy Daddies
         while ($line = $this->cir->next()) {
             $linenum++;
             $this->upt->flush();
@@ -85,6 +88,15 @@ class import  {
             $this->upt->track('words', $wordsadded);
             $allwords+=$wordsadded;
             $headwords++;
+            //uncomment this to display a list of overcounted headwords after importing
+            /*
+            list($checkheadwords,$checkallwords) = utils::count_list_words($this->listid);
+            if($checkheadwords> $headwords + $overcounts){
+                echo 'h:' . $headwords . ' ch: ' . $checkheadwords . ' - ' . implode(' ',$line) .'<br/>';
+                $overcounts++;
+            }
+            */
+
         }
 
         $this->upt->close(); // Close table.
@@ -94,9 +106,9 @@ class import  {
         //update list table entry
         list($trueheadwords,$trueallwords) = utils::count_list_words($this->listid);
         if($allwords != $trueallwords || $headwords !=$trueheadwords){
-            //something is wrong
+            //because there ARE overcounts, we just use headwords and not $trueheadwords
         }
-        $DB->update_record(constants::M_LISTSTABLE,['id'=>$this->listid,'headwords'=>$trueheadwords,'allwords'=>$trueallwords]);
+        $DB->update_record(constants::M_LISTSTABLE,['id'=>$this->listid,'headwords'=>$headwords,'allwords'=>$trueallwords]);
     }
 
 

@@ -1,6 +1,6 @@
 <div>
     <div id="{{uniqid}}_al_levelstats" style="width: 80%; max-width: 800px; border: 1px black solid; padding: 2px; display: none" class="mod-ogte-stats"></div>
-    <div contentEditable="true" id="{{uniqid}}_al_passage" style=" height: auto; min-height: 150px; width: 80%; max-width: 800px; border: 1px black solid; padding: 2px;"></div>
+    <div contentEditable="true" id="{{uniqid}}_al_passage" style=" height: auto; min-height: 150px; width: 80%; max-width: 800px; border: 1px black solid; padding: 2px;">{{passage}}</div>
     <div id="{{uniqid}}_al_articlestats" style="width: 80%; max-width: 800px; border: 1px black solid; padding: 2px; display: none" class="mod-ogte-stats"></div>
     <br><br>
     <button id="{{uniqid}}_addtoignore" type="button" style="width: 80%; max-width: 800px">{{#str}}add-to-ignore, mod_ogte{{/str}}</button>
@@ -25,6 +25,7 @@
         // <script>
             require(['jquery', 'core/log','mod_ogte/utils'], function($, log, utils) {
 
+                var hiddenTextBox = $("input[name='text']");
                 var passagebox= $('#{{uniqid}}_al_passage');
                 var levelstats= $('#{{uniqid}}_al_levelstats');
                 var articlestats= $('#{{uniqid}}_al_articlestats');
@@ -51,6 +52,13 @@
                     var text = (e.originalEvent || e).clipboardData.getData('text/plain');
                     // Insert plain text without additional divs
                     $(this).text(text);
+                    //also update our hidden text box
+                    hiddenTextBox.val($(this).text());
+                });
+
+                //Add the text to the hidden text box used to submit the form when text is edited
+                passagebox.on('input', function (e) {
+                    hiddenTextBox.val($(this).text());
                 });
 
 
