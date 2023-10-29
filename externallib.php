@@ -37,8 +37,8 @@ class mod_ogte_external extends external_api {
                 'ogteid' => new external_value(PARAM_INT, 'id of ogte activity'),
                 'listid' => new external_value(PARAM_INT, 'id of list to compare'),
                 'listlevel' => new external_value(PARAM_INT, 'level of list to compare'),
-                'passage' => new external_value(PARAM_TEXT, 'passage text'),
-                'ignore' => new external_value(PARAM_TEXT, 'ignore text')
+                'passage' => new external_value(PARAM_RAW, 'passage text'),
+                'ignore' => new external_value(PARAM_RAW, 'ignore text')
             )
         );
     }

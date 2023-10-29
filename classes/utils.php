@@ -247,13 +247,21 @@ class utils{
     }
 
     public static function clean_text($passage){
-        $passage = stripslashes($passage);
+        //remove slashes
+        $passage = stripslashes($passage );
+
+        //clean up unicode encoded &nbsp;
+        $passage = str_replace("\xc2\xa0", ' ', $passage);
+
+        //clean up other encoded &nbsp;
+        $passage = preg_replace('/\s*&nbsp;|&#160;|&\#x00A0;|&\#0160;|\xC2\xA0/u', ' ', $passage);
 
         // Convert HTML entities to their corresponding characters
-        $decodedText = html_entity_decode($passage, ENT_QUOTES, 'UTF-8');
+        //I think we do not need this
+        //$passage = html_entity_decode($passage, ENT_QUOTES, 'UTF-8');
 
         // Remove tags and convert multiple spaces into a single space
-        $cleanedText = preg_replace('/<[^>]*>/', ' ', $decodedText);
+        $cleanedText = preg_replace('/<[^>]*>/', ' ', $passage);
         $cleanedText = preg_replace('/\s+/', ' ', $cleanedText);
 
         // Trim spaces from the beginning and end of the text
