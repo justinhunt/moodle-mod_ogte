@@ -309,15 +309,21 @@ class utils{
         return [$headwords,$allwords];
     }
 
-    public static function get_list_options(){
+    public static function get_list_options($includelevels=false){
         global $DB;
         $listopts=[];
         $alllists = $DB->get_records(constants::M_LISTSTABLE,[]);
         foreach($alllists as $list){
             if(self::is_json($list->props)){
-                $listprops = json_decode($list->props);
-                foreach($listprops as $index=>$level){
-                    $listopts[]=['key'=>$list->id . '_' . $index, 'label'=>$list->name .': ' . $level->name];
+                if(self::is_json($list->props)){
+                    $listprops = json_decode($list->props);
+                    if($includelevels) {
+                        foreach ($listprops as $index => $level) {
+                            $listopts[] = ['key' => $list->id . '_' . $index, 'label' => $list->name . ': ' . $level->name];
+                        }
+                    }else{
+                        $listopts[] = ['key' => $list->id, 'label' => $list->name];
+                    }
                 }
             }
         }

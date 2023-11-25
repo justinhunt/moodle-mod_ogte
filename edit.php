@@ -212,7 +212,7 @@ echo $OUTPUT->box($intro);
 
 //echo our ai and level widgets and tabs
 $renderer = $PAGE->get_renderer(constants::M_COMPONENT);
-$params =['cloudpoodlltoken'=>$token,'ogteid'=>$cm->instance,'listlevels'=>utils::get_list_options(),'passage'=>$data->text];
+$params =['cloudpoodlltoken'=>$token,'ogteid'=>$cm->instance,'listoptions'=>utils::get_list_options(),'leveloptions'=>utils::get_list_options(true),'passage'=>$data->text];
 if(has_capability('mod/ogte:manage', $context)) {
     echo $renderer->back_to_lists_button($cm, get_string('addeditlists', constants::M_COMPONENT));
 }

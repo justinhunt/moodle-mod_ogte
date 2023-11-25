@@ -196,7 +196,9 @@ $string['error:failed']="Error - failed";
 $string['error:toofewcols']="Error - too few cols";
 $string['error:list']="Error - list rank";
 $string['add-to-ignore']="Add to Ignore List";
+$string['select-to-ignore']="Select words to ignore ..";
 $string['ignore-list']="Words to Ignore";
+$string['space-list-of-words']="Add a space separated list of words";
 $string['select-list-level']="Select word list and level";
 $string['viewentry']="View";
 $string['deleteentry']="delete";
@@ -210,8 +212,7 @@ $string['untitled']="Untitled";
 $string['excerpt']="Excerpt";
 $string['confirmentrydelete'] = 'Are you sure you want to <i>DELETE</i> entry? : {$a}';
 $string['confirmentrydeletetitle'] = 'Really delete entry?';
-$string['ignore-list']="Ignore List - space separated list of words to ignore.";
-$string['already-ignored']='Already ignoring: ';
+$string['already-ignored']='Ignoring: ';
 $string['do-ignore']='Ignore: ';
 
 

@@ -143,3 +143,16 @@ span.mod_ogte_outoflevel:after {
 .mod_ogte_tab-content  {
     margin-top: 8px;
 }
+.ogte-passage-editor{
+    height: auto;
+    min-height: 150px;
+}
+.ogte-wide {
+    width: 80%;
+    max-width: 800px;
+    border: 1px black solid;
+    padding: 2px;
+}
+.ogte-status-message {
+    font-style: italic;
+}
