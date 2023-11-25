@@ -26,8 +26,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'mod_ogte';
-$plugin->version  = 2023102500;
+$plugin->version  = 2023112302;
 $plugin->requires = 2017111300;  /* Moodle 3.4 */
-$plugin->release = '1.0.2 (Build: 2023102500)';
+$plugin->release = '1.0.3 (Build: 2023112302)';
 $plugin->maturity = MATURITY_STABLE;
-$plugin->cron     = 60;

@@ -27,6 +27,32 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot.'/mod/ogte/lib.php');
 
+use \mod_ogte\constants;
+
 function xmldb_ogte_upgrade($oldversion=0) {
+    global $DB;
+
+    $dbman = $DB->get_manager(); // loads ddl manager and xmldb classes
+
+    if($oldversion < 2023112302){
+        // fields to change the notnull definition for] viewstart and viewend
+        $table = new xmldb_table(constants::M_ENTRIESTABLE);
+        $fields=[];
+        $fields[] = new xmldb_field('title', XMLDB_TYPE_CHAR, 255, null,XMLDB_NOTNULL, null, 'untitled');
+        $fields[] = new xmldb_field('jsonrating', XMLDB_TYPE_TEXT, null,null, null, null, '{}');
+
+
+        // Alter fields
+        foreach ($fields as $field) {
+            if (!$dbman->field_exists($table, $field)) {
+                $dbman->add_field($table, $field);
+            }
+        }
+
+
+        upgrade_mod_savepoint(true, 2023112302, 'ogte');
+    }
+
+
     return true;
 }

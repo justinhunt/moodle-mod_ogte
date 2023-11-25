@@ -1,0 +1,21 @@
+<table id="ogte_passages_id" class="table table-bordered">
+    <thead>
+    <tr>
+        <th scope="col">#</th>
+        <th scope="col">{{#str}}title, mod_ogte{{/str}}</th>
+        <th scope="col">{{#str}}excerpt, mod_ogte{{/str}}</th>
+        <th scope="col">{{#str}}actions, mod_ogte{{/str}}</th>
+    </tr>
+    {{#entries}}
+    <tr>
+        <td>{{id}}</td>
+        <td>{{title}}</td>
+        <td>{{#shortentext}} 20, {{{text}}} {{/shortentext}}</td>
+        <td>
+            <a class="mod_ogte_entryaction" href="{{{editurl}}}" alt="{{#str}}viewentry, mod_ogte{{/str}}">{{#pix}}i/edit{{/pix}}</a>
+            <a class="mod_ogte_entryaction" href="{{{deleteurl}}}" alt="{{#str}}deleteentry, mod_ogte{{/str}}">{{#pix}}i/delete{{/pix}}</a>
+            <a class="mod_ogte_entryaction" href="{{{downloadurl}}}" alt="{{#str}}downloadentry, mod_ogte{{/str}}">{{#pix}}t/down{{/pix}}</a>
+        </td>
+    </tr>
+    {{/entries}}
+</table>

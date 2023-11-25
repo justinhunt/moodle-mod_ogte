@@ -27,18 +27,39 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot.'/lib/formslib.php');
 
+use \mod_ogte\constants;
+
 class mod_ogte_entry_form extends moodleform {
 
     public function definition() {
 
+        //text field
         $this->_form->addElement('hidden', 'text');
-        // $this->_form->addElement('textarea','text', get_string("entry", "ogte"), 'wrap="virtual" rows="20" cols="50"');
-       //$this->_form->addRule('text', null, 'required', null, 'client');
-
         $this->_form->setType('text', PARAM_RAW);
 
+        //json rating field
+        $this->_form->addElement('hidden', 'jsonrating');
+        $this->_form->setType('jsonrating', PARAM_RAW);
+        $this->_form->setDefault('jsonrating','{}');
+
+        //item id
         $this->_form->addElement('hidden', 'id');
         $this->_form->setType('id', PARAM_INT);
+
+        //entry id
+        $this->_form->addElement('hidden', 'entryid');
+        $this->_form->setType('entryid', PARAM_INT);
+
+        //action
+        $this->_form->addElement('hidden', 'action');
+        $this->_form->setType('action', PARAM_TEXT);
+        $this->_form->setDefault('action','form');
+
+        //title field
+        $this->_form->addElement('text', 'title', get_string('title', constants::M_COMPONENT), array('size' => '64'));
+        $this->_form->setType('title', PARAM_TEXT);
+        $this->_form->setDefault('title',get_string('untitled',constants::M_COMPONENT) );
+
         $this->add_action_buttons();
     }
 }

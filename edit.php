@@ -31,13 +31,15 @@ use \mod_ogte\constants;
 use \mod_ogte\utils;
 
 $id = required_param('id', PARAM_INT);    // Course Module ID.
+$entryid = optional_param('entryid',null, PARAM_INT);    // Course Module ID.
+$action = optional_param('action',null, PARAM_ALPHA);    // Course Module ID.
 
 if (!$cm = get_coursemodule_from_id('ogte', $id)) {
-    print_error("Course Module ID was incorrect");
+    throw new \moodle_exception('invalidcoursemodule');
 }
 
 if (!$course = $DB->get_record("course", array("id" => $cm->course))) {
-    print_error("Course is misconfigured");
+    throw new \moodle_exception('coursemisconf');
 }
 
 $context = context_module::instance($cm->id);
@@ -47,7 +49,7 @@ require_login($course, false, $cm);
 require_capability('mod/ogte:addentries', $context);
 
 if (! $ogte = $DB->get_record("ogte", array("id" => $cm->instance))) {
-    print_error("Course module is incorrect");
+    throw new \moodle_exception('invalidcoursemodule');
 }
 if (!empty($ogte->preventry)){
     $prev_ogte = $DB->get_record("ogte", array("id" => $ogte->preventry));
@@ -58,40 +60,36 @@ $PAGE->set_url('/mod/ogte/edit.php', array('id' => $id));
 $PAGE->navbar->add(get_string('edit'));
 $PAGE->set_title(format_string($ogte->name));
 $PAGE->set_heading($course->fullname);
+$renderer = $PAGE->get_renderer(constants::M_COMPONENT);
 
-$data = new stdClass();
-
-$entry = $DB->get_record("ogte_entries", array("userid" => $USER->id, "ogte" => $ogte->id));
-if ($entry) {
-    $data->entryid = $entry->id;
-    $data->text = $entry->text;
+//get the existing entry if it exists
+if($entryid) {
+    $entry = $DB->get_record("ogte_entries", array("userid" => $USER->id, "ogte" => $ogte->id, "id" => $entryid));
 } else {
-    $data->entryid = null;
-    $data->text = '';
+    $entry = false;
 }
 
-$data->id = $cm->id;
-//get token
-//first confirm we are authorised before we try to get the token
-$config = get_config(constants::M_COMPONENT);
-if(empty($config->apiuser) || empty($config->apisecret)){
-    $errormessage = get_string('nocredentials',constants::M_COMPONENT,
-        $CFG->wwwroot . constants::M_PLUGINSETTINGS);
-    return $this->show_problembox($errormessage);
-}else {
-    //fetch token
-    $token = utils::fetch_token($config->apiuser,$config->apisecret);
+//handle delete actions
+//we always head back to view page after delete and cancel actions
+$redirecturl = new moodle_url('/mod/ogte/view.php', array('id'=>$cm->id));
+if($action == 'confirmdelete'){
 
-    //check token authenticated and no errors in it
-    $errormessage = utils::fetch_token_error($token);
-    if(!empty($errormessage)){
-        return $this->show_problembox($errormessage);
-    }
+    echo $renderer->header();
+    echo $renderer->confirm(get_string("confirmentrydelete",constants::M_COMPONENT,$entry->title),
+        new moodle_url('/mod/ogte/edit.php', array('action'=>'delete','id'=>$cm->id,'entryid'=>$entryid)),
+        $redirecturl);
+    echo $renderer->footer();
+    return;
+
+    /////// Delete item NOW////////
+}elseif ($action == 'delete'){
+    require_sesskey();
+    $success = $DB->delete_records(constants::M_ENTRIESTABLE, array("userid" => $USER->id, "ogte" => $ogte->id, "id" => $entryid));
+    redirect($redirecturl);
 }
 
-$form = new mod_ogte_entry_form(null, array('entryid' => $data->entryid));
-$form->set_data($data);
-
+//get the form (if it has data OR been cancelled - we need it)
+$form = new mod_ogte_entry_form(null, array('entryid' => $entryid));
 if ($form->is_cancelled()) {
     redirect($CFG->wwwroot . '/mod/ogte/view.php?id=' . $cm->id);
 } else if ($fromform = $form->get_data()) {
@@ -104,6 +102,8 @@ if ($form->is_cancelled()) {
     // This will be overwriten after being we have the entryid.
     $newentry = new stdClass();
     $newentry->text = $fromform->text;
+    $newentry->title = $fromform->title;
+    $newentry->jsonrating = $fromform->jsonrating;
     $newentry->format = FORMAT_HTML;
     $newentry->modified = $timenow;
 
@@ -152,6 +152,39 @@ if ($form->is_cancelled()) {
     die;
 }
 
+//show a form with data or empty form
+$data = new stdClass();
+if ($entryid && $entry) {
+    $data->entryid = $entry->id;
+    $data->text = $entry->text;
+    $data->title = $entry->title;
+    $data->jsonrating = $entry->jsonrating;
+} else {
+    $data->entryid = null;
+    $data->text = '';
+}
+
+$data->id = $cm->id;
+//get token
+//first confirm we are authorised before we try to get the token
+$config = get_config(constants::M_COMPONENT);
+if(empty($config->apiuser) || empty($config->apisecret)){
+    $errormessage = get_string('nocredentials',constants::M_COMPONENT,
+        $CFG->wwwroot . constants::M_PLUGINSETTINGS);
+    return $this->show_problembox($errormessage);
+}else {
+    //fetch token
+    $token = utils::fetch_token($config->apiuser,$config->apisecret);
+
+    //check token authenticated and no errors in it
+    $errormessage = utils::fetch_token_error($token);
+    if(!empty($errormessage)){
+        return $this->show_problembox($errormessage);
+    }
+}
+
+
+$form->set_data($data);
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading(format_string($ogte->name));

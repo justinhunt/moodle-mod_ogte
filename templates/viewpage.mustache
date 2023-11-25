@@ -1,0 +1,8 @@
+{{#haveentries}}
+    {{{addnewbutton}}}
+    {{> mod_ogte/entriestable}}
+{{/haveentries}}
+{{^haveentries}}
+    <div class="mod_ogte_noentries">{{#str}}noentries, mod_ogte{{/str}}</div>
+    {{{addnewbutton}}}
+{{/haveentries}}

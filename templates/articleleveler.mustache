@@ -26,6 +26,8 @@
             require(['jquery', 'core/log','mod_ogte/utils'], function($, log, utils) {
 
                 var hiddenTextBox = $("input[name='text']");
+                var hiddenTitleBox = $("input[name='title']");
+                var hiddenJSONRatingBox = $("input[name='jsonrating']");
                 var passagebox= $('#{{uniqid}}_al_passage');
                 var levelstats= $('#{{uniqid}}_al_levelstats');
                 var articlestats= $('#{{uniqid}}_al_articlestats');
@@ -34,6 +36,30 @@
                 var listlevel_select= $('#{{uniqid}}_listlevel');
                 var addtoIgnoreButton = $('#{{uniqid}}_addtoignore');
                 var ignorelist = $('#{{uniqid}}_ignorelist');
+
+                var updateAllFromJSONRating = function(jsonrating){
+                    var theresponse = JSON.parse(jsonrating);
+                    themessage.text('');
+                    passagebox.html(theresponse.passage);
+
+                    //add stats to original
+                    var articleStatsTable = utils.analyzeText(theresponse.passage);
+                    articlestats.html(articleStatsTable );
+                    articlestats.show();
+
+                    var levelStatsTable = utils.levelStats(theresponse);
+                    levelstats.html(levelStatsTable );
+                    levelstats.show();
+                };
+
+                var isJSON=function (str) {
+                    try {
+                        JSON.parse(str);
+                        return true;
+                    } catch (e) {
+                        return false;
+                    }
+                };
 
                 addtoIgnoreButton.on('click',function(e){
                     var word = utils.getSelectedWord();
@@ -90,22 +116,19 @@
                     utils.levelPassage(thepassage,ignore,listid,listlevel,ogteid).then(function(ajaxresult) {
                         var theresponse = JSON.parse(ajaxresult);
                         if (theresponse) {
-                            themessage.text('');
-                            passagebox.html(theresponse.passage);
-
-                            //add stats to original
-                            var articleStatsTable = utils.analyzeText(theresponse.passage);
-                            articlestats.html(articleStatsTable );
-                            articlestats.show();
-
-                            var levelStatsTable = utils.levelStats(theresponse);
-                            levelstats.html(levelStatsTable );
-                            levelstats.show();
+                            hiddenJSONRatingBox.val(ajaxresult);
+                            updateAllFromJSONRating(theresponse);
                         } else {
                             log.debug('ajax call to level coverage failed');
                         }
                     });//end of level passage
                 });//end of click
+
+                //Do initialization
+                var jsonrating = hiddenJSONRatingBox.val();
+                if(isJSON(jsonrating)){
+                    updateAllFromJSONRating(jsonrating);
+                }
 
             });
     {{/js}}

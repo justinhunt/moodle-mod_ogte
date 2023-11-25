@@ -54,6 +54,7 @@ define(['jquery', 'core/log','core/ajax'], function ($, log,ajax) {
         },
 
         stripTags: function(input) {
+            if(typeof input === "undefined" || input == null) return "";
             return input.replace(/<[^>]*>/g, '');
         },
 

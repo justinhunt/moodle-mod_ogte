@@ -198,8 +198,18 @@ $string['error:list']="Error - list rank";
 $string['add-to-ignore']="Add to Ignore List";
 $string['ignore-list']="Words to Ignore";
 $string['select-list-level']="Select word list and level";
+$string['viewentry']="View";
+$string['deleteentry']="delete";
+$string['downloadentry']="Download";
+$string['noentries']="There are no passages. Please add a new one.";
+$string['addnew']="Add New";
 
-
+$string['title']="Title";
+$string['actions']="Actions";
+$string['untitled']="Untitled";
+$string['excerpt']="Excerpt";
+$string['confirmentrydelete'] = 'Are you sure you want to <i>DELETE</i> entry? : {$a}';
+$string['confirmentrydeletetitle'] = 'Really delete entry?';
 
 
 

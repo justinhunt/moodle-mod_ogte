@@ -51,18 +51,18 @@ $entriesmanager = has_capability('mod/ogte:manageentries', $context);
 $canadd = has_capability('mod/ogte:addentries', $context);
 
 if (!$entriesmanager && !$canadd) {
-    print_error('accessdenied', 'ogte');
+    throw new \moodle_exception('accessdenied');
 }
 
 if (! $ogte = $DB->get_record("ogte", array("id" => $cm->instance))) {
-    print_error("Course module is incorrect");
+    throw new \moodle_exception('invalidcoursemodule');
 }
 if (!empty($ogte->preventry)){
     $prev_ogte = $DB->get_record("ogte", array("id" => $ogte->preventry));
 }
 
 if (! $cw = $DB->get_record("course_sections", array("id" => $cm->section))) {
-    print_error("Course module is incorrect");
+    throw new \moodle_exception('invalidcoursemodule');
 }
 
 $ogtename = format_string($ogte->name, true, array('context' => $context));
@@ -75,8 +75,8 @@ $PAGE->set_heading($course->fullname);
 
 $renderer = $PAGE->get_renderer(constants::M_COMPONENT);
 
-echo $OUTPUT->header();
-echo $OUTPUT->heading($ogtename);
+echo $renderer->header();
+
 
 // Check to see if groups are being used here.
 $groupmode = groups_get_activity_groupmode($cm);
@@ -89,197 +89,55 @@ $currentgroup = groups_get_activity_group($cm, true);
           // get_string('viewallentries', 'ogte', $entrycount).'</a></div>';
 // }
 
+//template data
+$tdata=[];
+
+//introl
+if (!empty($ogte->intro)) {
+    $ogte->intro = trim($ogte->intro);
+    $tdata['intro'] = format_module_intro('ogte', $ogte, $cm->id);
+}
+
 //Check download mode, and display the download page button
 if ($ogte->mode == 1){
-    // echo get_string("downloadmesage", "ogte");
-    if (!empty($ogte->intro)) {
-        $intro = format_module_intro('ogte', $ogte, $cm->id);
-        echo '<table><tr><td>' . $intro .'</td></tr></table>';
-    }
-    echo '<br /><br />';
-    echo $OUTPUT->single_button('download.php?id='.$cm->id, get_string('download', 'ogte'), 'get',
+    $tdata['downloadbutton'] = $renderer->single_button('download.php?id='.$cm->id, get_string('download', 'ogte'), 'get',
                 array("class" => "singlebutton ogtestart"));
-    echo $OUTPUT->footer();
+    echo $renderer->render_from_template('mod_ogte/downloadpage', $tdata);
+    echo $renderer->footer();
     die;
 }
 
-if (!empty($prev_ogte)){
-    echo '<table border="2" width="99%"><tr><td>';
 
-    $prev_ogte->intro = trim($prev_ogte->intro);
-    if (!empty($prev_ogte->intro)) {
-        $intro = format_module_intro('ogte', $prev_ogte, $cm->id);
-        echo '<table><tr><td>' . $OUTPUT->image_icon('q-button', '', 'ogte', array('style'=>'height:48px; width:48px')) . '</td><td>' . $intro .'</td></tr></table>';
+// Display entries
+$entries = $DB->get_records(constants::M_ENTRIESTABLE, array('userid' => $USER->id, 'ogte' => $ogte->id));
+if($entries) {
+    $theentries =[];
+    $sesskey = sesskey();
+    foreach(array_values($entries) as $i=>$entry){
+        $arrayitem = (Array)$entry;
+        $arrayitem['index']=($i+1);
+        $editurl=new moodle_url('/mod/ogte/edit.php', array('id'=>$cm->id, 'entryid'=>$entry->id,'sesskey'=>$sesskey ,'action'=>'edit'));
+        $downloadurl=new moodle_url('/mod/ogte/edit.php', array('id'=>$cm->id, 'entryid'=>$entry->id,'sesskey'=>$sesskey ,'action'=>'download'));
+        $deleteurl=new moodle_url('/mod/ogte/edit.php', array('id'=>$cm->id, 'entryid'=>$entry->id,'sesskey'=>$sesskey ,'action'=>'confirmdelete'));
+        $arrayitem['editurl']=$editurl->out();
+        $arrayitem['downloadurl']=$downloadurl->out();
+        $arrayitem['deleteurl']=$deleteurl->out();
+
+        $theentries[]= $arrayitem;
     }
-
-    // echo '<br />';
-    $timenow = time();
-    if ($course->format == 'weeks' and $prev_ogte->days) {
-    $timestart = $course->startdate + (($cw->section - 1) * 604800);
-    if ($prev_ogte->days) {
-        $timefinish = $timestart + (3600 * 24 * $ogte->days);
-    } else {
-        $timefinish = $course->enddate;
-    }
-    } else {  // Have no time limits on the ogtes.
-
-    $timestart = $timenow - 1;
-    $timefinish = $timenow + 1;
-    $prev_ogte->days = 0;
-    }
-    if ($timenow > $timestart) {
-
-    // echo $OUTPUT->box_start();
-
-    // Display entry.
-    if ($prev_entry = $DB->get_record('ogte_entries', array('userid' => $USER->id, 'ogte' => $prev_ogte->id))) {
-        if (empty($prev_entry->text)) {
-            echo '<p align="center"><b>'.get_string('blankentry', 'ogte').'</b></p>';
-        } else {
-            // echo '<br>'. $OUTPUT->image_icon('a-button', '', 'ogte') . ogte_format_entry_text($entry, $course, $cm);
-            echo '<table><tr><td>' . $OUTPUT->image_icon('a-button', '', 'ogte', array('style'=>'height:48px; width:48px')) . '</td><td>' . ogte_format_entry_text($prev_entry, $course, $cm) .'</td></tr></table>';
-        }
-    } else {
-        echo '<br><span class="warning">'.get_string('notstarted', 'ogte').'</span>';
-    }
-
-    // echo '<br />';
-
-    // Edit button.
-    // if ($timenow < $timefinish) {
-
-        // if ($canadd) {
-            // echo $OUTPUT->single_button('edit.php?id='.$cm->id, get_string('startoredit', 'ogte'), 'get',
-                // array("class" => "singlebutton ogtestart"));
-        // }
-    // }
-
-    // echo $OUTPUT->box_end();
-
-    // Info.
-    if ($timenow < $timefinish) {
-        if (!empty($prev_entry->modified)) {
-            echo '<div class="s"><strong>'.get_string('submitted', 'ogte') . ' ';
-            echo userdate($prev_entry->modified);
-            // echo ' ('.get_string('numwords', '', count_words($entry->text)).')</strong>';
-            echo "</strong></div>";
-        }
-        // Added three lines to mark entry as being dirty and needing regrade.
-        if (!empty($prev_entry->modified) AND !empty($prev_entry->timemarked) AND $prev_entry->modified > $prev_entry->timemarked) {
-            echo "<div class=\"lastedit\">".get_string("needsregrade", "ogte"). "</div>";
-        }
-
-        if (!empty($prev_ogte->days)) {
-            echo '<div class="editend"><strong>'.get_string('editingends', 'ogte').': </strong> ';
-            echo userdate($timefinish).'</div>';
-        }
-
-    } else {
-        echo '<div class="editend"><strong>'.get_string('editingended', 'ogte').': </strong> ';
-        echo userdate($timefinish).'</div>';
-    }
-
-    // Feedback.
-    if (!empty($prev_entry->entrycomment) or !empty($prev_entry->rating)) {
-        $grades = make_grades_menu($prev_ogte->grade);
-        echo $OUTPUT->heading(get_string('feedback'));
-        ogte_print_feedback($course, $prev_entry, $grades);
-    }
-
-    } else {
-    echo '<div class="warning">'.get_string('notopenuntil', 'ogte').': ';
-    echo userdate($timestart).'</div>';
-    }
-    echo '</td></tr></table>';
-
-echo '<hr>';
+    $tdata['haveentries']=true;
+    $tdata['entries'] =  $theentries;
+    $ee=new moodle_url('/mod/ogte/edit.php', array('id'=>$cm->id, 'entryid'=>$entry->id,'action'=>'edit'));
+    $ee->out();
 }
 
-$ogte->intro = trim($ogte->intro);
-if (!empty($ogte->intro)) {
-    $intro = format_module_intro('ogte', $ogte, $cm->id);
-    echo '<table><tr><td>' . $OUTPUT->image_icon('q-button', '', 'ogte', array('style'=>'height:48px; width:48px')) . '</td><td>' . $intro .'</td></tr></table>';
+if ($canadd) {
+    $tdata['addnewbutton'] = $renderer->single_button('edit.php?id='.$cm->id, get_string('addnew', 'ogte'), 'get',
+        array("class" => "singlebutton ogtestart"));
 }
 
-// echo '<br />';
+echo $renderer->render_from_template('mod_ogte/viewpage', $tdata);
 
-$timenow = time();
-if ($course->format == 'weeks' and $ogte->days) {
-    $timestart = $course->startdate + (($cw->section - 1) * 604800);
-    if ($ogte->days) {
-        $timefinish = $timestart + (3600 * 24 * $ogte->days);
-    } else {
-        $timefinish = $course->enddate;
-    }
-} else {  // Have no time limits on the ogtes.
-
-    $timestart = $timenow - 1;
-    $timefinish = $timenow + 1;
-    $ogte->days = 0;
-}
-if ($timenow > $timestart) {
-
-    // echo $OUTPUT->box_start();
-
-    // Display entry.
-    if ($entry = $DB->get_record('ogte_entries', array('userid' => $USER->id, 'ogte' => $ogte->id))) {
-        if (empty($entry->text)) {
-            echo '<p align="center"><b>'.get_string('blankentry', 'ogte').'</b></p>';
-        } else {
-            // echo '<br>'. $OUTPUT->image_icon('a-button', '', 'ogte') . ogte_format_entry_text($entry, $course, $cm);
-            echo '<table><tr><td>' . $OUTPUT->image_icon('a-button', '', 'ogte', array('style'=>'height:48px; width:48px')) . '</td><td>' . ogte_format_entry_text($entry, $course, $cm) .'</td></tr></table>';
-        }
-    } else {
-        echo '<br><span class="warning">'.get_string('notstarted', 'ogte').'</span>';
-    }
-    
-    // echo '<br />';
-    
-    // Edit button.
-    if ($timenow < $timefinish) {
-    
-        if ($canadd) {
-            echo '<br>' . $OUTPUT->single_button('edit.php?id='.$cm->id, get_string('startoredit', 'ogte'), 'get',
-                array("class" => "singlebutton ogtestart"));
-        }
-    }
-
-    // echo $OUTPUT->box_end();
-
-    // Info.
-    if ($timenow < $timefinish) {
-        if (!empty($entry->modified)) {
-            echo '<div class="s"><strong>'.get_string('submitted', 'ogte') . ' ';
-            echo userdate($entry->modified);
-            // echo ' ('.get_string('numwords', '', count_words($entry->text)).')</strong>';
-            echo "</strong></div>";
-        }
-        // Added three lines to mark entry as being dirty and needing regrade.
-        if (!empty($entry->modified) AND !empty($entry->timemarked) AND $entry->modified > $entry->timemarked) {
-            echo "<div class=\"lastedit\">".get_string("needsregrade", "ogte"). "</div>";
-        }
-
-        if (!empty($ogte->days)) {
-            echo '<div class="editend"><strong>'.get_string('editingends', 'ogte').': </strong> ';
-            echo userdate($timefinish).'</div>';
-        }
-
-    } else {
-        echo '<div class="editend"><strong>'.get_string('editingended', 'ogte').': </strong> ';
-        echo userdate($timefinish).'</div>';
-    }
-
-    // Feedback.
-    if (!empty($entry->entrycomment) or !empty($entry->rating)) {
-        $grades = make_grades_menu($ogte->grade);
-        echo $OUTPUT->heading(get_string('feedback'));
-        ogte_print_feedback($course, $entry, $grades);
-    }
-
-} else {
-    echo '<div class="warning">'.get_string('notopenuntil', 'ogte').': ';
-    echo userdate($timestart).'</div>';
-}
 
 //lists page button
 if(has_capability('mod/ogte:manage', $context)) {
