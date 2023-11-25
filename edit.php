@@ -19,12 +19,11 @@
  *
  * @package mod_ogte
  * @copyright  1999 onwards Martin Dougiamas  {@link http://moodle.com}
- * @copyright  2021 Tengku Alauddin - din@pukunui.net
+ * @copyright  2023 Justin Hunt - justin@poodll.com
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  **/
 
 require_once("../../config.php");
-require_once('./edit_form.php');
 require_once($CFG->dirroot.'/lib/completionlib.php');
 
 use \mod_ogte\constants;
@@ -89,7 +88,7 @@ if($action == 'confirmdelete'){
 }
 
 //get the form (if it has data OR been cancelled - we need it)
-$form = new mod_ogte_entry_form(null, array('entryid' => $entryid));
+$form = new \mod_ogte\local\form\entryform(null, array('entryid' => $entryid));
 if ($form->is_cancelled()) {
     redirect($CFG->wwwroot . '/mod/ogte/view.php?id=' . $cm->id);
 } else if ($fromform = $form->get_data()) {
@@ -103,6 +102,9 @@ if ($form->is_cancelled()) {
     $newentry = new stdClass();
     $newentry->text = $fromform->text;
     $newentry->title = $fromform->title;
+    $newentry->listid = $fromform->listid;
+    $newentry->levelid = $fromform->levelid;
+    $newentry->ignores = $fromform->ignores;
     $newentry->jsonrating = $fromform->jsonrating;
     $newentry->format = FORMAT_HTML;
     $newentry->modified = $timenow;
@@ -158,6 +160,9 @@ if ($entryid && $entry) {
     $data->entryid = $entry->id;
     $data->text = $entry->text;
     $data->title = $entry->title;
+    $data->listid = $entry->listid;
+    $data->levelid = $entry->levelid;
+    $data->ignores = $entry->ignores;
     $data->jsonrating = $entry->jsonrating;
 } else {
     $data->entryid = null;

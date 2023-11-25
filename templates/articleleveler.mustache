@@ -4,6 +4,7 @@
     <div id="{{uniqid}}_al_articlestats" style="width: 80%; max-width: 800px; border: 1px black solid; padding: 2px; display: none" class="mod-ogte-stats"></div>
     <br/><br/>
     <button id="{{uniqid}}_addtoignore" type="button" style="width: 80%; max-width: 800px">{{#str}}add-to-ignore, mod_ogte{{/str}}</button><br/>
+    {{#str}}ignore-list, mod_ogte{{/str}}<br/>
     <input id="{{uniqid}}_ignorelist" type="text" style="width: 80%; max-width: 800px" placeholder="{{#str}}ignore-list, mod_ogte{{/str}}"/>
     <br/><br/>
     {{#str}}select-list-level, mod_ogte{{/str}}<br/>
@@ -26,6 +27,9 @@
             require(['jquery', 'core/log','mod_ogte/utils'], function($, log, utils) {
 
                 var hiddenTextBox = $("input[name='text']");
+                var hiddenListIdBox = $("input[name='listid']");
+                var hiddenLevelIdBox = $("input[name='levelid']");
+                var hiddenIgnoresBox = $("input[name='ignores']");
                 var hiddenTitleBox = $("input[name='title']");
                 var hiddenJSONRatingBox = $("input[name='jsonrating']");
                 var passagebox= $('#{{uniqid}}_al_passage');
@@ -38,16 +42,15 @@
                 var ignorelist = $('#{{uniqid}}_ignorelist');
 
                 var updateAllFromJSONRating = function(jsonrating){
-                    var theresponse = JSON.parse(jsonrating);
                     themessage.text('');
-                    passagebox.html(theresponse.passage);
+                    passagebox.html(jsonrating.passage);
 
                     //add stats to original
-                    var articleStatsTable = utils.analyzeText(theresponse.passage);
+                    var articleStatsTable = utils.analyzeText(jsonrating.passage);
                     articlestats.html(articleStatsTable );
                     articlestats.show();
 
-                    var levelStatsTable = utils.levelStats(theresponse);
+                    var levelStatsTable = utils.levelStats(jsonrating);
                     levelstats.html(levelStatsTable );
                     levelstats.show();
                 };
@@ -61,13 +64,23 @@
                     }
                 };
 
+                var getSelectedText = function() {
+                    var selectedText = "";
+                    if (window.getSelection) {
+                        selectedText = window.getSelection().toString();
+                    } else if (document.selection && document.selection.type !== "Control") {
+                        selectedText = document.selection.createRange().text;
+                    }
+                    return selectedText;
+                };
+
                 addtoIgnoreButton.on('click',function(e){
                     var word = utils.getSelectedWord();
                     if(word!==''){
                         var newignorelist = ignorelist.val() + ' ' + word;
                         ignorelist.val(newignorelist);
+                        hiddenIgnoresBox.val(newignorelist);
                     }
-
                 });
 
 
@@ -86,6 +99,39 @@
                 passagebox.on('input', function (e) {
                     thetext = $(this)[0].innerText;
                     hiddenTextBox.val(thetext);
+                });
+
+                passagebox.on('mouseup', function (e) {
+                    var selectedText = getSelectedText();
+                    if(selectedText!==''){
+                        var word = selectedText.trim();
+                        //we only single words
+                        if (word.includes(" ")) {
+                            addtoIgnoreButton.text( "{{#str}}add-to-ignore, mod_ogte{{/str}}");
+                            return;
+                        }
+                        //we only want words that we did not ignore yet
+                        var ignores = ignorelist.val();
+                        if(ignores.toLowerCase().includes(word.toLowerCase())){
+                            addtoIgnoreButton.text("{{#str}}already-ignored, mod_ogte{{/str}}" + word);
+                            return;
+                        }
+                        addtoIgnoreButton.text("{{#str}}do-ignore, mod_ogte{{/str}}" + word);
+                    }
+                });
+
+                //Add the ignores list to the hidden text box used to submit the form when text is edited
+                ignorelist.on('change', function (e) {
+                    hiddenIgnoresBox.val($(this).val());
+                });
+
+                //Add the ignores list to the hidden text box used to submit the form when text is edited
+                listlevel_select.on('change', function (e) {
+                    var listleveldata = $(this).val();
+                    var listid = listleveldata.split('_')[0];
+                    var levelid = listleveldata.split('_')[1];
+                    hiddenListIdBox.val(listid);
+                    hiddenLevelIdBox.val(levelid);
                 });
 
 
@@ -125,9 +171,22 @@
                 });//end of click
 
                 //Do initialization
-                var jsonrating = hiddenJSONRatingBox.val();
-                if(isJSON(jsonrating)){
+                //JSON rating
+                var jsonrating_string = hiddenJSONRatingBox.val();
+                if(isJSON(jsonrating_string)){
+                    var jsonrating = JSON.parse(jsonrating_string);
                     updateAllFromJSONRating(jsonrating);
+                }
+                //List and Level ID
+                var listid = hiddenListIdBox.val();
+                var levelid = hiddenLevelIdBox.val();
+                if(listid !='' && levelid!=''){
+                    listlevel_select.val(listid+'_'+levelid);
+                }
+                //Ignores
+                var ignores = hiddenIgnoresBox.val();
+                if(ignores!=''){
+                    ignorelist.val(ignores);
                 }
 
             });

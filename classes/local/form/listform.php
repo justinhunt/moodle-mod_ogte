@@ -31,7 +31,6 @@ namespace mod_ogte\local\form;
  * @copyright  (C) 1999 onwards Justin Hunt  http://poodll.com
  */
 
-//why do we need to include this?
 require_once($CFG->libdir . '/formslib.php');
 
 use \mod_ogte\constants;

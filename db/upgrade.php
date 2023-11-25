@@ -39,7 +39,7 @@ function xmldb_ogte_upgrade($oldversion=0) {
         $table = new xmldb_table(constants::M_ENTRIESTABLE);
         $fields=[];
         $fields[] = new xmldb_field('title', XMLDB_TYPE_CHAR, 255, null,XMLDB_NOTNULL, null, 'untitled');
-        $fields[] = new xmldb_field('jsonrating', XMLDB_TYPE_TEXT, null,null, null, null, '{}');
+        $fields[] = new xmldb_field('jsonrating', XMLDB_TYPE_TEXT, null,null, null, null, null);
 
 
         // Alter fields
@@ -51,6 +51,26 @@ function xmldb_ogte_upgrade($oldversion=0) {
 
 
         upgrade_mod_savepoint(true, 2023112302, 'ogte');
+    }
+
+    if($oldversion < 2023112500){
+        // fields to change the notnull definition for] viewstart and viewend
+        $table = new xmldb_table(constants::M_ENTRIESTABLE);
+        $fields=[];
+
+        $fields[] = new xmldb_field('ignores', XMLDB_TYPE_TEXT, null,null, null, null, null);
+        $fields[] = new xmldb_field('levelid', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, 0);
+        $fields[] = new xmldb_field('listid', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, 0);
+
+        // Alter fields
+        foreach ($fields as $field) {
+            if (!$dbman->field_exists($table, $field)) {
+                $dbman->add_field($table, $field);
+            }
+        }
+
+
+        upgrade_mod_savepoint(true, 2023112500, 'ogte');
     }
 
 

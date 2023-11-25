@@ -210,6 +210,9 @@ $string['untitled']="Untitled";
 $string['excerpt']="Excerpt";
 $string['confirmentrydelete'] = 'Are you sure you want to <i>DELETE</i> entry? : {$a}';
 $string['confirmentrydeletetitle'] = 'Really delete entry?';
+$string['ignore-list']="Ignore List - space separated list of words to ignore.";
+$string['already-ignored']='Already ignoring: ';
+$string['do-ignore']='Ignore: ';
 
 
 

@@ -35,7 +35,7 @@ class backup_ogte_activity_structure_step extends backup_activity_structure_step
         $entries = new backup_nested_element('entries');
 
         $entry = new backup_nested_element('entry', array('id'), array(
-            'userid', 'modified','title', 'text','jsonrating', 'format', 'rating',
+            'userid', 'modified','title', 'text','jsonrating','levelid','listid','ignores', 'format', 'rating',
             'entrycomment', 'teacher', 'timemarked', 'mailed'));
 
         // OGTE -> entries -> entry.
