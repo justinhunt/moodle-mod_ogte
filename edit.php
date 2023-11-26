@@ -97,13 +97,11 @@ if ($form->is_cancelled()) {
     // Prevent CSFR.
     confirm_sesskey();
     $timenow = time();
-
-    // This will be overwriten after being we have the entryid.
     $newentry = new stdClass();
     $newentry->text = $fromform->text;
     $newentry->title = $fromform->title;
     $newentry->listid = $fromform->listid;
-    $newentry->levelid = $fromform->levelid;
+    $newentry->levelid =$fromform->levelid;
     $newentry->ignores = $fromform->ignores;
     $newentry->jsonrating = $fromform->jsonrating;
     $newentry->format = FORMAT_HTML;
@@ -190,36 +188,35 @@ if(empty($config->apiuser) || empty($config->apisecret)){
 
 
 $form->set_data($data);
+$renderer = $PAGE->get_renderer(constants::M_COMPONENT);
+echo $renderer->header();
+echo $renderer->heading(format_string($ogte->name));
 
-echo $OUTPUT->header();
-echo $OUTPUT->heading(format_string($ogte->name));
-
-if(!empty($prev_ogte)){
-    $prev_intro = format_module_intro('ogte', $prev_ogte, $cm->id);
-}
-if (!empty($prev_intro)){
-    echo '<table border="2" width="99%"><tr><td>';
-    echo $OUTPUT->box($prev_intro);
-    
-    if (!empty($prev_entry->text)){
-        echo $OUTPUT->box($prev_entry->text);
-    }
-    echo '</td></tr></table>';
-}
 
 $intro = format_module_intro('ogte', $ogte, $cm->id);
-echo $OUTPUT->box($intro);
+echo $renderer->box($intro);
 
 //echo our ai and level widgets and tabs
-$renderer = $PAGE->get_renderer(constants::M_COMPONENT);
-$params =['cloudpoodlltoken'=>$token,'ogteid'=>$cm->instance,'listoptions'=>utils::get_list_options(),'leveloptions'=>utils::get_list_options(true),'passage'=>$data->text];
+$listlevels =utils::get_level_options();
+$leveloptions=isset($data->listid)?$listlevels[$data->listid]:[];
+$params =['cloudpoodlltoken'=>$token,'ogteid'=>$cm->instance,'listoptions'=>utils::get_list_options(),'leveloptions'=>$leveloptions,'listlevels'=>$listlevels,'passage'=>$data->text];
 if(has_capability('mod/ogte:manage', $context)) {
     echo $renderer->back_to_lists_button($cm, get_string('addeditlists', constants::M_COMPONENT));
 }
-echo $OUTPUT->render_from_template('mod_ogte/tabsandeditor', $params) ;
+
+//we put the opts in html on the page because moodle/AMD doesn't like lots of opts in js
+$jsonstring = json_encode($params);
+$optsid='amdopts_mod_ogte_editopts';
+$opts_html =
+    \html_writer::tag('input', '', array('id' => $optsid , 'type' => 'hidden', 'value' => $jsonstring));
+echo $opts_html;
+$opts = array('optsid' => $optsid);
+$PAGE->requires->js_call_amd("mod_ogte/articleleveler", 'init', array($opts));
+echo $renderer->render_from_template('mod_ogte/tabsandeditor', $params) ;
+$PAGE->requires->strings_for_js(['already-ignored','select-to-ignore','do-ignore', 'enter-something','text-too-long-5000'],constants::M_COMPONENT);
 
 
 //fill and print the form.
 $form->display();
 
-echo $OUTPUT->footer();
+echo $renderer->footer();

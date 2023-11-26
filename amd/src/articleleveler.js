@@ -1,5 +1,5 @@
 
-require(['jquery', 'core/log','mod_ogte/utils'], function($, log, utils) {
+define(['jquery', 'core/log','core/str','mod_ogte/utils'], function($, log,str, utils) {
     "use strict"; // jshint ;_;
     /*
     This file combines with the articleleveler.mustache template to create the article leveler
@@ -13,22 +13,81 @@ require(['jquery', 'core/log','mod_ogte/utils'], function($, log, utils) {
     var hiddenIgnoresBox = $("input[name='ignores']");
     var hiddenTitleBox = $("input[name='title']");
     var hiddenJSONRatingBox = $("input[name='jsonrating']");
-    var passagebox= $('#{{uniqid}}_al_passage');
-    var levelstats= $('#{{uniqid}}_al_levelstats');
-    var articlestats= $('#{{uniqid}}_al_articlestats');
-    var themessage= $('#{{uniqid}}_al_message');
-    var thebutton= $('#{{uniqid}}_al_button');
-    var listselect= $('#{{uniqid}}_listselect');
-    var levelselect= $('#{{uniqid}}_levelselect');
-    var addtoIgnoreButton = $('#{{uniqid}}_addtoignore');
-    var ignorelist = $('#{{uniqid}}_ignorelist');
-    var statusmessage =$('#{{uniqid}}_al_status_message');
+    var passagebox= $('#the_al_passage');
+    var levelstats= $('#the_al_levelstats');
+    var articlestats= $('#the_al_articlestats');
+    var themessage= $('#the_al_message');
+    var thebutton= $('#the_al_button');
+    var listselect= $('#the_listselect');
+    var levelselect= $('#the_levelselect');
+    var addtoIgnoreButton = $('#the_addtoignore');
+    var ignorelist = $('#the_ignorelist');
+    var statusmessage =$('#the_al_status_message');
 
-    return {
+    var app= {
 
+        strings:[],
+        opts: {},
+
+        //initialize
+        init: function (props) {
+            log.debug('initializing article leveler');
+
+            //pick up opts from html
+            var theid = '#' + props.optsid;
+            var configcontrol = $(theid).get(0);
+            if (configcontrol) {
+                this.opts = JSON.parse(configcontrol.value);
+                $(theid).remove();
+            } else {
+                //if there is no config we might as well give up
+                log.debug('No config found on page. Giving up.');
+                return;
+            }
+
+            this.init_strings();
+            this.registerEvents();
+
+            //JSON rating
+            var jsonrating_string = hiddenJSONRatingBox.val();
+            log.debug('is json?');
+            if (this.isJSON(jsonrating_string)) {
+                log.debug('yes json');
+                var jsonrating = JSON.parse(jsonrating_string);
+                log.debug('is level stats');
+                if (jsonrating.hasOwnProperty('passage')) {
+                    log.debug('yes level stats');
+                    this.updateAllFromJSONRating(jsonrating);
+                }
+            }
+            //List and Level ID
+            var listid = hiddenListIdBox.val();
+            var levelid = hiddenLevelIdBox.val();
+            if (listid !== '' && levelid !== '') {
+                listselect.val(listid);
+                levelselect.val(levelid);
+            }
+            //Ignores
+            var ignores = hiddenIgnoresBox.val();
+            if (ignores !== '') {
+                ignorelist.val(ignores);
+            }
+        },
+
+
+        //init strings
+        init_strings: function(){
+            var that =this;
+            var strs=['already-ignored','select-to-ignore','do-ignore', 'enter-something','text-too-long-5000'];
+            for (var key in strs) {
+                var thestring = strs[key];
+                str.get_string(thestring,'mod_ogte').done(function(s){that.strings[thestring]=s;});
+            }
+        },
 
         //Update Stats and Analysis
         updateAllFromJSONRating: function (jsonrating) {
+            log.debug('updateAllFromJSONRating');
             themessage.text('');
             passagebox.html(jsonrating.passage);
 
@@ -65,27 +124,30 @@ require(['jquery', 'core/log','mod_ogte/utils'], function($, log, utils) {
 
         // Function to update the options in the second dropdown based on the selection in the first dropdown
         updateLevelDropdown: function () {
-            const selectedCategory = $('#firstDropdown').val();
-            const secondDropdown = $('#secondDropdown');
-
+            const selectedList = listselect.val();
+            log.debug('selected list: ' + selectedList);
             // Clear existing options
-            secondDropdown.empty();
+            levelselect.empty();
 
             // Populate options based on the selected category
-            options[selectedCategory].forEach(function (option) {
-                secondDropdown.append($('<option>').text(option));
+            app.opts.listlevels[selectedList].forEach(function (option) {
+                levelselect.append($('<option value="' +option.key+'">' + option.label+ '</option>'));
             });
+            levelselect.prop('selectedIndex', 0);
+            hiddenListIdBox.val(selectedList);
+            hiddenLevelIdBox.val(levelselect.val());
         },
 
         //Register Event Handlers
         registerEvents: function () {
+            var that=this;
             addtoIgnoreButton.on('click', function (e) {
                 var word = utils.getSelectedWord();
                 if (word !== '') {
                     var newignorelist = ignorelist.val() + ' ' + word;
                     ignorelist.val(newignorelist);
                     hiddenIgnoresBox.val(newignorelist);
-                    statusmessage.text("{{#str}}already-ignored, mod_ogte{{/str}}" + word);
+                    statusmessage.text(app.strings["already-ignored"] + word);
                     addtoIgnoreButton.hide();
                 }
             });
@@ -109,28 +171,28 @@ require(['jquery', 'core/log','mod_ogte/utils'], function($, log, utils) {
             passagebox.on('mouseup', function (e) {
                 var selectedText = getSelectedText();
                 if (selectedText === '') {
-                    statusmessage.text("{{#str}}select-to-ignore, mod_ogte{{/str}}");
+                    statusmessage.text(app.strings["select-to-ignore"]);
                     addtoIgnoreButton.hide();
                     return;
                 } else {
                     var word = selectedText.trim();
                     //we only single words
                     if (word.includes(" ")) {
-                        statusmessage.text("{{#str}}select-to-ignore, mod_ogte{{/str}}");
+                        statusmessage.text(app.strings["select-to-ignore"]);
                         addtoIgnoreButton.hide();
                         return;
                     }
                     //we only want words that we did not ignore yet
                     var ignores = ignorelist.val();
                     if (ignores.toLowerCase().includes(word.toLowerCase())) {
-                        statusmessage.text("{{#str}}already-ignored, mod_ogte{{/str}}" + word);
+                        statusmessage.text(app.strings["already-ignored"] + word);
                         addtoIgnoreButton.hide();
                         return;
                     }
 
                     //if we get here its ignorable
                     statusmessage.text("");
-                    addtoIgnoreButton.text("{{#str}}do-ignore, mod_ogte{{/str}}" + word);
+                    addtoIgnoreButton.text(app.strings["do-ignore"] + word);
                     addtoIgnoreButton.data("ignore", word);
                     addtoIgnoreButton.show();
                 }
@@ -141,12 +203,15 @@ require(['jquery', 'core/log','mod_ogte/utils'], function($, log, utils) {
                 hiddenIgnoresBox.val($(this).val());
             });
 
-            //Add the ignores list to the hidden text box used to submit the form when text is edited
-            levelselect.on('change', function (e) {
-                var listleveldata = $(this).val();
-                var listid = listleveldata.split('_')[0];
-                var levelid = listleveldata.split('_')[1];
+            listselect.on('change', function (e) {
+                var listid =  $(this).val();
                 hiddenListIdBox.val(listid);
+                that.updateLevelDropdown();
+            });
+
+            //Level select on change
+            levelselect.on('change', function (e) {
+                var levelid =  $(this).val();
                 hiddenLevelIdBox.val(levelid);
             });
 
@@ -161,26 +226,25 @@ require(['jquery', 'core/log','mod_ogte/utils'], function($, log, utils) {
 
                 //no super long readings or empty ones
                 if (!thepassage || thepassage.trim() === '') {
-                    themessage.text('{{#str}}enter-something, mod_ogte{{/str}}');
+                    themessage.text(app.strings['enter-something']);
                     return;
                 }
                 if (thepassage.length > 5000) {
-                    themessage.text('{{#str}}text-too-long-5000, mod_ogte{{/str}}');
+                    themessage.text(app.strings['text-too-long-5000']);
                     return;
                 }
                 var language = 'en-US';
 
                 var ignore = ignorelist.val();
-                var listleveldata = levelselect.val();
-                var listid = listleveldata.split('_')[0];
-                var listlevel = listleveldata.split('_')[1];
-                var ogteid=1;
+                var listid = listselect.val();
+                var listlevel = levelselect.val();
+                var ogteid=app.opts.ogteid;
 
                 utils.levelPassage(thepassage, ignore, listid, listlevel, ogteid).then(function (ajaxresult) {
                     var theresponse = JSON.parse(ajaxresult);
                     if (theresponse) {
                         hiddenJSONRatingBox.val(ajaxresult);
-                        this.updateAllFromJSONRating(theresponse);
+                        that.updateAllFromJSONRating(theresponse);
                     } else {
                         log.debug('ajax call to level coverage failed');
                     }
@@ -189,31 +253,7 @@ require(['jquery', 'core/log','mod_ogte/utils'], function($, log, utils) {
 
         },
 
-        //initialize
-       init: function () {
-            this.registerEvents();
-            //JSON rating
-            var jsonrating_string = hiddenJSONRatingBox.val();
-            if (this.isJSON(jsonrating_string)) {
-                var jsonrating = JSON.parse(jsonrating_string);
-                if (jsonrating.hasOwnProperty('levelstats')) {
-                    updateAllFromJSONRating(jsonrating);
-                }
-            }
-            //List and Level ID
-            var listid = hiddenListIdBox.val();
-            var levelid = hiddenLevelIdBox.val();
-            if (listid !== '' && levelid !== '') {
-                listselect.val(listid);
-                levelselect.val(listid + '_' + levelid);
-            }
-            //Ignores
-            var ignores = hiddenIgnoresBox.val();
-            if (ignores !== '') {
-                ignorelist.val(ignores);
-            }
-        },
-
-    }
+    };
+    return app;
 
 });

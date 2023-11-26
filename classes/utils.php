@@ -309,25 +309,45 @@ class utils{
         return [$headwords,$allwords];
     }
 
-    public static function get_list_options($includelevels=false){
+    public static function get_list_options(){
         global $DB;
         $listopts=[];
         $alllists = $DB->get_records(constants::M_LISTSTABLE,[]);
         foreach($alllists as $list){
             if(self::is_json($list->props)){
                 if(self::is_json($list->props)){
-                    $listprops = json_decode($list->props);
-                    if($includelevels) {
-                        foreach ($listprops as $index => $level) {
-                            $listopts[] = ['key' => $list->id . '_' . $index, 'label' => $list->name . ': ' . $level->name];
-                        }
-                    }else{
-                        $listopts[] = ['key' => $list->id, 'label' => $list->name];
-                    }
+                    $listopts[] = ['key' => $list->id, 'label' => $list->name];
                 }
             }
         }
         return $listopts;
+    }
+
+    public static function get_level_options($listid=0){
+        global $DB;
+        $listlevels=[];
+        if($listid){
+            $alllists = $DB->get_records(constants::M_LISTSTABLE,['id'=>$listid]);
+        }else{
+            $alllists = $DB->get_records(constants::M_LISTSTABLE,[]);
+        }
+        foreach($alllists as $list){
+            if(self::is_json($list->props)){
+                if(self::is_json($list->props)){
+                    $listprops = json_decode($list->props);
+                    $onelistlevels=[];
+                    foreach ($listprops as $index => $level) {
+                        $onelistlevels[] = ['key' => $index, 'label' => $list->name . ': ' . $level->name];
+                    }
+                    $listlevels[$list->id]=$onelistlevels;
+                }
+            }
+        }
+        if($listid){
+            return $onelistlevels;
+        }else{
+            return $listlevels;
+        }
     }
 
     public static function get_lang_options(){
