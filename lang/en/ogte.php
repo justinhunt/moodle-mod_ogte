@@ -153,6 +153,7 @@ $string['managelists']="Manage lists";
 $string['listinstructions']="Add or edit lists below";
 $string['editlist']="Edit";
 $string['deletelist']="Delete";
+$string['list']="List";
 $string['listname']="Name";
 $string['listprops']="Props";
 $string['listdescription']="Description";
