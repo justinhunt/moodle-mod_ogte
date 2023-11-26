@@ -120,8 +120,8 @@ $string['original-passage'] = 'Original passage';
 $string['passage-language'] = 'Passage language';
 $string['article-topic-here'] = 'Article topic here';
 $string['paste-text-here'] = 'Paste text here';
-$string['enter-something'] = 'Please enter something in the text area.';
-$string['text-too-long-5000'] = 'The text is too long. Passages must be 5000 characters are shorter.';
+$string['entersomething'] = 'Please enter something in the text area.';
+$string['texttoolong5000'] = 'The text is too long. Passages must be 5000 characters are shorter.';
 $string['text-too-long-200'] = 'The prompt is too long. Prompts must be 200 characters are shorter.';
 $string['articlegenerator'] = 'Article Generator';
 $string['articlerewriter'] = 'Article Rewriter';
@@ -195,10 +195,10 @@ $string['listallwords']="Words(all)";
 $string['error:failed']="Error - failed";
 $string['error:toofewcols']="Error - too few cols";
 $string['error:list']="Error - list rank";
-$string['add-to-ignore']="Add to Ignore List";
-$string['select-to-ignore']="Select words to ignore ..";
-$string['ignore-list']="Words to Ignore";
-$string['space-list-of-words']="Add a space separated list of words";
+$string['addtoignore']="Add to Ignore List";
+$string['selecttoignore']="Select words to ignore ..";
+$string['ignorelist']="Words to Ignore";
+$string['spacelistofwords']="Add a space separated list of words";
 $string['select-list-level']="Select word list and level";
 $string['viewentry']="View";
 $string['deleteentry']="delete";
@@ -212,8 +212,8 @@ $string['untitled']="Untitled";
 $string['excerpt']="Excerpt";
 $string['confirmentrydelete'] = 'Are you sure you want to <i>DELETE</i> entry? : {$a}';
 $string['confirmentrydeletetitle'] = 'Really delete entry?';
-$string['already-ignored']='Ignoring: ';
-$string['do-ignore']='Ignore: ';
+$string['alreadyignored']='Ignoring: ';
+$string['doignore']='Ignore: ';
 
 
 

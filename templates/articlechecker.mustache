@@ -100,13 +100,13 @@
 
                 //no super long readings or empty ones
                 if(!usetext || usetext.trim()==='') {
-                    theresult.val('{{#str}}enter-something, mod_ogte{{/str}}');
+                    theresult.val('{{#str}}entersomething, mod_ogte{{/str}}');
                     theresult.show();
                     spinner.hide();
                     return;
                 }
                 if(usetext.length > 5000){
-                    theresult.val('{{#str}}text-too-long-5000, mod_ogte{{/str}}');
+                    theresult.val('{{#str}}texttoolong5000, mod_ogte{{/str}}');
                     theresult.show();
                     spinner.hide();
                     return;

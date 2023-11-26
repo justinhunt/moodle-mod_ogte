@@ -26,7 +26,7 @@ define(['jquery', 'core/log','core/str','mod_ogte/utils'], function($, log,str, 
 
     var app= {
 
-        strings:[],
+        strings:{},
         opts: {},
 
         //initialize
@@ -78,11 +78,29 @@ define(['jquery', 'core/log','core/str','mod_ogte/utils'], function($, log,str, 
         //init strings
         init_strings: function(){
             var that =this;
-            var strs=['already-ignored','select-to-ignore','do-ignore', 'enter-something','text-too-long-5000'];
+            var strs=['alreadyignored','selecttoignore','doignore', 'entersomething','texttoolong5000'];
             for (var key in strs) {
+                ///log.debug('getting string: ' + strs[key]);
                 var thestring = strs[key];
                 str.get_string(thestring,'mod_ogte').done(function(s){that.strings[thestring]=s;});
             }
+
+            // Set up strings
+            str.get_strings([
+                { "key": "alreadyignored", "component": 'mod_ogte'},
+                { "key": "selecttoignore", "component": 'mod_ogte'},
+                { "key": 'doignore', "component": 'mod_ogte' },
+                { "key": 'entersomething', "component": 'mod_ogte'},
+                { "key": 'texttoolong5000', "component": 'mod_ogte' },
+                
+            ]).done(function (s) {
+                var i = 0;
+                that.strings.alreadyignored = s[i++];
+                that.strings.selecttoignore = s[i++];
+                that.strings.doignore = s[i++];
+                that.strings.entersomething = s[i++];
+                that.strings.texttoolong5000 = s[i++];
+            });
         },
 
         //Update Stats and Analysis
@@ -147,7 +165,7 @@ define(['jquery', 'core/log','core/str','mod_ogte/utils'], function($, log,str, 
                     var newignorelist = ignorelist.val() + ' ' + word;
                     ignorelist.val(newignorelist);
                     hiddenIgnoresBox.val(newignorelist);
-                    statusmessage.text(app.strings["already-ignored"] + word);
+                    statusmessage.text(app.strings["alreadyignored"] + word);
                     addtoIgnoreButton.hide();
                 }
             });
@@ -169,30 +187,30 @@ define(['jquery', 'core/log','core/str','mod_ogte/utils'], function($, log,str, 
             });
 
             passagebox.on('mouseup', function (e) {
-                var selectedText = getSelectedText();
+                var selectedText = that.getSelectedText();
                 if (selectedText === '') {
-                    statusmessage.text(app.strings["select-to-ignore"]);
+                    statusmessage.text(app.strings["selecttoignore"]);
                     addtoIgnoreButton.hide();
                     return;
                 } else {
                     var word = selectedText.trim();
                     //we only single words
                     if (word.includes(" ")) {
-                        statusmessage.text(app.strings["select-to-ignore"]);
+                        statusmessage.text(app.strings["selecttoignore"]);
                         addtoIgnoreButton.hide();
                         return;
                     }
                     //we only want words that we did not ignore yet
                     var ignores = ignorelist.val();
                     if (ignores.toLowerCase().includes(word.toLowerCase())) {
-                        statusmessage.text(app.strings["already-ignored"] + word);
+                        statusmessage.text(app.strings["alreadyignored"] + word);
                         addtoIgnoreButton.hide();
                         return;
                     }
 
                     //if we get here its ignorable
                     statusmessage.text("");
-                    addtoIgnoreButton.text(app.strings["do-ignore"] + word);
+                    addtoIgnoreButton.text(app.strings["doignore"] + word);
                     addtoIgnoreButton.data("ignore", word);
                     addtoIgnoreButton.show();
                 }
@@ -226,11 +244,11 @@ define(['jquery', 'core/log','core/str','mod_ogte/utils'], function($, log,str, 
 
                 //no super long readings or empty ones
                 if (!thepassage || thepassage.trim() === '') {
-                    themessage.text(app.strings['enter-something']);
+                    themessage.text(app.strings['entersomething']);
                     return;
                 }
                 if (thepassage.length > 5000) {
-                    themessage.text(app.strings['text-too-long-5000']);
+                    themessage.text(app.strings['texttoolong5000']);
                     return;
                 }
                 var language = 'en-US';

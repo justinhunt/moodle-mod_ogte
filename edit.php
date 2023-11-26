@@ -213,7 +213,7 @@ echo $opts_html;
 $opts = array('optsid' => $optsid);
 $PAGE->requires->js_call_amd("mod_ogte/articleleveler", 'init', array($opts));
 echo $renderer->render_from_template('mod_ogte/tabsandeditor', $params) ;
-$PAGE->requires->strings_for_js(['already-ignored','select-to-ignore','do-ignore', 'enter-something','text-too-long-5000'],constants::M_COMPONENT);
+$PAGE->requires->strings_for_js(['alreadyignored','selecttoignore','doignore', 'entersomething','texttoolong5000'],constants::M_COMPONENT);
 
 
 //fill and print the form.
