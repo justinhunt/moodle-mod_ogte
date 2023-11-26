@@ -142,6 +142,7 @@ span.mod_ogte_outoflevel:after {
 
 .mod_ogte_tab-content  {
     margin-top: 8px;
+    max-width: 1200px;
 }
 .ogte-passage-editor{
     height: auto;
