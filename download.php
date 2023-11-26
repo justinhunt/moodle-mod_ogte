@@ -28,6 +28,7 @@ require_once("lib.php");
 require_once($CFG->libdir . '/pdflib.php');
 
 $id = required_param('id', PARAM_INT);    // Course Module ID.
+$entryid = required_param('entryid', PARAM_INT);    // Course Module ID.
 
 if (! $cm = get_coursemodule_from_id('ogte', $id)) {
     print_error("Course Module ID was incorrect");
@@ -138,36 +139,23 @@ $doc->AddPage();
 
 $html = '<h1>' . $categoryname . ':' . $coursename . '</h1>';
 $html .= '<h4>' .get_string('name', 'ogte') . $username.'</h4>';
+$entry = $DB->get_record('ogte_entries', array('userid' => $USER->id, 'id' => $entryid));
 
-foreach ($item as $list){
-    $htmlsection = $htmlmodule = '';
-    $section_count = 0;
-    $htmlsection .= '<hr><h3>'. format_text($list->section_name, FORMAT_PLAIN) . '</h3>';
-    foreach ($list->sequence as $l){
-        $section_count++;
-        $obj = $sp[$moduleinstance[$l]];
-        if (empty($obj)){
-            continue;
-        }
-        $pagetitle = $obj->name;
-        $question = $obj->intro;
-        $htmlmodule = '<strong><u>'.format_text($pagetitle, FORMAT_PLAIN).'</u></strong><br>';
-        $htmlmodule .= $question;
-        
-        $entry = $DB->get_record('ogte_entries', array('userid' => $USER->id, 'ogte' => $obj->id));
-        $text = format_text($entry->text, FORMAT_PLAIN);
-        $htmlmodule .= '<p><em>'.$text.'</em></p>';
-        
-        if (!empty($htmlmodule)){
-            if ($section_count == 1){
-                $html .= $htmlsection;                
-            }
-            $html .= $htmlmodule;
-            $html .='<br>';
-        }
-    }
+$htmlsection = $htmlmodule = '';
+
+$pagetitle = $entry->title;
+$htmlmodule = '<strong><u>'.format_text($entry->title, FORMAT_PLAIN).'</u></strong><br>';
+$text = format_text($entry->text, FORMAT_PLAIN);
+$htmlmodule .= '<p><em>'.$text.'</em></p>';
+
+if (!empty($htmlmodule)){
+    $html .= $htmlsection;
+    $html .= $htmlmodule;
+    $html .='<br>';
 }
+
+
 // output the HTML content
 $doc->writeHTML($html, true, false, true, false, '');
 
-$doc->Output('OGTE - '.$coursename.' - '.$username.'.pdf', 'D');
+$doc->Output('OGTE - '.$entry->title.' - '.$username.'.pdf', 'D');

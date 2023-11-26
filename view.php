@@ -126,7 +126,7 @@ if($entries) {
         }
 
         $editurl=new moodle_url('/mod/ogte/edit.php', array('id'=>$cm->id, 'entryid'=>$entry->id,'sesskey'=>$sesskey ,'action'=>'edit'));
-        $downloadurl=new moodle_url('/mod/ogte/edit.php', array('id'=>$cm->id, 'entryid'=>$entry->id,'sesskey'=>$sesskey ,'action'=>'download'));
+        $downloadurl=new moodle_url('/mod/ogte/download.php', array('id'=>$cm->id, 'entryid'=>$entry->id,'sesskey'=>$sesskey ,'action'=>'download'));
         $deleteurl=new moodle_url('/mod/ogte/edit.php', array('id'=>$cm->id, 'entryid'=>$entry->id,'sesskey'=>$sesskey ,'action'=>'confirmdelete'));
         $arrayitem['editurl']=$editurl->out();
         $arrayitem['downloadurl']=$downloadurl->out();
