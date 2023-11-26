@@ -109,6 +109,7 @@ if ($ogte->mode == 1){
 
 
 // Display entries
+$lists=utils::get_level_options();
 $entries = $DB->get_records(constants::M_ENTRIESTABLE, array('userid' => $USER->id, 'ogte' => $ogte->id));
 if($entries) {
     $theentries =[];
@@ -116,6 +117,14 @@ if($entries) {
     foreach(array_values($entries) as $i=>$entry){
         $arrayitem = (Array)$entry;
         $arrayitem['index']=($i+1);
+        //get list and level info
+        $thelevels=utils::get_level_options($entry->listid);
+        if(array_key_exists($entry->levelid, $thelevels)) {
+            $arrayitem['listinfo'] = $thelevels[$entry->levelid]['listname'] . ' - ' . $thelevels[$entry->levelid]['label'];
+        }else{
+            $arrayitem['listinfo'] ='';
+        }
+
         $editurl=new moodle_url('/mod/ogte/edit.php', array('id'=>$cm->id, 'entryid'=>$entry->id,'sesskey'=>$sesskey ,'action'=>'edit'));
         $downloadurl=new moodle_url('/mod/ogte/edit.php', array('id'=>$cm->id, 'entryid'=>$entry->id,'sesskey'=>$sesskey ,'action'=>'download'));
         $deleteurl=new moodle_url('/mod/ogte/edit.php', array('id'=>$cm->id, 'entryid'=>$entry->id,'sesskey'=>$sesskey ,'action'=>'confirmdelete'));
