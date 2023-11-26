@@ -1,5 +1,5 @@
 
-define(['jquery', 'core/log','core/str','mod_ogte/utils'], function($, log,str, utils) {
+define(['jquery', 'core/log','core/notification','core/str','core/templates','mod_ogte/utils'], function($, log,notification,str, templates, utils) {
     "use strict"; // jshint ;_;
     /*
     This file combines with the articleleveler.mustache template to create the article leveler
@@ -66,6 +66,9 @@ define(['jquery', 'core/log','core/str','mod_ogte/utils'], function($, log,str, 
             if (listid !== '' && levelid !== '') {
                 listselect.val(listid);
                 levelselect.val(levelid);
+            }else{
+                var listid = listselect.val();
+                this.updateLevelDropdown(listid);
             }
             //Ignores
             var ignores = hiddenIgnoresBox.val();
@@ -109,14 +112,30 @@ define(['jquery', 'core/log','core/str','mod_ogte/utils'], function($, log,str, 
             themessage.text('');
             passagebox.html(jsonrating.passage);
 
-            //add stats to original
-            var articleStatsTable = utils.analyzeText(jsonrating.passage);
-            articlestats.html(articleStatsTable);
-            articlestats.show();
+            // Add level stats to the page
+            jsonrating.listname=app.opts.listlevels[jsonrating.listid][jsonrating.levelid].listname;
+            jsonrating.levelname=app.opts.listlevels[jsonrating.listid][jsonrating.levelid].label;
+            templates.render('mod_ogte/levelstatstable', jsonrating).done(function(html, js) {
 
-            var levelStatsTable = utils.levelStats(jsonrating);
-            levelstats.html(levelStatsTable);
-            levelstats.show();
+                // Update the page.
+                levelstats.fadeOut("fast", function() {
+                    templates.replaceNodeContents(levelstats, html, js);
+                    levelstats.fadeIn("fast");
+                }.bind(this));
+
+            }.bind(this)).fail(notification.exception);
+
+            //add text stats to the page
+            var textStatsData = utils.analyzeText(jsonrating.passage);
+            templates.render('mod_ogte/textstatstable', textStatsData).done(function(html, js) {
+
+                    // Update the page.
+                articlestats.fadeOut("fast", function() {
+                        templates.replaceNodeContents(articlestats, html, js);
+                    articlestats.fadeIn("fast");
+                    }.bind(this));
+
+            }.bind(this)).fail(notification.exception);
         },
 
         //is the string JSON?

@@ -77,7 +77,7 @@
 {{^element.frozen}}
     {{#js}}
         // <script>
-        require(['jquery', 'mod_ogte/utils'], function($, utils) {
+        require(['jquery','core/templates','core/notification', 'mod_ogte/utils'], function($,templates,notification, utils) {
 
             //On click load text into the player and play it
             var theresult= $('#{{uniqid}}_ac_result');
@@ -112,21 +112,33 @@
                     return;
                 }
 
-                //add stats to original 
-                var originalStatsTable = utils.analyzeText(usetext);
-                originalstats.html(originalStatsTable );
-                originalstats.show();
+                //add stats to original
+                var textStatsData = utils.analyzeText(usetext);
+                templates.render('mod_ogte/textstatstable', textStatsData).done(function(html, js) {
+                    originalstats.fadeOut("fast", function() {
+                        templates.replaceNodeContents(originalstats, html, js);
+                        originalstats.fadeIn("fast");
+                    }.bind(this));
+
+                }.bind(this)).fail(notification.exception);
+
 
                 utils.call_ai(usetext,language,'','request_grammar_correction',function(correction){
                     theresult.val(correction);
                     theresult.show();
 
                     //add stats to result
-                    var resultStatsTable = utils.analyzeText(correction);
-                    resultstats.html(resultStatsTable );
+                    var textStatsData = utils.analyzeText(correction);
+                    templates.render('mod_ogte/textstatstable', textStatsData).done(function(html, js) {
+                        resultstats.fadeOut("fast", function() {
+                            templates.replaceNodeContents(resultstats, html, js);
+                            resultstats.fadeIn("fast");
+                        }.bind(this));
+
+                    }.bind(this)).fail(notification.exception);
+
                     //hide a spinner and show results
                     theresult.show();
-                    resultstats.show();
                     spinner.hide();
 
                 });

@@ -9,22 +9,31 @@
     {{#str}}ignorelist, mod_ogte{{/str}}<br/>
     <input id="the_ignorelist" type="text" class="ogte-wide" placeholder="{{#str}}spacelistofwords, mod_ogte{{/str}}"/>
     <br/><br/>
-    {{#str}}select-list-level, mod_ogte{{/str}}<br/>
-    <select id="the_listselect" name="listselect">
-        {{#listoptions}}
-            <option value="{{key}}">{{label}}</option>
-        {{/listoptions}}
-    </select>
-    <select id="the_levelselect" name="levelselect">
-    {{#leveloptions}}
-        <option value="{{key}}">{{label}}</option>
-    {{/leveloptions}}
-    </select>
-    <br/><br/>
-    <div id="the_al_message" style="width: 80%; max-width: 800px; text-align: center"></div>
-    <br/><br/>
-    <button id="the_al_button" type="button" style="width: 80%; max-width: 800px">{{#str}}level-article, mod_ogte{{/str}}</button>
-    <br/><br/>
 
+    <span class="ogte-go-panel-instructions">{{#str}}select-list-level-then-go, mod_ogte{{/str}}</span><br/>
+    <div id="the_ogte_go_panel" class="ogte-gopanel form-row">
+        <!-- The word list select -->
+        <div class="col">
+            <select id="the_listselect" class="form-control" name="listselect">
+                {{#listoptions}}
+                    <option value="{{key}}">{{label}}</option>
+                {{/listoptions}}
+            </select>
+        </div>
+        <!-- The word list level select -->
+        <div class="col">
+            <select id="the_levelselect" class="form-control"  name="levelselect">
+            {{#leveloptions}}
+                <option value="{{key}}">{{label}}</option>
+            {{/leveloptions}}
+            </select>
+        </div>
+        <!-- The Go button -->
+        <div class="col">
+            <button id="the_al_button" class="btn btn-success" type="button">{{#str}}go, mod_ogte{{/str}}</button>
+        </div>
+    </div>
+    <div id="the_al_message" style="width: 80%; max-width: 800px; text-align: center"></div>
 </div>
+
 

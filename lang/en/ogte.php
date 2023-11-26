@@ -179,6 +179,7 @@ $string['confirmclearwordstitle']="Clearing Words from List";
 $string['listprops']="Props";
 $string['articleleveler']="Article Leveler";
 $string['level-article']="Level Passage";
+$string['go']="GO";
 $string['article-text-here']="Passage text goes here";
 
 $string['csvdelimiter']="CSV Delimiter";
@@ -199,7 +200,7 @@ $string['addtoignore']="Add to Ignore List";
 $string['selecttoignore']="Select words to ignore ..";
 $string['ignorelist']="Words to Ignore";
 $string['spacelistofwords']="Add a space separated list of words";
-$string['select-list-level']="Select word list and level";
+$string['select-list-level-then-go']="Select word list and level, then press GO";
 $string['viewentry']="View";
 $string['deleteentry']="delete";
 $string['downloadentry']="Download";
@@ -214,6 +215,19 @@ $string['confirmentrydelete'] = 'Are you sure you want to <i>DELETE</i> entry? :
 $string['confirmentrydeletetitle'] = 'Really delete entry?';
 $string['alreadyignored']='Ignoring: ';
 $string['doignore']='Ignore: ';
+$string['totalwords']="Total Words";
+$string['inlevel']="In Level";
+$string['outoflevel']="Out of Level";
+$string['outoflist']="Out of List";
+$string['ignored']="Ignored";
+$string['coverage']="Coverage";
+$string['characters']="Characters";
+$string['words']="Words";
+$string['averagewordlength']="Av. Word Length";
+$string['sentences']="Sentences";
+$string['averagesentencelength']="Av. Sentence Length";
+$string['entryforminstructions']="Enter a title, and click the 'Save' button to save your changes. Click the 'Back' button to return to the list of passages.";
+
 
 
 

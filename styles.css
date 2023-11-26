@@ -156,3 +156,13 @@ span.mod_ogte_outoflevel:after {
 .ogte-status-message {
     font-style: italic;
 }
+.ogte_stats_td_hd {
+    font-size: 11px;
+}
+.ogte_stats_td_sub {
+    font-size: 11px;
+    font-style: italic;
+}
+.mod_ogte_entryforminstructions {
+    padding: 15px;
+}

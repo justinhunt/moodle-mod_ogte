@@ -38,7 +38,7 @@
 {{^element.frozen}}
     {{#js}}
         // <script>
-            require(['jquery', 'mod_ogte/utils'], function($, utils) {
+            require(['jquery', 'core/templates','core/notification','mod_ogte/utils'], function($,templates,notification, utils) {
 
                 var theresult= $('#{{uniqid}}_ar_result');
                 var originalstats= $('#{{uniqid}}_ar_originalstats');
@@ -73,21 +73,33 @@
                     }
 
                     //add stats to original
-                    var originalStatsTable = utils.analyzeText(usetext);
-                    originalstats.html(originalStatsTable );
-                    originalstats.show();
+                    var textStatsData = utils.analyzeText(usetext);
+                    templates.render('mod_ogte/textstatstable', textStatsData).done(function(html, js) {
+                        originalstats.fadeOut("fast", function() {
+                            templates.replaceNodeContents(originalstats, html, js);
+                            originalstats.fadeIn("fast");
+                        }.bind(this));
+
+                    }.bind(this)).fail(notification.exception);
 
                     utils.call_ai(usetext,'en-US',difficulty,'rewrite_article',function(newarticle){
                         theresult.val(newarticle);
                         theresult.show();
 
                         //add stats to result
-                        var resultStatsTable = utils.analyzeText(newarticle);
-                        resultstats.html(resultStatsTable );
+                        var textStatsData = utils.analyzeText(newarticle);
+                        templates.render('mod_ogte/textstatstable', textStatsData).done(function(html, js) {
+                            resultstats.fadeOut("fast", function() {
+                                templates.replaceNodeContents(resultstats, html, js);
+                                resultstats.fadeIn("fast");
+                            }.bind(this));
+
+                        }.bind(this)).fail(notification.exception);
+
                         //hide a spinner and show results
                         theresult.show();
-                        resultstats.show();
                         spinner.hide();
+
 
                     });
                 });

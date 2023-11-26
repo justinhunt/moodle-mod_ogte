@@ -9,7 +9,7 @@
 {{^element.frozen}}
     {{#js}}
         // <script>
-            require(['jquery', 'mod_ogte/utils'], function($, utils) {
+            require(['jquery','core/templates','core/notification','mod_ogte/utils'], function($,templates,notification, utils) {
 
                 var promptbox= $('#{{uniqid}}_ag_prompt');
                 var articlebox= $('#{{uniqid}}_ag_article');
@@ -38,9 +38,16 @@
                         themessage.text('');
                         articlebox.val(thearticle);
                         articlebox.show();
-                        var articleStatsTable = utils.analyzeText(thearticle);
-                        articlestats.html(articleStatsTable );
-                        articlestats.show();
+
+                        var textStatsData = utils.analyzeText(thearticle);
+                        templates.render('mod_ogte/textstatstable', textStatsData).done(function(html, js) {
+                            articlestats.fadeOut("fast", function() {
+                                templates.replaceNodeContents(articlestats, html, js);
+                                articlestats.fadeIn("fast");
+                            }.bind(this));
+
+                        }.bind(this)).fail(notification.exception);
+
                     });
                 });
 

@@ -337,7 +337,7 @@ class utils{
                     $listprops = json_decode($list->props);
                     $onelistlevels=[];
                     foreach ($listprops as $index => $level) {
-                        $onelistlevels[] = ['key' => $index, 'label' => $list->name . ': ' . $level->name];
+                        $onelistlevels[] = ['key' => $index, 'label' => $level->name,'listname'=>$list->name ];
                     }
                     $listlevels[$list->id]=$onelistlevels;
                 }
@@ -484,10 +484,29 @@ class utils{
             return ['passage'=>$passage,'status'=>'error','message'=>'no words found','coverage'=>0];
         }else{
             $coverage = round(($inlevel/($wordcount-$ignored))*100);
-            return ['passage'=>implode(' ',$retwords),'status'=>'success',
-                'message'=>'coverage returned','coverage'=>$coverage,
-                'inlevel'=>$inlevel,'outoflevel'=>$outoflevel,'outoflist'=>$outoflist,'ignored'=>$ignored,'wordcount'=>$wordcount];
+            return ['passage'=>implode(' ',$retwords),
+                'status'=>'success',
+                'message'=>'coverage returned',
+                'listid'=>$listid,
+                'levelid'=>$listlevel,
+                'coverage'=>$coverage,
+                'inlevel'=>$inlevel,
+                'outoflevel'=>$outoflevel,
+                'outoflist'=>$outoflist,
+                'ignored'=>$ignored,
+                'wordcount'=>$wordcount,
+                'inlevel_percent'=>self::makePercent($inlevel,$wordcount),
+                'outoflevel_percent'=>self::makePercent($outoflevel,$wordcount),
+                'outoflist_percent'=>self::makePercent($outoflist,$wordcount),
+                'ignored_percent'=>self::makePercent($ignored,$wordcount)];
         }
     }
 
+    public static function makePercent($count,$total){
+        if($total == 0){
+            return 0;
+        }else{
+            return round(($count/$total)*100);
+        }
+    }
 }

@@ -217,6 +217,7 @@ $PAGE->requires->strings_for_js(['alreadyignored','selecttoignore','doignore', '
 
 
 //fill and print the form.
+echo $renderer->render_from_template('mod_ogte/entryforminstructions', []) ;
 $form->display();
 
 echo $renderer->footer();

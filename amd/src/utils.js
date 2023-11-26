@@ -40,18 +40,6 @@ define(['jquery', 'core/log','core/ajax'], function ($, log,ajax) {
             }])[0];
         },
 
-        levelStats: function(theresults){
-
-            var table='<table><tr>';
-            table+= '<td><span style="font-size: 11px">Total Words</span><br>' + theresults.wordcount +'</td>';
-            table+= '<td><span style="font-size: 11px">In Level</span><br>' + theresults.inlevel +'</td>';
-            table+= '<td><span style="font-size: 11px">Out of Level</span><br>' + theresults.outoflevel +'</td>';
-            table+= '<td><span style="font-size: 11px">Out of List</span><br>' + theresults.outoflist +'</td>';
-            table+= '<td><span style="font-size: 11px">Ignored</span><br>' + theresults.ignored +'</td>';
-            table+= '<td><span style="font-size: 11px">Coverage</span><br>' + theresults.coverage +'%</td>';
-            table+= '</tr></table>';
-            return table;
-        },
 
         stripTags: function(input) {
             if(typeof input === "undefined" || input == null) return "";
@@ -109,14 +97,7 @@ define(['jquery', 'core/log','core/ajax'], function ($, log,ajax) {
                 sentenceCount: sentenceCount,
                 avSentenceLength: averageSentenceLength,
             };
-            var table='<table><tr>';
-            table+= '<td><span style="font-size: 11px">characters</span><br>' + stats.charCount +'</td>';
-            table+= '<td><span style="font-size: 11px">words</span><br>' + stats.wordCount +'</td>';
-            table+= '<td><span style="font-size: 11px">av. word length</span><br>' + stats.avWordLength +'</td>';
-            table+= '<td><span style="font-size: 11px">sentences</span><br>' + stats.sentenceCount +'</td>';
-            table+= '<td><span style="font-size: 11px">av. sentence length</span><br>' + stats.avSentenceLength +'</td>';
-            table+= '</tr></table>';
-            return table;
+            return stats;
         },
 
         //FUNCTION rewrite article
