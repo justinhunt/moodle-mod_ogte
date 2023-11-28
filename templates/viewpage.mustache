@@ -1,6 +1,7 @@
 {{#haveentries}}
     {{{addnewbutton}}}
     {{> mod_ogte/entriestable}}
+    <a href="{{{downloadallurl}}}" class="btn btn-secondary">{{#str}}downloadall, mod_ogte{{/str}}</a>
 {{/haveentries}}
 {{^haveentries}}
     <div class="mod_ogte_noentries">{{#str}}noentries, mod_ogte{{/str}}</div>

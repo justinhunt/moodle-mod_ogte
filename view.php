@@ -33,11 +33,11 @@ use \mod_ogte\utils;
 $id = required_param('id', PARAM_INT);    // Course Module ID.
 
 if (! $cm = get_coursemodule_from_id('ogte', $id)) {
-    print_error("Course Module ID was incorrect");
+    throw new \moodle_exception('invalidcoursemodule');
 }
 
 if (! $course = $DB->get_record("course", array('id' => $cm->course))) {
-    print_error("Course is misconfigured");
+    throw new \moodle_exception('coursemisconf');
 }
 
 $context = context_module::instance($cm->id);
@@ -136,8 +136,9 @@ if($entries) {
     }
     $tdata['haveentries']=true;
     $tdata['entries'] =  $theentries;
-    $ee=new moodle_url('/mod/ogte/edit.php', array('id'=>$cm->id, 'entryid'=>$entry->id,'action'=>'edit'));
-    $ee->out();
+    $tdata['downloadallurl']=new moodle_url('/mod/ogte/download.php', array('id'=>$cm->id, 'entryid'=>0,'sesskey'=>$sesskey ,'action'=>'download'));
+  //  $ee=new moodle_url('/mod/ogte/edit.php', array('id'=>$cm->id, 'entryid'=>$entry->id,'action'=>'edit'));
+  //  $ee->out();
 }
 
 if ($canadd) {

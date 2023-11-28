@@ -27,15 +27,18 @@ require_once("../../config.php");
 require_once("lib.php");
 require_once($CFG->libdir . '/pdflib.php');
 
+use \mod_ogte\constants;
+use \mod_ogte\utils;
+
 $id = required_param('id', PARAM_INT);    // Course Module ID.
 $entryid = required_param('entryid', PARAM_INT);    // Course Module ID.
 
 if (! $cm = get_coursemodule_from_id('ogte', $id)) {
-    print_error("Course Module ID was incorrect");
+    throw new \moodle_exception('invalidcoursemodule');
 }
 
 if (! $course = $DB->get_record("course", array('id' => $cm->course))) {
-    print_error("Course is misconfigured");
+    throw new \moodle_exception('coursemisconf');
 }
 $categoryname = $DB->get_record("course_categories", array('id' => $course->category));
 $categoryname = $categoryname->name;
@@ -47,115 +50,74 @@ $context = context_module::instance($cm->id);
 require_login($course, true, $cm);
 
 if (! $ogte = $DB->get_record("ogte", array("id" => $cm->instance))) {
-    print_error("Course module is incorrect");
-}
-//Retrieve sections from course, sort by section and retrieve course module ids
-if (! $cw = $DB->get_records("course_sections", array('course' => $cm->course), 'section')) {
-    print_error("Course module is incorrect");
+    throw new \moodle_exception('invalidcoursemodule');
 }
 
-$moduleid = $DB->get_record("modules", array('name' => 'ogte'));
-
-//Retrieve ogte modules in the course, remove deleted/hiddden
-//build $modulesearch for $item 
-$moduleslist = $DB->get_records("course_modules", array('course' => $cm->course, 'module' => $moduleid->id));
-
-$modulesearch = array();
-foreach ($moduleslist as $module){
-    if ($module->deletioninprogress || !$module->visible){
-        unset ($moduleslist[$module->id]);
-    }else{
-        array_push($modulesearch, $module->id);
-    }
-}
-//$item is sorted using section name for display.
-$item = array();
-foreach ($cw as $section){
-    if (empty($section->name)){
-        if ($section->section == 0){
-            $item[$section->section]->section_name="General";
-        }else{
-            $item[$section->section]->section_name="Topic " . (string)$section->section;            
-        }
-    }else{
-        $item[$section->section]->section_name=$section->name;
-    }
-    // Filter out unrelated modules in sequence
-    if (!empty($section->sequence)){
-        if (strpos($section->sequence, ',') !== false){
-            $seq = array();
-            $seq = explode(',',$section->sequence);
-            $prep = array();
-            foreach ($seq as $s){
-                if (in_array($s, $modulesearch)){
-                    array_push($prep, $s);
-                }
-            }
-            if (empty($prep)){
-                // Remove unneeded section
-                unset($item[$section->section]);
-            }else{
-                $item[$section->section]->sequence = $prep;
-            }
-        }else{
-            if (in_array($section->sequence, $modulesearch)){
-                $item[$section->section]->sequence=[$section->sequence];
-            }else{
-                unset($item[$section->section]);
-            }
-        }
-    }else{
-        unset($item[$section->section]);
-    }
-}
-
-$moduleid = $DB->get_record("modules", array('name' => 'ogte'));
-//Retrieve ogte modules in the course, remove deleted/hiddden and order by
-$moduleslist = $DB->get_records("course_modules", array('course' => $cm->course, 'module' => $moduleid->id));
-$modulesearch = array(); 
-$moduleinstance = array();
-foreach ($moduleslist as $module){
-    if ($module->deletioninprogress || !$module->visible){
-        unset ($moduleslist[$module->id]);
-    }else{
-        array_push($modulesearch, $module->id);
-        $moduleinstance[$module->id] = $module->instance;
-    }
-}
-
-$sp = $DB->get_records("ogte", array("course" => $course->id));
-foreach ($sp as $s){
-    if ($s->mode == 1){
-        unset($sp[$s->id]);
-    }
-}
 ob_clean();
 $doc = new pdf();
 $doc->setPrintHeader(false);
 $doc->setPrintFooter(false);
 $doc->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
 
-$doc->AddPage();
+//Do we want all entries for this user or just one?
+if($entryid) {
+    $entries = $DB->get_records('ogte_entries', array('userid' => $USER->id, 'id' => $entryid));
+}else{
+    $entries = $DB->get_records('ogte_entries', array('userid' => $USER->id, 'ogte' => $ogte->id));
+}
 
-$html = '<h1>' . $categoryname . ':' . $coursename . '</h1>';
-$html .= '<h4>' .get_string('name', 'ogte') . $username.'</h4>';
-$entry = $DB->get_record('ogte_entries', array('userid' => $USER->id, 'id' => $entryid));
+//get Level options
+$thelevels =utils::get_level_options();
 
-$htmlsection = $htmlmodule = '';
+//loop through entries each on a new page
+foreach ($entries as $entry) {
+    //new page
+    $doc->AddPage();
 
-$pagetitle = $entry->title;
-$htmlmodule = '<strong><u>'.format_text($entry->title, FORMAT_PLAIN).'</u></strong><br>';
-$text = format_text($entry->text, FORMAT_PLAIN);
-$htmlmodule .= '<p><em>'.$text.'</em></p>';
+    //title and author
+    $html = '';
+    $html .= '<h1>' . format_text($entry->title, FORMAT_PLAIN) . '</h1>';
+    $html .= '<h4>' . get_string('author', 'ogte') .': ' . $username . '</h4>';
+    $htmlsection = $htmlmodule = '';
+    $pagetitle = $entry->title;
 
-if (!empty($htmlmodule)){
-    $html .= $htmlsection;
-    $html .= $htmlmodule;
-    $html .='<br>';
+    //list and level and coverage
+
+    if(array_key_exists($entry->listid, $thelevels) && array_key_exists($entry->levelid, $thelevels[$entry->listid])) {
+        $thelevel=$thelevels[$entry->listid];
+        $listandlevel = $thelevel[$entry->levelid]['listname'] . ' - ' . $thelevel[$entry->levelid]['label'];
+    }else{
+        $listandlevel ='';
+    }
+    if(utils::is_json($entry->jsonrating)) {
+        $jsonrating = json_decode($entry->jsonrating);
+        $coverage = $jsonrating->coverage;
+    }else{
+        $coverage = '--';
+    }
+    $coverage = get_string('coverage', 'ogte') . ": " . $coverage . '%';
+    $htmlmodule = "<strong><u>$listandlevel ($coverage) </u></strong><br>";
+    $ignoring = get_string('ignoring', 'ogte') . ": ";
+    $htmlmodule .= "$ignoring" . $entry->ignores . "<br>";
+    $text = format_text($entry->text, FORMAT_PLAIN);
+    $htmlmodule .= '<p><em>' . $text . '</em></p>';
+
+    if (!empty($htmlmodule)) {
+        $html .= $htmlsection;
+        $html .= $htmlmodule;
+        $html .= '<br>';
+    }
+    // output the HTML content
+    $doc->writeHTML($html, true, false, true, false, '');
 }
 
 
-// output the HTML content
-$doc->writeHTML($html, true, false, true, false, '');
 
-$doc->Output('OGTE - '.$entry->title.' - '.$username.'.pdf', 'D');
+//get the write document title
+if($entryid) {
+    $doctitle= $entry->title;
+}else{
+    $doctitle= 'passages';
+}
+//save the file
+$doc->Output('OGTE - '.$doctitle.' - '.$username.'.pdf', 'D');

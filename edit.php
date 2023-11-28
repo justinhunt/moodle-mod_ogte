@@ -199,7 +199,10 @@ echo $renderer->box($intro);
 //echo our ai and level widgets and tabs
 $listlevels =utils::get_level_options();
 $leveloptions=isset($data->listid)?$listlevels[$data->listid]:[];
-$params =['cloudpoodlltoken'=>$token,'ogteid'=>$cm->instance,'listoptions'=>utils::get_list_options(),'leveloptions'=>$leveloptions,'listlevels'=>$listlevels,'passage'=>$data->text];
+$params =['cloudpoodlltoken'=>$token,'ogteid'=>$cm->instance,
+    'listoptions'=>utils::get_list_options(),'leveloptions'=>$leveloptions,
+    'listlevels'=>$listlevels,'passage'=>$data->text,'form'=>$form->render()];
+
 if(has_capability('mod/ogte:manage', $context)) {
     echo $renderer->back_to_lists_button($cm, get_string('addeditlists', constants::M_COMPONENT));
 }
@@ -218,6 +221,6 @@ $PAGE->requires->strings_for_js(['alreadyignored','selecttoignore','doignore', '
 
 //fill and print the form.
 echo $renderer->render_from_template('mod_ogte/entryforminstructions', []) ;
-$form->display();
+
 
 echo $renderer->footer();

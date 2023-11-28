@@ -207,6 +207,7 @@ $string['deleteentry']="delete";
 $string['downloadentry']="Download";
 $string['noentries']="There are no passages. Please add a new one.";
 $string['addnew']="Add New";
+$string['author']="Author";
 
 $string['title']="Title";
 $string['actions']="Actions";
@@ -215,6 +216,7 @@ $string['excerpt']="Excerpt";
 $string['confirmentrydelete'] = 'Are you sure you want to <i>DELETE</i> entry? : {$a}';
 $string['confirmentrydeletetitle'] = 'Really delete entry?';
 $string['alreadyignored']='Ignoring: ';
+$string['ignoring']='Ignoring';
 $string['doignore']='Ignore: ';
 $string['totalwords']="Total Words";
 $string['inlevel']="In Level";
@@ -227,7 +229,8 @@ $string['words']="Words";
 $string['averagewordlength']="Av. Word Length";
 $string['sentences']="Sentences";
 $string['averagesentencelength']="Av. Sentence Length";
-$string['entryforminstructions']="Enter a title, and click the 'Save' button to save your changes. Click the 'Back' button to return to the list of passages.";
+$string['entryforminstructions']="Enter a title, and click the 'Save' button to save your changes. Click the 'Cancel' button to return to the list of passages.";
+$string['downloadall']="Download All";
 
 
 
