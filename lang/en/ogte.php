@@ -219,18 +219,25 @@ $string['alreadyignored']='Ignoring: ';
 $string['ignoring']='Ignoring';
 $string['doignore']='Ignore: ';
 $string['totalwords']="Total Words";
+$string['total']="Total";
+$string['level']="Level";
+$string['frequency']="Frequency";
 $string['inlevel']="In Level";
 $string['outoflevel']="Out of Level";
+$string['outoflevelfreq']="% Out of Level";
 $string['outoflist']="Out of List";
 $string['ignored']="Ignored";
 $string['coverage']="Coverage";
 $string['characters']="Characters";
 $string['words']="Words";
+$string['word']="Word";
 $string['averagewordlength']="Av. Word Length";
 $string['sentences']="Sentences";
 $string['averagesentencelength']="Av. Sentence Length";
 $string['entryforminstructions']="Enter a title, and click the 'Save' button to save your changes. Click the 'Cancel' button to return to the list of passages.";
 $string['downloadall']="Download All";
+$string['articleleveler_instructions'] ="Enter a passage of text in the box below, select the correct wordlist and level of the wordlist to check against and press the go button.";
+
 
 
 

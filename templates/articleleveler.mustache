@@ -1,46 +1,68 @@
 <div>
-    <div id="the_al_levelstats" style="display: none" class="mod-ogte-stats ogte-wide"></div>
-    <div contentEditable="true" id="the_al_passage" class="ogte-passage-editor ogte-wide">{{passage}}</div>
-    <div id="the_al_articlestats" style="width: 80%; max-width: 800px; border: 1px black solid; padding: 2px; display: none" class="mod-ogte-stats"></div>
-    <div id="the_al_status" class="mod-ogte-stats">
-     <span id="the_al_status_message" class="ogte-status-message">{{#str}}selecttoignore, mod_ogte{{/str}}</span> <button id="the_addtoignore" type="button" style="display: none">{{#str}}addtoignore, mod_ogte{{/str}}</button>
-    </div>
-    <br/>
-    {{#str}}ignorelist, mod_ogte{{/str}}<br/>
-    <input id="the_ignorelist" type="text" class="ogte-wide" placeholder="{{#str}}spacelistofwords, mod_ogte{{/str}}"/>
-    <br/><br/>
-    <div id="the_outoflistwords" class="ogte-outoflistwords" style="display: none"></div>
-    <div id="the_outoflevelwords" class="ogte-outoflevelwords" style="display: none"></div>
-    <div id="the_outoflistranks" class="ogte-outoflistranks" style="display: none"></div>
+    <div id="ogte-leftright" class="ogte-leftright container">
+        <!--passage and stats-->
+        <div id="ogte-passageandstats" class="ogte-passageandstats">
 
-    <span class="ogte-go-panel-instructions">{{#str}}select-list-level-then-go, mod_ogte{{/str}}</span><br/>
-    <div id="the_ogte_go_panel" class="ogte-gopanel form-row">
-        <!-- The word list select -->
-        <div class="col">
-            <select id="the_listselect" class="form-control" name="listselect">
-                {{#listoptions}}
-                    <option value="{{key}}">{{label}}</option>
-                {{/listoptions}}
-            </select>
+            <span class="ogte-go-panel-instructions">{{#str}}articleleveler_instructions, mod_ogte{{/str}}</span><br/>
+            <div id="the_ogte_go_panel" class="ogte-gopanel form-row">
+                <!-- The word list select -->
+                <div class="col">
+                    <select id="the_listselect" class="form-control" name="listselect">
+                        {{#listoptions}}
+                        <option value="{{key}}">{{label}}</option>
+                        {{/listoptions}}
+                    </select>
+                </div>
+                <!-- The word list level select -->
+                <div class="col">
+                    <select id="the_levelselect" class="form-control"  name="levelselect">
+                        {{#leveloptions}}
+                        <option value="{{key}}">{{label}}</option>
+                        {{/leveloptions}}
+                    </select>
+                </div>
+                <!-- The Go button -->
+                <div class="col">
+                    <button id="the_al_button" class="btn btn-success" type="button">{{#str}}go, mod_ogte{{/str}}</button>
+                </div>
+            </div>
+            <div id="the_al_message" style="width: 80%; max-width: 800px; text-align: center"></div>
+
+            <div id="the_al_levelstats" style="display: none" class="mod-ogte-stats ogte-wide"></div>
+            <div contentEditable="true" id="the_al_passage" class="ogte-passage-editor ogte-wide">{{passage}}</div>
+            <div id="the_al_articlestats" style="display: none" class="mod-ogte-stats ogte-wide"></div>
+            <div id="ogte-actions" class="ogte-actions">
+                <!-- actions -->
+                    <div id="the_al_status" class="mod-ogte-stats">
+                        <span id="the_al_status_message" class="ogte-status-message">{{#str}}selecttoignore, mod_ogte{{/str}}</span> <button id="the_addtoignore" type="button" style="display: none">{{#str}}addtoignore, mod_ogte{{/str}}</button>
+                    </div>
+                    <br/>
+                    {{#str}}ignorelist, mod_ogte{{/str}}<br/>
+                    <input id="the_ignorelist" type="text" class="ogte-wide" placeholder="{{#str}}spacelistofwords, mod_ogte{{/str}}"/>
+                    <br/><br/>
+
+
+
+
+                    <br/>
+                    <!-- the form for saving the new entry -->
+                    <hr />
+                    <div class="mod_ogte_entryforminstructions"> {{#str}} entryforminstructions,mod_ogte{{/str}}</div>
+                    {{{form}}}
+
+            </div>
+
         </div>
-        <!-- The word list level select -->
-        <div class="col">
-            <select id="the_levelselect" class="form-control"  name="levelselect">
-            {{#leveloptions}}
-                <option value="{{key}}">{{label}}</option>
-            {{/leveloptions}}
-            </select>
-        </div>
-        <!-- The Go button -->
-        <div class="col">
-            <button id="the_al_button" class="btn btn-success" type="button">{{#str}}go, mod_ogte{{/str}}</button>
+        <!--blocks-->
+        <div id="ogte-blocks" class="ogte-blocks">
+            <div id="the_outoflistwords" class="ogte-outof_container" style="display: none"></div>
+            <div id="the_outoflevelwords" class="ogte-outof_container" style="display: none"></div>
+            <div id="the_ignoredwords" class="ogte-outof_container" style="display: none"></div>
+            <div id="the_outoflevelfreq" class="ogte-outof_container" style="display: none"></div>
         </div>
     </div>
-    <div id="the_al_message" style="width: 80%; max-width: 800px; text-align: center"></div>
 </div>
-<br/>
-<!-- the form for saving the new entry -->
-<hr>
-<div class="mod_ogte_entryforminstructions"> {{#str}} entryforminstructions,mod_ogte{{/str}}</div>
-{{{form}}}
+
+
+
 

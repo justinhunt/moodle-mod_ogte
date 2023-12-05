@@ -30,7 +30,7 @@ use \mod_ogte\constants;
 use \mod_ogte\utils;
 
 $id = required_param('id', PARAM_INT);    // Course Module ID.
-$entryid = optional_param('entryid',null, PARAM_INT);    // Course Module ID.
+$entryid = optional_param('entryid',0, PARAM_INT);    // Course Module ID.
 $action = optional_param('action',null, PARAM_ALPHA);    // Course Module ID.
 
 if (!$cm = get_coursemodule_from_id('ogte', $id)) {
@@ -55,7 +55,7 @@ if (!empty($ogte->preventry)){
     $prev_entry = $DB->get_record("ogte_entries", array("userid" => $USER->id, "ogte" => $ogte->preventry));
 }
 // Header.
-$PAGE->set_url('/mod/ogte/edit.php', array('id' => $id));
+$PAGE->set_url('/mod/ogte/edit.php', array('id' => $id, 'entryid' => $entryid));
 $PAGE->navbar->add(get_string('edit'));
 $PAGE->set_title(format_string($ogte->name));
 $PAGE->set_heading($course->fullname);
@@ -203,9 +203,11 @@ $params =['cloudpoodlltoken'=>$token,'ogteid'=>$cm->instance,
     'listoptions'=>utils::get_list_options(),'leveloptions'=>$leveloptions,
     'listlevels'=>$listlevels,'passage'=>$data->text,'form'=>$form->render()];
 
+/*
 if(has_capability('mod/ogte:manage', $context)) {
     echo $renderer->back_to_lists_button($cm, get_string('addeditlists', constants::M_COMPONENT));
 }
+*/
 
 //we put the opts in html on the page because moodle/AMD doesn't like lots of opts in js
 $jsonstring = json_encode($params);
@@ -216,7 +218,8 @@ echo $opts_html;
 $opts = array('optsid' => $optsid);
 $PAGE->requires->js_call_amd("mod_ogte/articleleveler", 'init', array($opts));
 echo $renderer->render_from_template('mod_ogte/tabsandeditor', $params) ;
-$PAGE->requires->strings_for_js(['alreadyignored','selecttoignore','doignore', 'entersomething','texttoolong5000'],constants::M_COMPONENT);
+$PAGE->requires->strings_for_js(['alreadyignored','selecttoignore','doignore',
+    'entersomething','texttoolong5000','ignored','outoflist','outoflevel','outoflevelfreq'],constants::M_COMPONENT);
 
 
 //fill and print the form.

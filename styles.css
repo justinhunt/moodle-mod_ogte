@@ -105,7 +105,7 @@
     max-width: 800px;
 }
 
-.mod-ogte-stats th, td {
+.ogte-passageandstats th,.ogte-passageandstats  td {
     border: 1px solid black;
     width: 20%; /* or width: 100px; */
     padding: 10px;
@@ -147,12 +147,12 @@ span.mod_ogte_outoflevel:after {
 .ogte-passage-editor{
     height: auto;
     min-height: 150px;
+    padding: 10px;
 }
 .ogte-wide {
-    width: 80%;
-    max-width: 800px;
+    width: 90%;
+    max-width: 1200px;
     border: 1px black solid;
-    padding: 2px;
 }
 .ogte-status-message {
     font-style: italic;
@@ -166,4 +166,53 @@ span.mod_ogte_outoflevel:after {
 }
 .mod_ogte_entryforminstructions {
     padding: 15px;
+}
+.ogte-leftright {
+    display: flex;
+    justify-content: space-between;
+}
+.ogte-passageandstats {
+    flex: 1;
+}
+.ogte-blocks {
+    width: 300px;
+}
+.ogte-block-uncovered {
+   /* height: 279px; */
+}
+.ogte-block-title {
+    background-color: #BAE7FA;
+    padding: 4px 6px;
+}
+.ogte-outof_container {
+    border: 1px solid #ddd;
+    padding: 5px;
+}
+
+.ogte-outof_container table {
+    border: 0 none;
+    margin: 0;
+    display: table;
+    width: 94%;
+}
+.ogte-outof_container tbody tr:nth-child(2n+1) {
+   background-color: #EEEEEE;
+}
+.ogte-outof_container  {
+    margin-top: 5px;
+    overflow-x: hidden;
+    min-height: 100px;
+    overflow-y: auto;
+    max-height: 279px;
+}
+
+.ogte-gopanel {
+    margin: 10px;
+}
+.ogte-go-panel-instructions {
+    margin-top: 10px;
+    margin-bottom: 5px;
+    display: block;
+    width: 90%;
+    max-width: 1200px;
 }

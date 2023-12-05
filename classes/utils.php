@@ -436,6 +436,7 @@ class utils{
         $outoflevel=0;
         $wordcount=0;
         $ignored=0;
+        $numbers=0;
         $retwords = [];
         foreach($words as $word){
             $cleanword = trim(preg_replace('/[^a-zA-Z0-9]/', '', strip_tags($word)));
@@ -444,9 +445,12 @@ class utils{
             if(!empty($cleanword)) {
                 //check if its being ignored
                 if (is_array($ignores) && in_array($cleanword, $ignores)) {
-                    $retwords[]=\html_writer::span($word, 'mod_ogte_ignored', ['data-index'=>$wordcount]);
+                    $retwords[] = \html_writer::span($word, 'mod_ogte_ignored', ['data-index' => $wordcount]);
                     $ignored++;
-                }else {
+                }elseif(is_numeric($cleanword)){
+                    $retwords[]=\html_writer::span($word, 'mod_ogte_number', ['data-index'=>$wordcount]);
+                    $numbers++;
+                }else{
                     //search for the word listrank and process depending on the level
                     //due to some lists having capitalized versions of the same word, multiple entries are not impossible
                     //we just take the first one
@@ -480,6 +484,9 @@ class utils{
                 $retwords[] = $word;
             }
         }
+        //adjust for numbers
+        $wordcount = $wordcount - $numbers;
+
         if($wordcount == 0){
             return ['passage'=>$passage,'status'=>'error','message'=>'no words found','coverage'=>0];
         }else{
@@ -494,6 +501,7 @@ class utils{
                 'outoflevel'=>$outoflevel,
                 'outoflist'=>$outoflist,
                 'ignored'=>$ignored,
+                'rawwordcount'=>$wordcount + $numbers,
                 'wordcount'=>$wordcount,
                 'inlevel_percent'=>self::makePercent($inlevel,$wordcount),
                 'outoflevel_percent'=>self::makePercent($outoflevel,$wordcount),

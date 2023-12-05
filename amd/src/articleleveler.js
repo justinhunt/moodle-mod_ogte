@@ -23,6 +23,10 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
     var addtoIgnoreButton = $('#the_addtoignore');
     var ignorelist = $('#the_ignorelist');
     var statusmessage =$('#the_al_status_message');
+    var outoflistwords_block =$('#the_outoflistwords');
+    var outoflevelwords_block =$('#the_outoflevelwords');
+    var ignoredwords_block =$('#the_ignoredwords');
+    var outoflevelfreq_block =$('#the_outoflevelfreq');
 
     var app= {
 
@@ -81,12 +85,24 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
         //init strings
         init_strings: function(){
             var that =this;
-            var strs=['alreadyignored','selecttoignore','doignore', 'entersomething','texttoolong5000'];
+            var strs=['alreadyignored','selecttoignore','doignore', 'entersomething','texttoolong5000',
+                'ignored','outoflist','outoflevel','outoflevelfreq'];
             for (var key in strs) {
                 ///log.debug('getting string: ' + strs[key]);
                 var thestring = strs[key];
                 str.get_string(thestring,'mod_ogte').done(function(s){that.strings[thestring]=s;});
             }
+
+            //Promises are promises and jsonrating cant wait around for them, so we hack it
+            that.strings.alreadyignored = "Already Ignored";
+            that.strings.selecttoignore = "Select to Ignore";
+            that.strings.doignore = "Ignore";
+            that.strings.entersomething = "Enter something";
+            that.strings.texttoolong5000 = "Text too long (5000 characters max)";
+            that.strings.ignored = "Ignored";
+            that.strings.outoflist = "Out of List";
+            that.strings.outoflevel = "Out of Level";
+            that.strings.outoflevelfreq =  "% Out of Level";
 
             // Set up strings
             str.get_strings([
@@ -95,6 +111,10 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
                 { "key": 'doignore', "component": 'mod_ogte' },
                 { "key": 'entersomething', "component": 'mod_ogte'},
                 { "key": 'texttoolong5000', "component": 'mod_ogte' },
+                { "key": 'ignored', "component": 'mod_ogte' },
+                { "key": 'outoflist', "component": 'mod_ogte'},
+                { "key": 'outoflevel', "component": 'mod_ogte' },
+                { "key": 'outoflevelfreq', "component": 'mod_ogte'},
                 
             ]).done(function (s) {
                 var i = 0;
@@ -103,6 +123,10 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
                 that.strings.doignore = s[i++];
                 that.strings.entersomething = s[i++];
                 that.strings.texttoolong5000 = s[i++];
+                that.strings.ignored = s[i++];
+                that.strings.outoflist = s[i++];
+                that.strings.outoflevel = s[i++];
+                that.strings.outoflevelfreq = s[i++];
             });
         },
 
@@ -136,7 +160,65 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
                     }.bind(this));
 
             }.bind(this)).fail(notification.exception);
+
+            //add more coverage stats to the page as blocks
+            var ignoredAndOutOfData = utils.analyzeOutListLevelsIgnored(jsonrating.passage);
+
+            //out of list words block
+            outoflistwords_block.show();
+            templates.render('mod_ogte/block_uncovered',
+                {words: ignoredAndOutOfData.outoflist, haslevels: false, title: this.strings.outoflist}).done(function(html, js) {
+
+                // Update the page.
+                outoflistwords_block.fadeOut("fast", function() {
+                    templates.replaceNodeContents(outoflistwords_block, html, js);
+                    outoflistwords_block.fadeIn("fast");
+                }.bind(this));
+
+            }.bind(this)).fail(notification.exception);
+
+            //out of level words block
+            outoflevelwords_block.show();
+            templates.render('mod_ogte/block_uncovered',
+                {words: ignoredAndOutOfData.outoflevel, haslevels: true, title: this.strings.outoflevel}).done(function(html, js) {
+
+                // Update the page.
+                outoflevelwords_block.fadeOut("fast", function() {
+                    templates.replaceNodeContents(outoflevelwords_block, html, js);
+                    outoflevelwords_block.fadeIn("fast");
+                }.bind(this));
+
+            }.bind(this)).fail(notification.exception);
+
+            //ignored words block
+            ignoredwords_block.show();
+            templates.render('mod_ogte/block_uncovered',
+                {words: ignoredAndOutOfData.ignored, haslevels: false,title: this.strings.ignored}).done(function(html, js) {
+
+                // Update the page.
+                ignoredwords_block.fadeOut("fast", function() {
+                    templates.replaceNodeContents(ignoredwords_block, html, js);
+                    ignoredwords_block.fadeIn("fast");
+                }.bind(this));
+
+            }.bind(this)).fail(notification.exception);
+
+            //out of level frequency block
+            var outOfLevelFreqData = utils.calc_outoflevel_frequencies(jsonrating.passage);
+            outoflevelfreq_block.show();
+            templates.render('mod_ogte/block_outoflevelfreq',
+                {levels: outOfLevelFreqData, title: this.strings.outoflevelfreq}).done(function(html, js) {
+
+                // Update the page.
+                outoflevelfreq_block.fadeOut("fast", function() {
+                    templates.replaceNodeContents(outoflevelfreq_block, html, js);
+                    outoflevelfreq_block.fadeIn("fast");
+                }.bind(this));
+
+            }.bind(this)).fail(notification.exception);
+
         },
+
 
         //is the string JSON?
         isJSON:  function (str) {
