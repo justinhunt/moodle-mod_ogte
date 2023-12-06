@@ -1,5 +1,5 @@
 
-define(['jquery', 'core/log','core/notification','core/str','core/templates','mod_ogte/utils'], function($, log,notification,str, templates, utils) {
+define(['jquery', 'core/log','core/notification','core/str','core/templates','mod_ogte/utils','mod_ogte/clipboardhelper'], function($, log,notification,str, templates, utils, clipboardhelper) {
     "use strict"; // jshint ;_;
     /*
     This file combines with the articleleveler.mustache template to create the article leveler
@@ -51,6 +51,7 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
 
             this.init_strings();
             this.registerEvents();
+            clipboardhelper.init({});
 
             //JSON rating
             var jsonrating_string = hiddenJSONRatingBox.val();
@@ -167,7 +168,7 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
             //out of list words block
             outoflistwords_block.show();
             templates.render('mod_ogte/block_uncovered',
-                {words: ignoredAndOutOfData.outoflist, haslevels: false, title: this.strings.outoflist}).done(function(html, js) {
+                {words: ignoredAndOutOfData.outoflist,haswords: ignoredAndOutOfData.outoflist.length>0, haslevels: false, title: this.strings.outoflist}).done(function(html, js) {
 
                 // Update the page.
                 outoflistwords_block.fadeOut("fast", function() {
@@ -180,7 +181,7 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
             //out of level words block
             outoflevelwords_block.show();
             templates.render('mod_ogte/block_uncovered',
-                {words: ignoredAndOutOfData.outoflevel, haslevels: true, title: this.strings.outoflevel}).done(function(html, js) {
+                {words: ignoredAndOutOfData.outoflevel, haswords: ignoredAndOutOfData.outoflevel.length>0, haslevels: true, title: this.strings.outoflevel}).done(function(html, js) {
 
                 // Update the page.
                 outoflevelwords_block.fadeOut("fast", function() {
@@ -193,7 +194,7 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
             //ignored words block
             ignoredwords_block.show();
             templates.render('mod_ogte/block_uncovered',
-                {words: ignoredAndOutOfData.ignored, haslevels: false,title: this.strings.ignored}).done(function(html, js) {
+                {words: ignoredAndOutOfData.ignored, haswords: ignoredAndOutOfData.ignored.length>0, haslevels: false,title: this.strings.ignored}).done(function(html, js) {
 
                 // Update the page.
                 ignoredwords_block.fadeOut("fast", function() {
@@ -207,7 +208,7 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
             var outOfLevelFreqData = utils.calc_outoflevel_frequencies(jsonrating.passage);
             outoflevelfreq_block.show();
             templates.render('mod_ogte/block_outoflevelfreq',
-                {levels: outOfLevelFreqData, title: this.strings.outoflevelfreq}).done(function(html, js) {
+                {levels: outOfLevelFreqData,haslevels: outOfLevelFreqData.length>0, title: this.strings.outoflevelfreq}).done(function(html, js) {
 
                 // Update the page.
                 outoflevelfreq_block.fadeOut("fast", function() {

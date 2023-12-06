@@ -11,12 +11,19 @@
             </tr>
             </thead>
             <tbody class="ogte-block-uncovered-row">
+            {{#haslevels}}
             {{#levels}}
             <tr>
                 <td>{{level}}</td>
                 <td>{{frequency}}%</td>
             </tr>
             {{/levels}}
+            {{/haslevels}}
+            {{^haslevels}}
+            <tr>
+                <td colspan="2">{{#str}}no_out_of_levels, mod_ogte{{/str}}</td>
+            </tr>
+            {{/haslevels}}
             </tbody>
         </table>
     </div>

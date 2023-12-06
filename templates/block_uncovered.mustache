@@ -14,6 +14,7 @@
             </tr>
             </thead>
             <tbody class="ogte-block-uncovered-row">
+            {{#haswords}}
             {{#words}}
             <tr>
                 <td>{{word}}</td>
@@ -21,6 +22,12 @@
                 <td>{{frequency}}</td>
             </tr>
             {{/words}}
+            {{/haswords}}
+            {{^haswords}}
+            <tr>
+                <td colspan="{{#haslevels}}3{{/haslevels}}{{^haslevels}}2{{/haslevels}}">{{#str}}no_words, mod_ogte{{/str}}</td>
+            </tr>
+            {{/haswords}}
             </tbody>
         </table>
     </div>

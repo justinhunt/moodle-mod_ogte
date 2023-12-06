@@ -34,16 +34,17 @@
             <div id="ogte-actions" class="ogte-actions">
                 <!-- actions -->
                     <div id="the_al_status" class="mod-ogte-stats">
-                        <span id="the_al_status_message" class="ogte-status-message">{{#str}}selecttoignore, mod_ogte{{/str}}</span> <button id="the_addtoignore" type="button" style="display: none">{{#str}}addtoignore, mod_ogte{{/str}}</button>
+                        <span id="the_al_status_message" class="ogte-status-message">{{#str}}selecttoignore, mod_ogte{{/str}}</span>
+                        <button id="the_addtoignore" type="button" style="display: none">{{#str}}addtoignore, mod_ogte{{/str}}</button>
+                        <div class="ogte_article_copy_button">
+                            <a class="btn btn-secondary ogte_clipboardbutton" data-clipboard-action="copy" data-clipboard-target="#the_al_passage"></a>
+                            <span class="ogte_copied" style="display: none">{{#str}}copied, mod_ogte{{/str}}</span>
+                        </div>
                     </div>
                     <br/>
                     {{#str}}ignorelist, mod_ogte{{/str}}<br/>
                     <input id="the_ignorelist" type="text" class="ogte-wide" placeholder="{{#str}}spacelistofwords, mod_ogte{{/str}}"/>
                     <br/><br/>
-
-
-
-
                     <br/>
                     <!-- the form for saving the new entry -->
                     <hr />
