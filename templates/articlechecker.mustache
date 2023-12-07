@@ -1,7 +1,7 @@
+<span class="ogte-panel-instructions">{{#str}}articlechecker_instructions, mod_ogte{{/str}}</span><br/>
 <div class="container">
     <div class="row">
         <div class="col-lg">
-
             <h4>{{#str}}original-passage, mod_ogte{{/str}}</h4>
             <textarea id="{{uniqid}}_ac_originaltext" class="mod-ogte-textarea" placeholder="{{#str}}paste-text-here, mod_ogte{{/str}}">{{passage}}</textarea><br/>
             <div id="{{uniqid}}_ac_originalstats" class="mod-ogte-stats"></div>
@@ -64,8 +64,18 @@
             <div id="{{uniqid}}_ac_rewritten"  style="display: none">
                 <h4>{{#str}}corrected-passage, mod_ogte{{/str}}</h4>
                 <div id="{{uniqid}}_ac_spinner" style="text-align: center; width: 100%; display: none;"><i class="fa fa-spinner fa-spin fa-lg"></i></div>
-                <textarea id="{{uniqid}}_ac_result" class="mod-ogte-textarea" style="display: none;"></textarea>
+                <textarea id="the_ac_result" class="mod-ogte-textarea" style="display: none;"></textarea>
                 <div id="{{uniqid}}_ac_resultstats" class="mod-ogte-stats" style="display: none;"></div>
+
+                <!-- actions -->
+                <div id="ogte_checker_actions" class="mod-ogte-passage-opts" style="display: none">
+                    <div class="ogte-spacer"></div>
+                    <div class="ogte_article_copy_button">
+                        <a class="btn btn-secondary ogte_clipboardbutton" data-clipboard-action="copy" data-clipboard-target="#the_ac_result"></a>
+                        <span class="ogte_copied" style="display: none">{{#str}}copied, mod_ogte{{/str}}</span>
+                    </div>
+                </div>
+
             </div>
 
         </div>
@@ -80,11 +90,12 @@
         require(['jquery','core/templates','core/notification', 'mod_ogte/utils'], function($,templates,notification, utils) {
 
             //On click load text into the player and play it
-            var theresult= $('#{{uniqid}}_ac_result');
+            var theresult= $('#the_ac_result');
             var originalstats= $('#{{uniqid}}_ac_originalstats');
             var resultstats= $('#{{uniqid}}_ac_resultstats');
             var rewritten= $('#{{uniqid}}_ac_rewritten');
             var spinner= $('#{{uniqid}}_ac_spinner');
+            var actions= $('#ogte_checker_actions');
 
             utils.setCloudPoodllToken('{{cloudpoodlltoken}}');
 
@@ -139,6 +150,7 @@
 
                     //hide a spinner and show results
                     theresult.show();
+                    actions.show();
                     spinner.hide();
 
                 });

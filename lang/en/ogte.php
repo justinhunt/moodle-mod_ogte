@@ -240,8 +240,9 @@ $string['averagesentencelength']="Av. Sentence Length";
 $string['entryforminstructions']="Enter a title, and click the 'Save' button to save your changes. Click the 'Cancel' button to return to the list of passages.";
 $string['downloadall']="Download All";
 $string['articleleveler_instructions'] ="Enter a passage of text in the box below, select the correct wordlist and level of the wordlist to check against and press the go button.";
-
-
+$string['articlegenerator_instructions'] ="Enter a topic in the box below. Then press the 'Generate Article' button. The AI helper will generate a short easy English passage of text suitable for language learners.";
+$string['articlerewrite_instructions'] ="Enter a passage of text in the 'Original article' box below. Then choose the level from 1 (very easy) to 5 (not easy) and press the 'Rewrite Article' button. The AI helper will rewrite the article into easy English suitable for language learners. N.B. It is trained to simplify the original passage, not make it more difficult.";
+$string['articlechecker_instructions'] ="Enter a passage of text in the 'Original article' box below. Then press the 'Correct grammar' button. The AI helper will check the article and show the re-written version in a new text area.";
 
 
 

@@ -1,9 +1,21 @@
 <div>
-    <input type="text" id="{{uniqid}}_ag_prompt" style="width: 80%; max-width: 800px;" placeholder="{{#str}}article-topic-here, mod_ogte{{/str}}"></textarea>
-    <div id="{{uniqid}}_ag_message" style="width: 80%; max-width: 800px; text-align: center"></div>
-    <button id="{{uniqid}}_ag_button" type="button" style="width: 80%; max-width: 800px">{{#str}}generate-article, mod_ogte{{/str}}</button>
-    <div><textarea id="{{uniqid}}_ag_article" style="overflow: auto; resize: auto; height: 150px; width: 80%; max-width: 800px; display: none"></textarea><br></div>
-    <div id="{{uniqid}}_ag_articlestats" style="display: none" class="mod-ogte-stats"></div>
+    <span class="ogte-panel-instructions">{{#str}}articlegenerator_instructions, mod_ogte{{/str}}</span><br/>
+    <input type="text" id="{{uniqid}}_ag_prompt" class="ogte-wide" placeholder="{{#str}}article-topic-here, mod_ogte{{/str}}"></textarea>
+    <div id="{{uniqid}}_ag_message" class="ogte-wide" style="text-align: center"></div>
+    <button id="{{uniqid}}_ag_button" type="button" class="ogte-wide">{{#str}}generate-article, mod_ogte{{/str}}</button>
+    <div><textarea id="the_ag_article" class="ogte-wide" style="overflow: auto; resize: auto; height: 150px; display: none"></textarea><br></div>
+    <div id="{{uniqid}}_ag_articlestats" style="display: none" class="mod-ogte-stats ogte-wide"></div>
+
+    <!-- actions -->
+    <div id="ogte_generator_actions" class="mod-ogte-passage-opts" style="display: none">
+        <div class="ogte-spacer"></div>
+        <div class="ogte_article_copy_button">
+            <a class="btn btn-secondary ogte_clipboardbutton" data-clipboard-action="copy" data-clipboard-target="#the_ag_article"></a>
+            <span class="ogte_copied" style="display: none">{{#str}}copied, mod_ogte{{/str}}</span>
+        </div>
+    </div>
+
+
 </div>
 <!-- @@CLOUDPOODLLTOKEN@@ -->
 {{^element.frozen}}
@@ -12,8 +24,9 @@
             require(['jquery','core/templates','core/notification','mod_ogte/utils'], function($,templates,notification, utils) {
 
                 var promptbox= $('#{{uniqid}}_ag_prompt');
-                var articlebox= $('#{{uniqid}}_ag_article');
+                var articlebox= $('#the_ag_article');
                 var articlestats= $('#{{uniqid}}_ag_articlestats');
+                var articleactions= $('#ogte_generator_actions');
                 var themessage= $('#{{uniqid}}_ag_message');
 
                 utils.setCloudPoodllToken('{{cloudpoodlltoken}}');
@@ -38,6 +51,7 @@
                         themessage.text('');
                         articlebox.val(thearticle);
                         articlebox.show();
+                        articleactions.show();
 
                         var textStatsData = utils.analyzeText(thearticle);
                         templates.render('mod_ogte/textstatstable', textStatsData).done(function(html, js) {

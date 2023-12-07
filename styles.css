@@ -105,7 +105,8 @@
     max-width: 800px;
 }
 
-.ogte-passageandstats th,.ogte-passageandstats  td {
+.ogte-passageandstats th,.ogte-passageandstats  td,
+.mod-ogte-stats th,.mod-ogte-stats td {
     border: 1px solid black;
     width: 20%; /* or width: 100px; */
     padding: 10px;
@@ -209,7 +210,7 @@ span.mod_ogte_outoflevel:after {
 .ogte-gopanel {
     margin: 10px;
 }
-.ogte-go-panel-instructions {
+.ogte-panel-instructions {
     margin-top: 10px;
     margin-bottom: 5px;
     display: block;
@@ -232,7 +233,7 @@ span.mod_ogte_outoflevel:after {
 .ogte_article_copy_button {
     width: 60px;
 }
-.ogte-ignore-opts {
+.ogte-ignore-opts,.ogte-spacer {
     flex: 1;
 }
 

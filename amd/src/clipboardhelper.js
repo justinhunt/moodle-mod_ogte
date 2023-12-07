@@ -25,6 +25,9 @@ define(['jquery','core/log','mod_ogte/clipboard'], function($, log, clipboard) {
                 var copied = $(e.trigger).parent().parent().find('.ogte_copied');
                 copied.show();
                 e.clearSelection();
+                setTimeout(function(){
+                    copied.fadeOut();
+                },2000);
             });
 
 
