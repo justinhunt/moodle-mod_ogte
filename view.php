@@ -89,10 +89,14 @@ $currentgroup = groups_get_activity_group($cm, true);
           // get_string('viewallentries', 'ogte', $entrycount).'</a></div>';
 // }
 
+
+$intro = format_module_intro('ogte', $ogte, $cm->id);
+echo $renderer->box($intro);
+
 //template data
 $tdata=[];
 
-//introl
+//intro
 if (!empty($ogte->intro)) {
     $ogte->intro = trim($ogte->intro);
     $tdata['intro'] = format_module_intro('ogte', $ogte, $cm->id);

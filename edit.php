@@ -192,10 +192,6 @@ $renderer = $PAGE->get_renderer(constants::M_COMPONENT);
 echo $renderer->header();
 echo $renderer->heading(format_string($ogte->name));
 
-
-$intro = format_module_intro('ogte', $ogte, $cm->id);
-echo $renderer->box($intro);
-
 //echo our ai and level widgets and tabs
 $listlevels =utils::get_level_options();
 $leveloptions=isset($data->listid)?$listlevels[$data->listid]:[];
