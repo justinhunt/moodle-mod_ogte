@@ -258,6 +258,13 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
             hiddenLevelIdBox.val(levelselect.val());
         },
 
+        setStatusMessage: function (message) {
+            statusmessage.text(message);
+            setTimeout(function () {
+                statusmessage.fadeOut();
+            },2000);
+        },
+
         //Register Event Handlers
         registerEvents: function () {
             var that=this;
@@ -267,7 +274,7 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
                     var newignorelist = ignorelist.val() + ' ' + word;
                     ignorelist.val(newignorelist);
                     hiddenIgnoresBox.val(newignorelist);
-                    statusmessage.text(app.strings["alreadyignored"] + word);
+                    app.setStatusMessage(app.strings["alreadyignored"] + word);
                     addtoIgnoreButton.hide();
                 }
             });
@@ -291,21 +298,19 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
             passagebox.on('mouseup', function (e) {
                 var selectedText = that.getSelectedText();
                 if (selectedText === '') {
-                    statusmessage.text(app.strings["selecttoignore"]);
                     addtoIgnoreButton.hide();
                     return;
                 } else {
                     var word = selectedText.trim();
                     //we only single words
                     if (word.includes(" ")) {
-                        statusmessage.text(app.strings["selecttoignore"]);
                         addtoIgnoreButton.hide();
                         return;
                     }
                     //we only want words that we did not ignore yet
                     var ignores = ignorelist.val();
                     if (ignores.toLowerCase().includes(word.toLowerCase())) {
-                        statusmessage.text(app.strings["alreadyignored"] + word);
+                        app.setStatusMessage(app.strings["alreadyignored"] + word);
                         addtoIgnoreButton.hide();
                         return;
                     }
