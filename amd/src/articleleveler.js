@@ -21,6 +21,7 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
     var listselect= $('#the_listselect');
     var levelselect= $('#the_levelselect');
     var addtoIgnoreButton = $('#the_addtoignore');
+    var downloadButton = $('.ogte_downloadbutton');
     var ignorelist = $('#the_ignorelist');
     var statusmessage =$('#the_al_status_message');
     var outoflistwords_block =$('#the_outoflistwords');
@@ -277,6 +278,19 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
                     app.setStatusMessage(app.strings["alreadyignored"] + word);
                     addtoIgnoreButton.hide();
                 }
+            });
+
+            downloadButton.on('click', function (e) {
+                var target_selector = $(this).attr('data-download-target');
+                var text = $(target_selector).text();
+
+                var filename='article.txt';
+                var filename_selector = $(this).attr('data-download-filename');
+                if(filename_selector!=='' && filename_selector!==undefined) {
+                    filename = $(filename_selector).val() + '.txt';
+                    filename=filename.trim().replace(/ /g,"_");
+                }
+                utils.downloadTextContent(text, filename);
             });
 
             //prevent the editable div from creating more divs on copy and paste

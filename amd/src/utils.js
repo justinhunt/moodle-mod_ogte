@@ -183,6 +183,22 @@ define(['jquery', 'core/log','core/ajax'], function ($, log,ajax) {
             return cleanedWord;
         },
 
+        downloadTextContent: function(textcontent, fileName) {
+
+            var blob = new Blob([textcontent], { type: 'text/plain' });
+            var link = document.createElement('a');
+
+            link.href = window.URL.createObjectURL(blob);
+            link.download = fileName;
+
+            // Append the link to the document and trigger a click event to start the download
+            document.body.appendChild(link);
+            link.click();
+
+            // Remove the link from the document
+            document.body.removeChild(link);
+        },
+
         //FUNCTION rewrite article
         call_ai: function(prompt, language,subject,action, callback) {
 
