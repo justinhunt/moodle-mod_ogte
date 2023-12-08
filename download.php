@@ -96,9 +96,10 @@ foreach ($entries as $entry) {
         $coverage = '--';
     }
     $coverage = get_string('coverage', 'ogte') . ": " . $coverage . '%';
-    $htmlmodule = $listandlevel .': '. $coverage .'<br>';
-    $ignoring = get_string('ignoring', 'ogte') . ": ";
-    $htmlmodule .= "$ignoring" . $entry->ignores . "<br>";
+    $htmlmodule = $listandlevel .'<br>';
+    $htmlmodule .= $coverage .'<br>';
+    $ignoring = get_string('ignoring', 'ogte') . ": <em>";
+    $htmlmodule .= "$ignoring" . $entry->ignores . "</em><br>";
     $text = format_text($entry->text, FORMAT_PLAIN);
     $htmlmodule .= '<p>' . $text . '</p>';
 
