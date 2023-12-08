@@ -228,6 +228,8 @@ span.mod_ogte_outoflevel:after {
 .btn.btn-secondary.ogte_clipboardbutton,
 .btn.btn-secondary.ogte_downloadbutton {
     height: 32px;
+    width: 40px;
+    border-radius: 5px;
     padding-top: 32px;
     color: #1569E8;
     background-color: transparent;
