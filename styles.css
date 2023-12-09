@@ -279,3 +279,6 @@ span.mod_ogte_outoflevel:after {
     margin-right: 5px;
     text-align: center;
 }
+span.ogte-smalltext {
+    font-size: smaller;
+}
