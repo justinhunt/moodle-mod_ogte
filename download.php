@@ -41,8 +41,11 @@ if (! $cm = get_coursemodule_from_id('ogte', $id)) {
 if (! $course = $DB->get_record("course", array('id' => $cm->course))) {
     throw new \moodle_exception('coursemisconf');
 }
+$categoryname ="";
 $categoryname = $DB->get_record("course_categories", array('id' => $course->category));
-$categoryname = $categoryname->name;
+if($categoryname) {
+    $categoryname = $categoryname->name;
+}
 $coursename = $course->fullname;
 $username = fullname($USER);
 
