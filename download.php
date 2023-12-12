@@ -19,7 +19,7 @@
  *
  * @package mod_ogte
  * @copyright  1999 onwards Martin Dougiamas  {@link http://moodle.com}
- * @copyright  2021 Tengku Alauddin - din@pukunui.net
+ * @copyright  2023 Justin Hunt - justin@poodll.com
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  **/
 
@@ -32,6 +32,7 @@ use \mod_ogte\utils;
 
 $id = required_param('id', PARAM_INT);    // Course Module ID.
 $entryid = required_param('entryid', PARAM_INT);    // Course Module ID.
+$format = optional_param('format', 'pdf', PARAM_ALPHA);    // Course Module ID.
 
 if (! $cm = get_coursemodule_from_id('ogte', $id)) {
     throw new \moodle_exception('invalidcoursemodule');
@@ -40,8 +41,11 @@ if (! $cm = get_coursemodule_from_id('ogte', $id)) {
 if (! $course = $DB->get_record("course", array('id' => $cm->course))) {
     throw new \moodle_exception('coursemisconf');
 }
+$categoryname ="";
 $categoryname = $DB->get_record("course_categories", array('id' => $course->category));
-$categoryname = $categoryname->name;
+if($categoryname) {
+    $categoryname = $categoryname->name;
+}
 $coursename = $course->fullname;
 $username = fullname($USER);
 
@@ -53,12 +57,6 @@ if (! $ogte = $DB->get_record("ogte", array("id" => $cm->instance))) {
     throw new \moodle_exception('invalidcoursemodule');
 }
 
-ob_clean();
-$doc = new pdf();
-$doc->setPrintHeader(false);
-$doc->setPrintFooter(false);
-$doc->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
-
 //Do we want all entries for this user or just one?
 if($entryid) {
     $entries = $DB->get_records('ogte_entries', array('userid' => $USER->id, 'id' => $entryid));
@@ -69,55 +67,110 @@ if($entryid) {
 //get Level options
 $thelevels =utils::get_level_options();
 
-//loop through entries each on a new page
-foreach ($entries as $entry) {
-    //new page
-    $doc->AddPage();
-
-    //title and author
-    $html = '';
-    $html .= '<h1>' . format_text($entry->title, FORMAT_PLAIN) . '</h1>';
-    $html .= '<h4>' . get_string('author', 'ogte') .': ' . $username . '</h4>';
-    $htmlsection = $htmlmodule = '';
-    $pagetitle = $entry->title;
-
-    //list and level and coverage
-
-    if(array_key_exists($entry->listid, $thelevels) && array_key_exists($entry->levelid, $thelevels[$entry->listid])) {
-        $thelevel=$thelevels[$entry->listid];
-        $listandlevel = $thelevel[$entry->levelid]['listname'] . ' - ' . $thelevel[$entry->levelid]['label'];
-    }else{
-        $listandlevel ='';
-    }
-    if(utils::is_json($entry->jsonrating)) {
-        $jsonrating = json_decode($entry->jsonrating);
-        $coverage = $jsonrating->coverage;
-    }else{
-        $coverage = '--';
-    }
-    $coverage = get_string('coverage', 'ogte') . ": " . $coverage . '%';
-    $htmlmodule = "<strong><u>$listandlevel ($coverage) </u></strong><br>";
-    $ignoring = get_string('ignoring', 'ogte') . ": ";
-    $htmlmodule .= "$ignoring" . $entry->ignores . "<br>";
-    $text = format_text($entry->text, FORMAT_PLAIN);
-    $htmlmodule .= '<p><em>' . $text . '</em></p>';
-
-    if (!empty($htmlmodule)) {
-        $html .= $htmlsection;
-        $html .= $htmlmodule;
-        $html .= '<br>';
-    }
-    // output the HTML content
-    $doc->writeHTML($html, true, false, true, false, '');
-}
-
-
-
-//get the write document title
-if($entryid) {
-    $doctitle= $entry->title;
+//get the document title
+if($entryid && count($entries)==1 && array_key_exists($entryid, $entries)) {
+    $doctitle= $entries[$entryid]->title;
 }else{
     $doctitle= 'passages';
 }
-//save the file
-$doc->Output('OGTE - '.$doctitle.' - '.$username.'.pdf', 'D');
+
+//If its a text document
+if($format=='txt'){
+    $filename = 'OGTE - '.$doctitle.' - '.$username.'.txt';
+    header('Content-Type: text/plain');
+    header('Content-Disposition: attachment; filename="'.$filename.'"');
+    foreach ($entries as $entry) {
+        echo get_string('title', 'ogte') .': ' . $entry->title . "\n";
+        echo get_string('author', 'ogte') .': ' . $username . "\n";
+        if(array_key_exists($entry->listid, $thelevels) && array_key_exists($entry->levelid, $thelevels[$entry->listid])) {
+            $thelevel=$thelevels[$entry->listid];
+            $listandlevel = $thelevel[$entry->levelid]['listname'] . ' - ' . $thelevel[$entry->levelid]['label'];
+        }else{
+            $listandlevel ='';
+        }
+        $listandlevel = get_string('listlevel', 'ogte') . ": " . $listandlevel;
+        if (utils::is_json($entry->jsonrating)) {
+            $jsonrating = json_decode($entry->jsonrating);
+            $coverage = $jsonrating->coverage;
+        } else {
+            $coverage = '';
+        }
+        if(!empty($coverage)){$coverage = $coverage . '%';}
+        $coverage = get_string('coverage', 'ogte') . ": " . $coverage;
+        echo $listandlevel ."\n";
+        echo $coverage ."\n";
+        $ignoring = get_string('ignoring', 'ogte') . ": ";
+        echo "$ignoring" . $entry->ignores . "\n";
+        echo "\n";
+        $text = html_entity_decode($entry->text, ENT_COMPAT, 'UTF-8');
+        $text = str_replace('<br />', "\n", $text);
+        // Remove consecutive newline characters
+        $text = preg_replace("/\n+/", "\n", $text);
+
+        echo $text . "\n";
+        echo "-----------------------------------------------\n";
+        echo "\n";
+    }
+    exit;
+
+//If its a PDF document
+}else {
+
+    ob_clean();
+    $doc = new pdf();
+    $doc->setPrintHeader(false);
+    $doc->setPrintFooter(false);
+    $doc->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+
+//loop through entries each on a new page
+    foreach ($entries as $entry) {
+        //new page
+        $doc->AddPage();
+
+        //title and author
+        $html = '';
+        $html .= '<h1>' . format_text($entry->title, FORMAT_PLAIN) . '</h1>';
+        $html .= '<h4>' . get_string('author', 'ogte') . ': ' . $username . '</h4>';
+        $htmlsection = $htmlmodule = '';
+        $pagetitle = $entry->title;
+
+        //list and level and coverage
+
+        if (array_key_exists($entry->listid, $thelevels) && array_key_exists($entry->levelid, $thelevels[$entry->listid])) {
+            $thelevel = $thelevels[$entry->listid];
+            $listandlevel = $thelevel[$entry->levelid]['listname'] . ' - ' . $thelevel[$entry->levelid]['label'];
+        } else {
+            $listandlevel = '';
+        }
+        $listandlevel = get_string('listlevel', 'ogte') . ": " . $listandlevel;
+        if (utils::is_json($entry->jsonrating)) {
+            $jsonrating = json_decode($entry->jsonrating);
+            $coverage = $jsonrating->coverage;
+        } else {
+            $coverage = '';
+        }
+        if(!empty($coverage)){$coverage = $coverage . '%';}
+        $coverage = get_string('coverage', 'ogte') . ": " . $coverage;
+        $htmlmodule = $listandlevel . '<br>';
+        $htmlmodule .= $coverage . '<br>';
+        $ignoring = get_string('ignoring', 'ogte') . ": <em>";
+        $htmlmodule .= "$ignoring" . $entry->ignores . "</em><br>";
+        $text = format_text($entry->text, FORMAT_PLAIN);
+        $htmlmodule .= '<p>' . $text . '</p>';
+
+        if (!empty($htmlmodule)) {
+            $html .= $htmlsection;
+            $html .= $htmlmodule;
+            $html .= '<br>';
+        }
+        // output the HTML content
+        $doc->writeHTML($html, true, false, true, false, '');
+    }
+    //save the file
+    $doc->Output('OGTE - ' . $doctitle . ' - ' . $username . '.pdf', 'D');
+}
+function decodeEntities($text) {
+    return preg_replace_callback('/&#(\d+);/', function($matches) {
+        return mb_convert_encoding('&#' . intval($matches[1]) . ';', 'UTF-8', 'HTML-ENTITIES');
+    }, $text);
+}

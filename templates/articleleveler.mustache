@@ -38,7 +38,10 @@
                             <span id="the_al_status_message" class="ogte-status-message" style="display: none"></span>
                             <button id="the_addtoignore" type="button" style="display: none">{{#str}}addtoignore, mod_ogte{{/str}}</button>
                         </div>
-                        <div class="ogte_article_copy_button">
+                        <div class="ogte_article_action_button ogte_article_download_button">
+                            <a class="btn btn-secondary ogte_downloadbutton" data-download-filename="input[name='title']" data-download-target="#the_al_passage"></a>
+                        </div>
+                        <div class="ogte_article_action_button ogte_article_copy_button">
                             <a class="btn btn-secondary ogte_clipboardbutton" data-clipboard-action="copy" data-clipboard-target="#the_al_passage"></a>
                             <span class="ogte_copied" style="display: none">{{#str}}copied, mod_ogte{{/str}}</span>
                         </div>

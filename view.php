@@ -130,17 +130,20 @@ if($entries) {
         }
 
         $editurl=new moodle_url('/mod/ogte/edit.php', array('id'=>$cm->id, 'entryid'=>$entry->id,'sesskey'=>$sesskey ,'action'=>'edit'));
-        $downloadurl=new moodle_url('/mod/ogte/download.php', array('id'=>$cm->id, 'entryid'=>$entry->id,'sesskey'=>$sesskey ,'action'=>'download'));
+        $downloadurl_pdf=new moodle_url('/mod/ogte/download.php', array('id'=>$cm->id, 'entryid'=>$entry->id,'sesskey'=>$sesskey ,'action'=>'download','format'=>'pdf'));
+        $downloadurl_txt=new moodle_url('/mod/ogte/download.php', array('id'=>$cm->id, 'entryid'=>$entry->id,'sesskey'=>$sesskey ,'action'=>'download','format'=>'txt'));
         $deleteurl=new moodle_url('/mod/ogte/edit.php', array('id'=>$cm->id, 'entryid'=>$entry->id,'sesskey'=>$sesskey ,'action'=>'confirmdelete'));
         $arrayitem['editurl']=$editurl->out();
-        $arrayitem['downloadurl']=$downloadurl->out();
+        $arrayitem['downloadurlpdf']=$downloadurl_pdf->out();
+        $arrayitem['downloadurltxt']=$downloadurl_txt->out();
         $arrayitem['deleteurl']=$deleteurl->out();
 
         $theentries[]= $arrayitem;
     }
     $tdata['haveentries']=true;
     $tdata['entries'] =  $theentries;
-    $tdata['downloadallurl']=new moodle_url('/mod/ogte/download.php', array('id'=>$cm->id, 'entryid'=>0,'sesskey'=>$sesskey ,'action'=>'download'));
+    $tdata['downloadallurlpdf']=new moodle_url('/mod/ogte/download.php', array('id'=>$cm->id, 'entryid'=>0,'sesskey'=>$sesskey ,'action'=>'download','format'=>'pdf'));
+    $tdata['downloadallurltxt']=new moodle_url('/mod/ogte/download.php', array('id'=>$cm->id, 'entryid'=>0,'sesskey'=>$sesskey ,'action'=>'download','format'=>'txt'));
   //  $ee=new moodle_url('/mod/ogte/edit.php', array('id'=>$cm->id, 'entryid'=>$entry->id,'action'=>'edit'));
   //  $ee->out();
 }
