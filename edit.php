@@ -194,7 +194,7 @@ echo $renderer->heading(format_string($ogte->name));
 
 //echo our ai and level widgets and tabs
 $listlevels =utils::get_level_options();
-$leveloptions=isset($data->listid)?$listlevels[$data->listid]:[];
+$leveloptions=isset($data->listid) && isset($listlevels[$data->listid]) ? $listlevels[$data->listid]:[];
 $params =['cloudpoodlltoken'=>$token,'ogteid'=>$cm->instance,
     'listoptions'=>utils::get_list_options(),'leveloptions'=>$leveloptions,
     'listlevels'=>$listlevels,'passage'=>$data->text,'form'=>$form->render()];
