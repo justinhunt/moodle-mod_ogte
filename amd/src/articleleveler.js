@@ -368,7 +368,7 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
                     themessage.text(app.strings['entersomething']);
                     return;
                 }
-                if (thepassage.length > 5000) {
+                if (thepassage.length > 50000) {
                     themessage.text(app.strings['texttoolong5000']);
                     return;
                 }
