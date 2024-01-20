@@ -49,6 +49,7 @@ $completion->set_module_viewed($cm);
 
 $entriesmanager = has_capability('mod/ogte:manageentries', $context);
 $canadd = has_capability('mod/ogte:addentries', $context);
+$isogteguest = true;//!$entriesmanager && !$canadd;
 
 if (!$entriesmanager && !$canadd) {
     throw new \moodle_exception('accessdenied');
@@ -56,9 +57,6 @@ if (!$entriesmanager && !$canadd) {
 
 if (! $ogte = $DB->get_record("ogte", array("id" => $cm->instance))) {
     throw new \moodle_exception('invalidcoursemodule');
-}
-if (!empty($ogte->preventry)){
-    $prev_ogte = $DB->get_record("ogte", array("id" => $ogte->preventry));
 }
 
 if (! $cw = $DB->get_record("course_sections", array("id" => $cm->section))) {
@@ -83,12 +81,6 @@ $groupmode = groups_get_activity_groupmode($cm);
 $currentgroup = groups_get_activity_group($cm, true);
 // groups_print_activity_menu($cm, $CFG->wwwroot . "/mod/ogte/view.php?id=$cm->id");
 
-// if ($entriesmanager) {
-    // $entrycount = ogte_count_entries($ogte, $currentgroup);
-    // echo '<div class="reportlink"><a href="report.php?id='.$cm->id.'">'.
-          // get_string('viewallentries', 'ogte', $entrycount).'</a></div>';
-// }
-
 
 $intro = format_module_intro('ogte', $ogte, $cm->id);
 echo $renderer->box($intro);
@@ -103,6 +95,8 @@ if (!empty($ogte->intro)) {
 }
 
 //Check download mode, and display the download page button
+//is this old code? Justinn 20/01/2024
+/*
 if ($ogte->mode == 1){
     $tdata['downloadbutton'] = $renderer->single_button('download.php?id='.$cm->id, get_string('download', 'ogte'), 'get',
                 array("class" => "singlebutton ogtestart"));
@@ -110,7 +104,7 @@ if ($ogte->mode == 1){
     echo $renderer->footer();
     die;
 }
-
+*/
 
 // Display entries
 $lists=utils::get_level_options();
@@ -153,14 +147,15 @@ if ($canadd) {
         array("class" => "singlebutton ogtestart"));
 }
 
+//lists page button
+if(has_capability('mod/ogte:manage', $context)) {
+    $tdata['backtolistsbutton'] = $renderer->back_to_lists_button($cm, get_string('addeditlists', constants::M_COMPONENT));
+}
+
+$tdata['isogteguest']=$isogteguest;
 echo $renderer->render_from_template('mod_ogte/viewpage', $tdata);
 
 
-//lists page button
-if(has_capability('mod/ogte:manage', $context)) {
-    echo '<br><hr>';
-    echo $renderer->back_to_lists_button($cm, get_string('addeditlists', constants::M_COMPONENT));
-}
 
 // Trigger module viewed event.
 $event = \mod_ogte\event\course_module_viewed::create(array(

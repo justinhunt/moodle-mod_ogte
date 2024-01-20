@@ -1,10 +1,20 @@
-{{#haveentries}}
-    {{{addnewbutton}}}
-    {{> mod_ogte/entriestable}}
-    <a href="{{{downloadallurlpdf}}}" class="btn btn-secondary">{{#str}}downloadallpdf, mod_ogte{{/str}}</a>
-    <a href="{{{downloadallurltxt}}}" class="btn btn-secondary">{{#str}}downloadalltxt, mod_ogte{{/str}}</a>
-{{/haveentries}}
-{{^haveentries}}
-    <div class="mod_ogte_noentries">{{#str}}noentries, mod_ogte{{/str}}</div>
-    {{{addnewbutton}}}
-{{/haveentries}}
+<div class="ogte-view-panel" {{#isogteguest}} style="display:none" {{/isogteguest}}>
+    {{#haveentries}}
+        {{{addnewbutton}}}
+        {{> mod_ogte/entriestable}}
+        <a href="{{{downloadallurlpdf}}}" class="btn btn-secondary">{{#str}}downloadallpdf, mod_ogte{{/str}}</a>
+        <a href="{{{downloadallurltxt}}}" class="btn btn-secondary">{{#str}}downloadalltxt, mod_ogte{{/str}}</a>
+    {{/haveentries}}
+    {{^haveentries}}
+        <div class="mod_ogte_noentries">{{#str}}noentries, mod_ogte{{/str}}</div>
+        {{{addnewbutton}}}
+    {{/haveentries}}
+    {{#backtolistsbutton}}
+        <br>
+        <hr>
+        {{{backtolistsbutton}}}
+    {{/backtolistsbutton}}
+</div>
+<div class="ogte-view-newplane" {{^isogteguest}} style="display:none" {{/isogteguest}}>
+    {{> mod_ogte/addnewmenu}}
+</div>

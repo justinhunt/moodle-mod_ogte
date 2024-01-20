@@ -33,7 +33,7 @@
         <FIELD NAME="modified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="title" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="untitled" SEQUENCE="false"/>
         <FIELD NAME="text" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="jsonrating" TYPE="text" NOTNULL="false" DEFAULT="" SEQUENCE="false"/>
+        <FIELD NAME="jsonrating" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="listid" TYPE="int"  LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="levelid" TYPE="int"  LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="ignores" TYPE="text" NOTNULL="false" SEQUENCE="false"/>

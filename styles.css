@@ -282,3 +282,9 @@ span.mod_ogte_outoflevel:after {
 span.ogte-smalltext {
     font-size: smaller;
 }
+
+.ogte-square-btn {
+        width: 150px;
+        height: 150px;
+        font-size: 16px;
+}
