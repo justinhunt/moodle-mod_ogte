@@ -32,6 +32,7 @@ use \mod_ogte\utils;
 $id = required_param('id', PARAM_INT);    // Course Module ID.
 $entryid = optional_param('entryid',0, PARAM_INT);    // Course Module ID.
 $action = optional_param('action',null, PARAM_ALPHA);    // Course Module ID.
+$passagetext = optional_param('text',null, PARAM_RAW);    // Course Module ID.
 
 if (!$cm = get_coursemodule_from_id('ogte', $id)) {
     throw new \moodle_exception('invalidcoursemodule');
@@ -165,6 +166,9 @@ if ($entryid && $entry) {
 } else {
     $data->entryid = null;
     $data->text = '';
+    if(!empty($passagetext)){
+        $data->text = $passagetext;
+    }
 }
 
 $data->id = $cm->id;

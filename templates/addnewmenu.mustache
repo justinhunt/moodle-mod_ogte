@@ -1,42 +1,33 @@
-<div class="container text-center ogte-addnewmenu">
+<div class="container text-center ogte-addnewmenu" id="ogte-addnewmenu">
     <div class="row">
         <div class="col-md-6">
-            <button type="button" class="btn btn-primary ogte-square-btn">
+            <button type="button" class="btn btn-primary ogte-square-btn ogte_next_button" data-nextaction="newblankform">
                 <div>I have text</div>
                 <small class="text-muted">Subtext 1</small>
             </button>
         </div>
         <div class="col-md-6">
-            <button type="button" class="btn btn-secondary ogte-square-btn">
+            <button type="button" class="btn btn-secondary ogte-square-btn ogte_next_button" data-nextaction="fictionmenu">
                 <div>Create text with AI</div>
                 <small class="text-muted">Subtext 2</small>
             </button>
         </div>
     </div>
 </div>
-<div class="container text-center ogte-fictionmenu" style="display: none">
+<div class="container text-center ogte-fictionmenu" id="ogte-fictionmenu" style="display: none">
     <div class="row">
         <div class="col-md-6">
-            <button type="button" class="btn btn-primary ogte-square-btn">
+            <button type="button" class="btn btn-primary ogte-square-btn ogte_next_button" data-nextaction="fictionform">
                 <div>Fiction</div>
                 <small class="text-muted">Subtext 1</small>
             </button>
         </div>
         <div class="col-md-6">
-            <button type="button" class="btn btn-secondary ogte-square-btn">
+            <button type="button" class="btn btn-secondary ogte-square-btn ogte_next_button" data-nextaction="nonfictionform">
                 <div>Non Fiction</div>
                 <small class="text-muted">Subtext 2</small>
             </button>
         </div>
     </div>
-    <a href="#">back</a>
+    <a href="#" class="ogte_back_button" data-nextaction="addnewmenu">back</a>
 </div>
-<!-- @@CLOUDPOODLLTOKEN@@ -->
-{{^element.frozen}}
-{{#js}}
-// <script>
-    require(['jquery','core/templates','core/notification','mod_ogte/utils'], function($,templates,notification, utils) {
-
-    });
-{{/js}}
-{{/element.frozen}}

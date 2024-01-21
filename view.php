@@ -49,7 +49,7 @@ $completion->set_module_viewed($cm);
 
 $entriesmanager = has_capability('mod/ogte:manageentries', $context);
 $canadd = has_capability('mod/ogte:addentries', $context);
-$isogteguest = true;//!$entriesmanager && !$canadd;
+$isogteguest = !$entriesmanager && !$canadd;
 
 if (!$entriesmanager && !$canadd) {
     throw new \moodle_exception('accessdenied');
@@ -64,6 +64,24 @@ if (! $cw = $DB->get_record("course_sections", array("id" => $cm->section))) {
 }
 
 $ogtename = format_string($ogte->name, true, array('context' => $context));
+
+//get token
+//first confirm we are authorised before we try to get the token
+$config = get_config(constants::M_COMPONENT);
+if(empty($config->apiuser) || empty($config->apisecret)){
+    $errormessage = get_string('nocredentials',constants::M_COMPONENT,
+        $CFG->wwwroot . constants::M_PLUGINSETTINGS);
+    return $this->show_problembox($errormessage);
+}else {
+    //fetch token
+    $token = utils::fetch_token($config->apiuser,$config->apisecret);
+
+    //check token authenticated and no errors in it
+    $errormessage = utils::fetch_token_error($token);
+    if(!empty($errormessage)){
+        return $this->show_problembox($errormessage);
+    }
+}
 
 // Header.
 $PAGE->set_url('/mod/ogte/view.php', array('id' => $id));
@@ -87,6 +105,7 @@ echo $renderer->box($intro);
 
 //template data
 $tdata=[];
+$tdata['cloudpoodlltoken']=$token;
 
 //intro
 if (!empty($ogte->intro)) {
@@ -145,6 +164,8 @@ if($entries) {
 if ($canadd) {
     $tdata['addnewbutton'] = $renderer->single_button('edit.php?id='.$cm->id, get_string('addnew', 'ogte'), 'get',
         array("class" => "singlebutton ogtestart"));
+    $addnewurl =new moodle_url('/mod/ogte/edit.php', array('id'=>$cm->id,'text'=>'hello 123 @ ?'));
+    $tdata['addnewurl'] = $addnewurl->out();
 }
 
 //lists page button

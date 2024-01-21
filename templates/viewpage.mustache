@@ -1,6 +1,9 @@
-<div class="ogte-view-panel" {{#isogteguest}} style="display:none" {{/isogteguest}}>
+<div class="ogte-view-panel ogte-admintop" id="ogte-admintop" {{#isogteguest}} style="display:none" {{/isogteguest}}>
     {{#haveentries}}
-        {{{addnewbutton}}}
+        <button type="button" class="btn btn-secondary ogte_next_button" data-nextaction="addnewmenu">
+            <div>Add New</div>
+        </button>
+
         {{> mod_ogte/entriestable}}
         <a href="{{{downloadallurlpdf}}}" class="btn btn-secondary">{{#str}}downloadallpdf, mod_ogte{{/str}}</a>
         <a href="{{{downloadallurltxt}}}" class="btn btn-secondary">{{#str}}downloadalltxt, mod_ogte{{/str}}</a>
@@ -15,6 +18,75 @@
         {{{backtolistsbutton}}}
     {{/backtolistsbutton}}
 </div>
-<div class="ogte-view-newplane" {{^isogteguest}} style="display:none" {{/isogteguest}}>
-    {{> mod_ogte/addnewmenu}}
+
+<div class="container text-center ogte-view-panel ogte-addnewmenu" id="ogte-addnewmenu" {{^isogteguest}} style="display:none" {{/isogteguest}}>
+<div class="row">
+    <div class="col-md-6">
+        <button type="button" class="btn btn-primary ogte-square-btn" >
+            <a href="{{{addnewurl}}}" style="color: white; text-decoration: none;">
+                <div>I have text</div>
+                <small class="text-muted">Subtext 1</small>
+            </a>
+
+        </button>
+    </div>
+    <div class="col-md-6">
+        <button type="button" class="btn btn-secondary ogte-square-btn ogte_next_button" data-nextaction="fictionmenu">
+            <div>Create text with AI</div>
+            <small class="text-muted">Subtext 2</small>
+        </button>
+    </div>
 </div>
+{{^isogteguest}} <a href="#" class="ogte_back_button" data-nextaction="admintop">back</a>{{/isogteguest}}
+</div>
+<div class="container text-center ogte-view-panel ogte-fictionmenu" id="ogte-fictionmenu" style="display: none">
+<div class="row">
+    <div class="col-md-6">
+        <button type="button" class="btn btn-primary ogte-square-btn ogte_next_button" data-nextaction="fictionform">
+            <div>Fiction</div>
+            <small class="text-muted">Subtext 1</small>
+        </button>
+    </div>
+    <div class="col-md-6">
+        <button type="button" class="btn btn-secondary ogte-square-btn ogte_next_button" data-nextaction="nonfictionform">
+            <div>Non Fiction</div>
+            <small class="text-muted">Subtext 2</small>
+        </button>
+    </div>
+</div>
+<a href="#" class="ogte_back_button" data-nextaction="addnewmenu">back</a>
+</div>
+
+<div class="container ogte-view-panel ogte-nonfictionform" id="ogte-nonfictionform" style="display: none">
+    {{> mod_ogte/embedarticlegenerator}}
+<a href="#" class="ogte_back_button" data-nextaction="fictionmenu">back</a>
+</div>
+
+<div class="container ogte-view-panel ogte-fictionform" id="ogte-fictionform" style="display: none">
+{{> mod_ogte/articlegenerator}}
+<a href="#" class="ogte_back_button" data-nextaction="fictionmenu">back</a>
+</div>
+
+{{^element.frozen}}
+    {{#js}}
+        // <script>
+        require(['jquery','core/templates','core/notification','mod_ogte/utils'], function($,templates,notification, utils) {
+            $('.ogte_next_button').on('click',function(){
+                var nextdivid= '#ogte-' + $(this).data('nextaction');
+                var nextdiv=$(nextdivid);
+                var olddiv =$(this).closest('.ogte-view-panel');
+                olddiv.hide(500);
+                nextdiv.show(500);
+
+            });
+            $('.ogte_back_button').on('click',function(){
+                var backdivid= '#ogte-' + $(this).data('nextaction');
+                var backdiv=$(backdivid);
+                var olddiv =$(this).closest('.ogte-view-panel');
+                olddiv.hide(500);
+                backdiv.show(500);
+            });
+
+        });
+    {{/js}}
+{{/element.frozen}}
