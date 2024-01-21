@@ -1,0 +1,105 @@
+<!-- Top Panel - Admin/Teacher user -->
+<div class="ogte-view-panel ogte-admintop" id="ogte-admintop" {{#isogteguest}} style="display:none" {{/isogteguest}}>
+    {{#haveentries}}
+        <button type="button" class="btn btn-secondary ogte_next_button" data-nextaction="addnewmenu">
+            <div>{{#str}}addnew, mod_ogte{{/str}}</div>
+        </button>
+
+        {{> mod_ogte/entriestable}}
+        <a href="{{{downloadallurlpdf}}}" class="btn btn-secondary">{{#str}}downloadallpdf, mod_ogte{{/str}}</a>
+        <a href="{{{downloadallurltxt}}}" class="btn btn-secondary">{{#str}}downloadalltxt, mod_ogte{{/str}}</a>
+    {{/haveentries}}
+    {{^haveentries}}
+        <div class="mod_ogte_noentries">{{#str}}noentries, mod_ogte{{/str}}</div>
+        <button type="button" class="btn btn-secondary ogte_next_button" data-nextaction="addnewmenu">
+            <div>{{#str}}addnew, mod_ogte{{/str}}</div>
+        </button>
+    {{/haveentries}}
+    {{#backtolistsbutton}}
+        <br>
+        <hr>
+        {{{backtolistsbutton}}}
+    {{/backtolistsbutton}}
+</div>
+
+<!-- Add New Menu Panel -->
+<div class="container text-center ogte-view-panel ogte-addnewmenu" id="ogte-addnewmenu" {{^isogteguest}} style="display:none" {{/isogteguest}}>
+    <div class="row">
+        <div class="col-md-6">
+            <button type="button" class="btn btn-secondary ogte-square-btn" >
+                <a href="{{{addnewurl}}}" style="text-decoration: none;">
+                    <div>{{#str}}ihavetext, mod_ogte{{/str}}</div>
+                    <small class="text-muted">Subtext 1</small>
+                </a>
+
+            </button>
+        </div>
+        <div class="col-md-6">
+            <button type="button" class="btn btn-secondary ogte-square-btn ogte_next_button" data-nextaction="fictionmenu">
+                <div>{{#str}}createtextwithai, mod_ogte{{/str}}</div>
+                <small class="text-muted">Subtext 2</small>
+            </button>
+        </div>
+    </div>
+    {{^isogteguest}} <a href="#" class="btn btn-secondary ogte_back_button" data-nextaction="admintop">Back</a>{{/isogteguest}}
+</div>
+
+<!-- Fiction/Non Fiction Menu Panel -->
+<div class="container text-center ogte-view-panel ogte-fictionmenu" id="ogte-fictionmenu" style="display: none">
+    <div class="row">
+        <div class="col-md-6">
+            <button type="button" class="btn btn-secondary ogte-square-btn ogte_next_button" data-nextaction="fictionform">
+                <div>{{#str}}fiction, mod_ogte{{/str}}</div>
+                <small class="text-muted">Subtext 1</small>
+            </button>
+        </div>
+        <div class="col-md-6">
+            <button type="button" class="btn btn-secondary ogte-square-btn ogte_next_button" data-nextaction="nonfictionform">
+                <div>{{#str}}nonfiction, mod_ogte{{/str}}</div>
+                <small class="text-muted">Subtext 2</small>
+            </button>
+        </div>
+    </div>
+    <a href="#" class="btn btn-secondary ogte_back_button" data-nextaction="addnewmenu">{{#str}}back, mod_ogte{{/str}}</a>
+</div>
+
+<!-- Fiction Generator Panel -->
+<div class="container ogte-view-panel ogte-nonfictionform" id="ogte-fictionform" style="display: none">
+    {{> mod_ogte/xxarticlegenerator}}
+    <div class="text-center">
+        <a href="#" class="btn btn-secondary ogte_back_button" data-nextaction="fictionmenu">{{#str}}back, mod_ogte{{/str}}</a>
+    </div>
+</div>
+
+<!-- Non Fiction Generator Panel -->
+<div class="container ogte-view-panel ogte-nonfictionform" id="ogte-nonfictionform" style="display: none">
+    {{> mod_ogte/embedarticlegenerator}}
+    <div class="text-center">
+        <a href="#" class="btn btn-secondary ogte_back_button" data-nextaction="fictionmenu">{{#str}}back, mod_ogte{{/str}}</a>
+    </div>
+</div>
+
+
+{{^element.frozen}}
+    {{#js}}
+        // <script>
+        require(['jquery','core/templates','core/notification','mod_ogte/utils'], function($,templates,notification, utils) {
+            $('.ogte_next_button').on('click',function(){
+                var nextdivid= '#ogte-' + $(this).data('nextaction');
+                var nextdiv=$(nextdivid);
+                var olddiv =$(this).closest('.ogte-view-panel');
+                olddiv.hide(500);
+                nextdiv.show(500);
+
+            });
+            $('.ogte_back_button').on('click',function(){
+                var backdivid= '#ogte-' + $(this).data('nextaction');
+                var backdiv=$(backdivid);
+                var olddiv =$(this).closest('.ogte-view-panel');
+                olddiv.hide(500);
+                backdiv.show(500);
+            });
+
+        });
+    {{/js}}
+{{/element.frozen}}

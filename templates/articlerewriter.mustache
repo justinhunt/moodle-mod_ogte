@@ -32,6 +32,9 @@
                 <!-- actions -->
                 <div id="ogte_rewriter_actions" class="mod-ogte-passage-opts" style="display: none">
                     <div class="ogte-spacer"></div>
+                    <div class="ogte_article_action_button ogte_ar_sendtoeditor_button" data-send-target="#the_ar_result">
+                        <a class="btn btn-secondary ogte_ar_sendtoeditor_button">Send to Editor</a>
+                    </div>
                     <div class="ogte_article_action_button ogte_article_download_button">
                         <a class="btn btn-secondary ogte_downloadbutton" data-download-target="#the_ar_result"></a>
                     </div>
@@ -57,6 +60,9 @@
                 var rewritten= $('#{{uniqid}}_ar_rewritten');
                 var actions= $('#ogte_rewriter_actions');
                 var spinner= $('#{{uniqid}}_ar_spinner');
+                var leveler_textbox=  $("#the_al_passage");
+                var leveler_hiddentextbox=  $('#the_al_hiddenpassage');
+                var leveler_gobutton=  $('#the_al_button');
 
                 utils.setCloudPoodllToken('{{cloudpoodlltoken}}');
 
@@ -117,8 +123,6 @@
 
                     });
                 });
-
-
 
             });
     {{/js}}

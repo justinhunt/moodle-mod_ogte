@@ -60,16 +60,6 @@ $string['ogte:addinstance'] = 'Add a new ogte';
 $string['ogte:manageentries'] = 'Manage ogte entries';
 $string['ogte:use'] = 'Use ogte';
 $string['ogte:manage'] = 'Manage ogte';
-
-$string['ogtemail'] = '{$a->teacher} has posted some feedback on your
-ogte entry for \'{$a->ogte}\'
-
-You can see it appended to your ogte entry:
-
-    {$a->url}';
-$string['ogtemailhtml'] = '{$a->teacher} has posted some feedback on your
-ogte entry for \'<i>{$a->ogte}</i>\'<br /><br />
-You can see it appended to your <a href="{$a->url}">ogte entry</a>.';
 $string['ogtename'] = 'OGTE name';
 $string['ogtequestion'] = 'OGTE question';
 $string['mailsubject'] = 'OGTE feedback';
@@ -248,6 +238,11 @@ $string['articlegenerator_instructions'] ="Enter a non-fiction topic in the box 
 $string['articlerewrite_instructions'] ="Enter a passage of text in the 'Original article' box below. Then choose the level from 1 (very easy) to 5 (not easy) and press the 'Rewrite Article' button. The AI helper will rewrite the article into easy English suitable for language learners. N.B. It is trained to simplify the original passage, not make it more difficult.";
 $string['articlechecker_instructions'] ="Enter a passage of text in the 'Original article' box below. Then press the 'Correct grammar' button. The AI helper will check the article and show the re-written version in a new text area.";
 
+$string['ihavetext']="I have Text";
+$string['createtextwithai']="Create Text with AI";
+$string['fiction']="Fiction";
+$string['nonfiction']="Non Fiction";
+$string['back']="Back";
 
 
 

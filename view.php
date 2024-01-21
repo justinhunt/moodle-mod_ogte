@@ -114,7 +114,7 @@ if (!empty($ogte->intro)) {
 }
 
 //Check download mode, and display the download page button
-//is this old code? Justinn 20/01/2024
+//is this old code? I think we do not need it. Justin 20/01/2024
 /*
 if ($ogte->mode == 1){
     $tdata['downloadbutton'] = $renderer->single_button('download.php?id='.$cm->id, get_string('download', 'ogte'), 'get',
@@ -157,14 +157,12 @@ if($entries) {
     $tdata['entries'] =  $theentries;
     $tdata['downloadallurlpdf']=new moodle_url('/mod/ogte/download.php', array('id'=>$cm->id, 'entryid'=>0,'sesskey'=>$sesskey ,'action'=>'download','format'=>'pdf'));
     $tdata['downloadallurltxt']=new moodle_url('/mod/ogte/download.php', array('id'=>$cm->id, 'entryid'=>0,'sesskey'=>$sesskey ,'action'=>'download','format'=>'txt'));
-  //  $ee=new moodle_url('/mod/ogte/edit.php', array('id'=>$cm->id, 'entryid'=>$entry->id,'action'=>'edit'));
-  //  $ee->out();
 }
 
 if ($canadd) {
     $tdata['addnewbutton'] = $renderer->single_button('edit.php?id='.$cm->id, get_string('addnew', 'ogte'), 'get',
         array("class" => "singlebutton ogtestart"));
-    $addnewurl =new moodle_url('/mod/ogte/edit.php', array('id'=>$cm->id,'text'=>'hello 123 @ ?'));
+    $addnewurl =new moodle_url('/mod/ogte/edit.php', array('id'=>$cm->id));
     $tdata['addnewurl'] = $addnewurl->out();
 }
 

@@ -22,6 +22,7 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
     var levelselect= $('#the_levelselect');
     var addtoIgnoreButton = $('#the_addtoignore');
     var downloadButton = $('.ogte_downloadbutton');
+    var sendToEditorButton = $('.ogte_ar_sendtoeditor_button')
     var ignorelist = $('#the_ignorelist');
     var statusmessage =$('#the_al_status_message');
     var outoflistwords_block =$('#the_outoflistwords');
@@ -291,6 +292,26 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
                     filename=filename.trim().replace(/ /g,"_");
                 }
                 utils.downloadTextContent(text, filename);
+            });
+
+            sendToEditorButton.on('click',function(){
+
+                //get the article text to update
+                var target_selector = $(this).attr('data-send-target');
+                var text = $(target_selector).val();
+
+                //set the text to the article leveler and level it
+                passagebox.text(text);
+                hiddenTextBox.val(text);
+                thebutton.click();
+
+                //switch to the article leveler tab
+                $('.mod_ogte_tab-content .tab-pane').removeClass('active');
+                $('.mod_ogte_tab-content #articleleveler').addClass('active');
+                $('.mod_ogte_nav-pills .nav-link').removeClass('active');
+                $('.mod_ogte_nav-pills a[href="#articleleveler"]').addClass('active');
+                $('#articleleveler').tab('show');
+
             });
 
             //prevent the editable div from creating more divs on copy and paste
