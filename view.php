@@ -51,6 +51,7 @@ $entriesmanager = has_capability('mod/ogte:manageentries', $context);
 $canadd = has_capability('mod/ogte:addentries', $context);
 $isogteguest = !$entriesmanager && !$canadd;
 
+require_capability('mod/ogte:addentries', $context);
 if (!$entriesmanager && !$canadd) {
     throw new \moodle_exception('accessdenied');
 }

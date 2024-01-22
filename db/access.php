@@ -60,7 +60,6 @@ $capabilities = array(
     ),
 
     'mod/ogte:addentries' => array(
-
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
         'archetypes' => array(
