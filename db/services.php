@@ -48,7 +48,7 @@ $functions = array(
         'classname'   => 'mod_ogte_external',
         'methodname'  => 'get_coverage',
         'description' => 'see how a passage is covered by a list/level' ,
-       // 'capabilities'=> 'mod/ogte:use',
+        'capabilities'=> 'mod/ogte:use',
         'type'        => 'read',
         'ajax'        => true,
     ),
