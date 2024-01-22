@@ -197,4 +197,31 @@ class renderer extends \plugin_renderer_base {
         $this->page->requires->js_call_amd("mod_ogte/datatables", 'init', array($opts));
         $this->page->requires->css( new \moodle_url('https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css'));
     }
+
+    function embed_tabsandeditor($cmid,$token){
+        $ret ='';
+        $cm = get_coursemodule_from_id('ogte', $cmid);
+        $ogteid = $cm->instance;
+
+        //here there is no form. It is for display on top page of site
+        $params =['cloudpoodlltoken'=>$token,'ogteid'=>$ogteid,
+            'listoptions'=>utils::get_list_options(),'leveloptions'=>[],
+            'listlevels'=>utils::get_level_options(),'passage'=>'','form'=>false];
+
+
+        //we put the opts in html on the page because moodle/AMD doesn't like lots of opts in js
+        $jsonstring = json_encode($params);
+        $optsid='amdopts_mod_ogte_editopts';
+        $opts_html =
+            \html_writer::tag('input', '', array('id' => $optsid , 'type' => 'hidden', 'value' => $jsonstring));
+        $ret .= $opts_html;
+        $opts = array('optsid' => $optsid);
+        $this->page->requires->js_call_amd("mod_ogte/articleleveler", 'init', array($opts));
+        $ret .= $this->output->render_from_template('mod_ogte/tabsandeditor', $params) ;
+        $this->page->requires->strings_for_js(['alreadyignored','selecttoignore','doignore',
+            'entersomething','texttoolong5000','ignored','outoflist','outoflevel','outoflevelfreq'],constants::M_COMPONENT);
+        return $ret;
+
+    }
+
 }

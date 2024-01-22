@@ -199,15 +199,13 @@ echo $renderer->heading(format_string($ogte->name));
 //echo our ai and level widgets and tabs
 $listlevels =utils::get_level_options();
 $leveloptions=isset($data->listid) && isset($listlevels[$data->listid]) ? $listlevels[$data->listid]:[];
+
+//here we sneakily add the form to the template data as well as list options
+//in the case where there is no form (for display on top page of site) then template gracefully ignores its absence
 $params =['cloudpoodlltoken'=>$token,'ogteid'=>$cm->instance,
     'listoptions'=>utils::get_list_options(),'leveloptions'=>$leveloptions,
     'listlevels'=>$listlevels,'passage'=>$data->text,'form'=>$form->render()];
 
-/*
-if(has_capability('mod/ogte:manage', $context)) {
-    echo $renderer->back_to_lists_button($cm, get_string('addeditlists', constants::M_COMPONENT));
-}
-*/
 
 //we put the opts in html on the page because moodle/AMD doesn't like lots of opts in js
 $jsonstring = json_encode($params);
@@ -222,8 +220,5 @@ $PAGE->requires->strings_for_js(['alreadyignored','selecttoignore','doignore',
     'entersomething','texttoolong5000','ignored','outoflist','outoflevel','outoflevelfreq'],constants::M_COMPONENT);
 
 
-//fill and print the form.
-echo $renderer->render_from_template('mod_ogte/entryforminstructions', []) ;
-
-
+//echo the footer
 echo $renderer->footer();

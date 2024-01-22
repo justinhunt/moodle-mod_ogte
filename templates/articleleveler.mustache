@@ -51,10 +51,12 @@
                     <input id="the_ignorelist" type="text" class="ogte-wide" placeholder="{{#str}}spacelistofwords, mod_ogte{{/str}}"/>
                     <br/>
                     <br/>
-                    <!-- the form for saving the new entry -->
-                    <hr />
-                    <div class="mod_ogte_entryforminstructions"> {{#str}} entryforminstructions,mod_ogte{{/str}}</div>
-                    {{{form}}}
+                    <!-- the form (if present) for saving the new entry -->
+                    {{#form}}
+                        <hr />
+                        <div class="mod_ogte_entryforminstructions"> {{#str}} entryforminstructions,mod_ogte{{/str}}</div>
+                        {{{form}}}
+                    {{/form}}
 
             </div>
 

@@ -243,6 +243,8 @@ $string['createtextwithai']="Create Text with AI";
 $string['fiction']="Fiction";
 $string['nonfiction']="Non Fiction";
 $string['back']="Back";
+$string['send-to-editor']="Send to Article Editor";
+
 
 
 
