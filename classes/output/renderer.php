@@ -205,7 +205,7 @@ class renderer extends \plugin_renderer_base {
         $ogteid = $cm->instance;
         //this fails on front page .. why?
         $context = \context_module::instance($cmid);
-        if(!has_capability('mod/ogte:use', $context) && !empty($CFG->guestloginbutton) and !empty($CFG->autologinguests)){
+        if(!isloggedin() && !empty($CFG->guestloginbutton) and !empty($CFG->autologinguests)){
             redirect(new \moodle_url('/course/view.php?id=1'));
         }
 
