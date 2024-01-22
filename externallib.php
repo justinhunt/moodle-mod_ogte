@@ -61,9 +61,9 @@ class mod_ogte_external extends external_api {
         $cm         = get_coursemodule_from_instance('ogte', $ogte->id, $course->id, false, MUST_EXIST);
 
         $context = context_module::instance($cm->id);
-        self::validate_context($context);;
+       // self::validate_context($context);;
     //disable this for now
-        //require_capability('mod/ogte:use', $context);
+        require_capability('mod/ogte:use', $context);
 
         //here we do the list comparison
         $result = utils::get_coverage($passage,$ignore,$listid,$listlevel);
