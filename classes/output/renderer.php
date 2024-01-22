@@ -199,16 +199,16 @@ class renderer extends \plugin_renderer_base {
     }
 
     function embed_tabsandeditor($cmid,$token){
+        global $COURSE, $CFG;
         $ret ='';
         $cm = get_coursemodule_from_id('ogte', $cmid);
         $ogteid = $cm->instance;
         //this fails on front page .. why?
         $context = \context_module::instance($cmid);
-        /*
-        if(!has_capability('mod/ogte:use', $context)){
-            require_login(0,true);
+        if(!has_capability('mod/ogte:use', $context) && !empty($CFG->guestloginbutton) and !empty($CFG->autologinguests)){
+            redirect('/course/view.php?id=1');
         }
-*/
+
         //here there is no form. It is for display on top page of site
         $params =['cloudpoodlltoken'=>$token,'ogteid'=>$ogteid,
             'listoptions'=>utils::get_list_options(),'leveloptions'=>[],
