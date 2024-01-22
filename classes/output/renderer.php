@@ -206,7 +206,7 @@ class renderer extends \plugin_renderer_base {
         //this fails on front page .. why?
         $context = \context_module::instance($cmid);
         if(!has_capability('mod/ogte:use', $context) && !empty($CFG->guestloginbutton) and !empty($CFG->autologinguests)){
-            redirect('/course/view.php?id=1');
+            redirect(new \moodle_url('/course/view.php?id=1'));
         }
 
         //here there is no form. It is for display on top page of site
