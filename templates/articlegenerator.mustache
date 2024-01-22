@@ -17,7 +17,7 @@
             <span class="ogte_copied" style="display: none">{{#str}}copied, mod_ogte{{/str}}</span>
         </div>
     </div>
-    <div class=" ogte_ar_sendtoeditor_button text-center" data-send-target="#the_ag_article">
+    <div class="ogte_sendtoeditor_button text-center" id="ogte_ag_sendtoeditor_button" data-send-target="#the_ag_article" style="display: none">
         <a class="btn btn-secondary ogte_ar_sendtoeditor_button">{{#str}}send-to-editor, mod_ogte{{/str}}</a>
     </div>
 
@@ -32,6 +32,7 @@
                 var articlebox= $('#the_ag_article');
                 var articlestats= $('#{{uniqid}}_ag_articlestats');
                 var articleactions= $('#ogte_generator_actions');
+                var sendtoeditor= $('#ogte_ag_sendtoeditor_button');
                 var themessage= $('#{{uniqid}}_ag_message');
 
                 utils.setCloudPoodllToken('{{cloudpoodlltoken}}');
@@ -57,6 +58,7 @@
                         articlebox.val(thearticle);
                         articlebox.show();
                         articleactions.show();
+                        sendtoeditor.show();
 
                         var textStatsData = utils.analyzeText(thearticle);
                         templates.render('mod_ogte/textstatstable', textStatsData).done(function(html, js) {

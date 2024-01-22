@@ -40,7 +40,7 @@
                         <span class="ogte_copied" style="display: none">{{#str}}copied, mod_ogte{{/str}}</span>
                     </div>
                 </div>
-                <div class=" ogte_ar_sendtoeditor_button text-center" data-send-target="#the_ar_result">
+                <div class=" ogte_sendtoeditor_button text-center" id="ogte_ar_sendtoeditor_button" data-send-target="#the_ar_result">
                     <a class="btn btn-secondary ogte_ar_sendtoeditor_button">{{#str}}send-to-editor, mod_ogte{{/str}}</a>
                 </div>
             </div>
@@ -60,9 +60,8 @@
                 var rewritten= $('#{{uniqid}}_ar_rewritten');
                 var actions= $('#ogte_rewriter_actions');
                 var spinner= $('#{{uniqid}}_ar_spinner');
-                var leveler_textbox=  $("#the_al_passage");
-                var leveler_hiddentextbox=  $('#the_al_hiddenpassage');
-                var leveler_gobutton=  $('#the_al_button');
+                var sendtoeditor= $('#ogte_ar_sendtoeditor_button');
+
 
                 utils.setCloudPoodllToken('{{cloudpoodlltoken}}');
 
@@ -72,6 +71,7 @@
                     theresult.hide();
                     spinner.show();
                     resultstats.hide();
+                    sendtoeditor.show();
 
                     var usetext = $('#{{uniqid}}_ar_originaltext').val();
                     var difficulty = $('input[name="difficulty"]:checked').val();
