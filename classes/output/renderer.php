@@ -202,8 +202,9 @@ class renderer extends \plugin_renderer_base {
         $ret ='';
         $cm = get_coursemodule_from_id('ogte', $cmid);
         $ogteid = $cm->instance;
-        $context = \context_module::instance($cmid);
-        require_capability('mod/ogte:use', $context);
+        //this fails on front page .. why?
+        //$context = \context_module::instance($cmid);
+        //require_capability('mod/ogte:use', $context);
 
         //here there is no form. It is for display on top page of site
         $params =['cloudpoodlltoken'=>$token,'ogteid'=>$ogteid,
