@@ -1,5 +1,6 @@
 
-define(['jquery', 'core/log','core/notification','core/str','core/templates','mod_ogte/utils','mod_ogte/clipboardhelper'], function($, log,notification,str, templates, utils, clipboardhelper) {
+define(['jquery', 'core/log','core/notification','core/str','core/templates','mod_ogte/utils','mod_ogte/clipboardhelper','mod_ogte/popoverhelper'],
+    function($, log,notification,str, templates, utils, clipboardhelper,popoverhelper) {
     "use strict"; // jshint ;_;
     /*
     This file combines with the articleleveler.mustache template to create the article leveler
@@ -82,6 +83,9 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
             if (ignores !== '') {
                 ignorelist.val(ignores);
             }
+
+            //init the popover now that we have set the correct callback event handling thingies
+            popoverhelper.init();
         },
 
 
@@ -267,6 +271,46 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
             },2000);
         },
 
+        doPopover: function (that,e) {
+            if(e.target.tagName === "SPAN" || e.target.tagName === "DIV") {
+                var selectedText = $(that).text();
+            }else if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") {
+                var selectedText = that.getSelectedText();
+            }
+
+            if (selectedText === '') {
+                addtoIgnoreButton.hide();
+                return;
+            } else {
+                var word = selectedText.trim();
+                //we only single words
+                if (word.includes(" ")) {
+                    addtoIgnoreButton.hide();
+                    return;
+                }
+                //we only want words that we did not ignore yet
+                var ignores = ignorelist.val();
+                if (ignores.toLowerCase().includes(word.toLowerCase())) {
+                    app.setStatusMessage(app.strings["alreadyignored"] + word);
+                    addtoIgnoreButton.hide();
+                    return;
+                }
+
+                //if we get here its ignorable
+                statusmessage.text("");
+                //show the ignore button .. old code
+                addtoIgnoreButton.text(app.strings["doignore"] + word);
+                addtoIgnoreButton.data("ignore", word);
+                addtoIgnoreButton.show();
+                //show the popover
+                if (!popoverhelper.isShowing(that)) {
+                    popoverhelper.doPopup(that,selectedText );
+                }else{
+                    popoverhelper.doPopup(that, selectedText );
+                }
+            }
+        },
+
         //Register Event Handlers
         registerEvents: function () {
             var that=this;
@@ -329,33 +373,13 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
                 var thetext = $(this)[0].innerText;
                 hiddenTextBox.val(thetext);
             });
-
+/*
             passagebox.on('mouseup', function (e) {
-                var selectedText = that.getSelectedText();
-                if (selectedText === '') {
-                    addtoIgnoreButton.hide();
-                    return;
-                } else {
-                    var word = selectedText.trim();
-                    //we only single words
-                    if (word.includes(" ")) {
-                        addtoIgnoreButton.hide();
-                        return;
-                    }
-                    //we only want words that we did not ignore yet
-                    var ignores = ignorelist.val();
-                    if (ignores.toLowerCase().includes(word.toLowerCase())) {
-                        app.setStatusMessage(app.strings["alreadyignored"] + word);
-                        addtoIgnoreButton.hide();
-                        return;
-                    }
-
-                    //if we get here its ignorable
-                    statusmessage.text("");
-                    addtoIgnoreButton.text(app.strings["doignore"] + word);
-                    addtoIgnoreButton.data("ignore", word);
-                    addtoIgnoreButton.show();
-                }
+                that.doPopover(this,e);
+            });
+*/
+            passagebox.on('click','span', function (e) {
+                that.doPopover(this,e);
             });
 
             //Add the ignores list to the hidden text box used to submit the form when text is edited

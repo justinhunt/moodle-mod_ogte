@@ -217,7 +217,7 @@ $opts = array('optsid' => $optsid);
 $PAGE->requires->js_call_amd("mod_ogte/articleleveler", 'init', array($opts));
 echo $renderer->render_from_template('mod_ogte/tabsandeditor', $params) ;
 $PAGE->requires->strings_for_js(['alreadyignored','selecttoignore','doignore',
-    'entersomething','texttoolong5000','ignored','outoflist','outoflevel','outoflevelfreq'],constants::M_COMPONENT);
+    'entersomething','texttoolong5000','ignored','outoflist','outoflevel','outoflevelfreq','popoveractions'],constants::M_COMPONENT);
 
 
 //echo the footer

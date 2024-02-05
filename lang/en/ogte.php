@@ -244,6 +244,7 @@ $string['fiction']="Fiction";
 $string['nonfiction']="Non Fiction";
 $string['back']="Back";
 $string['send-to-editor']="Send to Article Leveler";
+$string['popoveractions']="Actions";
 
 
 
