@@ -12,6 +12,7 @@ define(['jquery', 'core/log','core/templates', 'mod_ogte/dependencyloader', 'the
         lastitem: false,
         dispose: false, //Bv4 = dispose  Bv3 = destroy
         popuptitle: M.util.get_string('popoveractions','mod_ogte'),
+        currentword: '',
 
         init: function () {
             this.register_events();
@@ -19,7 +20,15 @@ define(['jquery', 'core/log','core/templates', 'mod_ogte/dependencyloader', 'the
         },
 
         register_events: function () {
-           return;
+
+            var that = this;
+            //when the ignore switch is toggled, call doIgnore
+            $(document).on('change','#mod_ogte_actionignoreswitch',function(e) {
+                var word = $(this).attr('data-theword');
+                var ignore = $(this).is(':checked');
+                that.onIgnore(word, ignore);
+            });
+
         },
 
         //different bootstrap/popover versions have a different word for "dispose" so this method bridges that.
@@ -61,7 +70,7 @@ define(['jquery', 'core/log','core/templates', 'mod_ogte/dependencyloader', 'the
             }
         },
 
-        doPopup: function (item,itemword) {
+        doPopup: function (item,itemword, ignoring) {
             var that = this;
             //if we are already showing this item then dispose of it, set last item to null and go home
             if (this.lastitem === item) {
@@ -81,6 +90,8 @@ define(['jquery', 'core/log','core/templates', 'mod_ogte/dependencyloader', 'the
             var tdata={};
             tdata.theword=itemword;
             tdata.ignoring=false;
+            tdata.ignoring=ignoring;
+            log.debug('OGTE Popover helper: doPopup' + itemword + ' ignoring=' + ignoring);
             templates.render('mod_ogte/popoveractionform', tdata).done(function(html, js) {
                 $(item).popover({
                     title: that.popuptitle,
@@ -92,7 +103,11 @@ define(['jquery', 'core/log','core/templates', 'mod_ogte/dependencyloader', 'the
                 });
                 $(item).popover('show');
             });
-        }
+        },
+
+        //this function is overridden by the calling class
+        //word = word, ignore = true/false
+        onIgnore: function(word,ignore){console.log('onIgnore');},
 
     };//end of return value
 });

@@ -86,6 +86,7 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
 
             //init the popover now that we have set the correct callback event handling thingies
             popoverhelper.init();
+            popoverhelper.onIgnore= this.doIgnore;
         },
 
 
@@ -277,36 +278,60 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
             }else if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") {
                 var selectedText = that.getSelectedText();
             }
-
+            //if its blank just return
             if (selectedText === '') {
+                return;
+            }
+
+            //if its two or more words just return
+            var word = selectedText.trim();
+            //we only single words
+            if (word.includes(" ")) {
                 addtoIgnoreButton.hide();
                 return;
-            } else {
-                var word = selectedText.trim();
-                //we only single words
-                if (word.includes(" ")) {
-                    addtoIgnoreButton.hide();
-                    return;
-                }
-                //we only want words that we did not ignore yet
-                var ignores = ignorelist.val();
-                if (ignores.toLowerCase().includes(word.toLowerCase())) {
-                    app.setStatusMessage(app.strings["alreadyignored"] + word);
-                    addtoIgnoreButton.hide();
-                    return;
-                }
+            }
 
-                //if we get here its ignorable
-                statusmessage.text("");
-                //show the ignore button .. old code
-                addtoIgnoreButton.text(app.strings["doignore"] + word);
-                addtoIgnoreButton.data("ignore", word);
-                addtoIgnoreButton.show();
-                //show the popover
-                if (!popoverhelper.isShowing(that)) {
-                    popoverhelper.doPopup(that,selectedText );
+            //check if its ignoring
+            var ignores = ignorelist.val();
+            var ignoring = ignores.toLowerCase().includes(word.toLowerCase());
+
+            //show the popover
+            popoverhelper.doPopup(that,selectedText,ignoring);
+
+        },
+
+        doIgnore: function(word,ignore){
+            var ignores = ignorelist.val();
+            var ignoring = ignores.toLowerCase().includes(word.toLowerCase());
+            //if we want to ignore this word
+            if(ignore){
+                //if its already ignores, just return
+                if(ignoring){
+                    log.debug('already ignoring: ' + word);
+                    return;
+                //ignore it
                 }else{
-                    popoverhelper.doPopup(that, selectedText );
+                    log.debug('ignoring: ' + word);
+                    var newignorelist = ignores + ' ' + word;
+                    ignorelist.val(newignorelist);
+                    hiddenIgnoresBox.val(newignorelist);
+                    //app.setStatusMessage(app.strings["alreadyignored"] + word);
+                    //addtoIgnoreButton.hide();
+                }
+            //if we don't want to ignore this word
+            }else{
+                //un-ignore it
+                if(ignoring){
+                    log.debug('unignoring: ' + word);
+                    var newignorelist = ignores.replace(word, '');
+                    ignorelist.val(newignorelist);
+                    hiddenIgnoresBox.val(newignorelist);
+                    //app.setStatusMessage(app.strings["alreadyignored"] + word);
+                    //addtoIgnoreButton.hide();
+                //if its already not ignored, just return
+                }else{
+                    log.debug('already unignoring: ' + word);
+                    return;
                 }
             }
         },
