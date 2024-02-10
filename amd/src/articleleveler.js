@@ -481,6 +481,8 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
                     if (theresponse) {
                         hiddenJSONRatingBox.val(ajaxresult);
                         that.updateAllFromJSONRating(theresponse);
+                        //if we were showing that a refresh was required, we remove that now, it's been refreshed
+                        thebutton.removeClass(refreshRequiredClass);
                     } else {
                         log.debug('ajax call to level coverage failed');
                     }
