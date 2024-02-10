@@ -11,7 +11,7 @@ define(['jquery', 'core/log','core/templates', 'mod_ogte/dependencyloader', 'the
 
         lastitem: false,
         dispose: false, //Bv4 = dispose  Bv3 = destroy
-        popuptitle: M.util.get_string('popoveractions','mod_ogte','Ignore'),
+        popuptitle: 'Actions: Ignore',//M.util.get_string('popoveractions','mod_ogte','Ignore'), //need to set this up to work in renderer
         currentword: '',
         showing: false,
 

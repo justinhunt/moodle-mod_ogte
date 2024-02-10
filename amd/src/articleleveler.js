@@ -128,6 +128,7 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
                 { "key": 'outoflist', "component": 'mod_ogte'},
                 { "key": 'outoflevel', "component": 'mod_ogte' },
                 { "key": 'outoflevelfreq', "component": 'mod_ogte'},
+                { "key": 'popoveractions', "component": 'mod_ogte'},
                 
             ]).done(function (s) {
                 var i = 0;
@@ -140,6 +141,7 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
                 that.strings.outoflist = s[i++];
                 that.strings.outoflevel = s[i++];
                 that.strings.outoflevelfreq = s[i++];
+                that.strings.popoveractions = s[i++];
             });
         },
 
