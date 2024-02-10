@@ -11,8 +11,9 @@ define(['jquery', 'core/log','core/templates', 'mod_ogte/dependencyloader', 'the
 
         lastitem: false,
         dispose: false, //Bv4 = dispose  Bv3 = destroy
-        popuptitle: M.util.get_string('popoveractions','mod_ogte'),
+        popuptitle: M.util.get_string('popoveractions','mod_ogte','Ignore'),
         currentword: '',
+        showing: false,
 
         init: function () {
             this.register_events();
@@ -28,7 +29,12 @@ define(['jquery', 'core/log','core/templates', 'mod_ogte/dependencyloader', 'the
                 var ignore = $(this).is(':checked');
                 that.onIgnore(word, ignore);
             });
-
+            $(document).on('click', function(e) {
+                    if (that.lastitem && !$(e.target).closest('.popover').length && !$(e.target).closest(that.lastitem).length && that.showing) {
+                        $(that.lastitem).popover(that.disposeWord());
+                        that.showing = false;
+                    }
+            });
         },
 
         //different bootstrap/popover versions have a different word for "dispose" so this method bridges that.
@@ -75,6 +81,7 @@ define(['jquery', 'core/log','core/templates', 'mod_ogte/dependencyloader', 'the
             //if we are already showing this item then dispose of it, set last item to null and go home
             if (this.lastitem === item) {
                 $(this.lastitem).popover(this.disposeWord());
+                that.showing = false;
                 this.lastitem = false;
                 return;
             }
@@ -82,6 +89,7 @@ define(['jquery', 'core/log','core/templates', 'mod_ogte/dependencyloader', 'the
             //dispose of previous popover, and remember this one
             if (this.lastitem) {
                 $(this.lastitem).popover(this.disposeWord());
+                that.showing = false;
                 this.lastitem = false;
             }
             this.lastitem = item;
@@ -102,7 +110,9 @@ define(['jquery', 'core/log','core/templates', 'mod_ogte/dependencyloader', 'the
                     sanitize: false
                 });
                 $(item).popover('show');
+                that.showing = true;
             });
+
         },
 
         //this function is overridden by the calling class

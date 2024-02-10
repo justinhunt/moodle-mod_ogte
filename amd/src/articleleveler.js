@@ -30,8 +30,13 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
     var outoflevelwords_block =$('#the_outoflevelwords');
     var ignoredwords_block =$('#the_ignoredwords');
     var outoflevelfreq_block =$('#the_outoflevelfreq');
+    var ignoredClass = 'mod_ogte_ignored';
+    var refreshRequiredClass = 'mod_ogte_refreshrequired';
+    var punctuationRegex = /[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]+$/;
 
-    var app= {
+
+
+        var app= {
 
         strings:{},
         opts: {},
@@ -291,12 +296,15 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
                 return;
             }
 
-            //check if its ignoring
+            //trim the word of punctuation
+            word = word.replace(punctuationRegex, '');
+
+            //check if its ignoring already
             var ignores = ignorelist.val();
             var ignoring = ignores.toLowerCase().includes(word.toLowerCase());
 
             //show the popover
-            popoverhelper.doPopup(that,selectedText,ignoring);
+            popoverhelper.doPopup(that,word,ignoring);
 
         },
 
@@ -315,6 +323,16 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
                     var newignorelist = ignores + ' ' + word;
                     ignorelist.val(newignorelist);
                     hiddenIgnoresBox.val(newignorelist);
+
+                    //find all spans in passagebox that contain the word and add the ignored class
+                    var wordRegex = new RegExp('\\b' + word + '\\b', 'gi'); // Match whole word, case-insensitive
+                    passagebox.find('span').filter(function() {
+                        return wordRegex.test($(this).text());
+                    }).addClass(ignoredClass);
+
+                    //Add a refresh required class to the GO button
+                    thebutton.addClass(refreshRequiredClass);
+
                     //app.setStatusMessage(app.strings["alreadyignored"] + word);
                     //addtoIgnoreButton.hide();
                 }
@@ -326,6 +344,17 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
                     var newignorelist = ignores.replace(word, '');
                     ignorelist.val(newignorelist);
                     hiddenIgnoresBox.val(newignorelist);
+
+
+                    //find all spans in passagebox that contain the word and remove the ignored class
+                    var wordRegex = new RegExp('\\b' + word + '\\b', 'gi'); // Match whole word, case-insensitive
+                    passagebox.find('span').filter(function() {
+                        return wordRegex.test($(this).text());
+                    }).removeClass(ignoredClass);
+
+                    //Add a refresh required class to the GO button
+                    thebutton.addClass(refreshRequiredClass);
+
                     //app.setStatusMessage(app.strings["alreadyignored"] + word);
                     //addtoIgnoreButton.hide();
                 //if its already not ignored, just return
@@ -442,13 +471,11 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
                     themessage.text(app.strings['texttoolong5000']);
                     return;
                 }
-                var language = 'en-US';
 
                 var ignore = ignorelist.val();
                 var listid = listselect.val();
                 var listlevel = levelselect.val();
                 var ogteid=app.opts.ogteid;
-
                 utils.levelPassage(thepassage, ignore, listid, listlevel, ogteid).then(function (ajaxresult) {
                     var theresponse = JSON.parse(ajaxresult);
                     if (theresponse) {

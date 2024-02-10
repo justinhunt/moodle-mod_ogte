@@ -288,3 +288,28 @@ span.ogte-smalltext {
         height: 150px;
         font-size: 16px;
 }
+
+.mod_ogte_actionignorelabel {
+    text-align: center;
+    font-size: large;
+    margin-bottom: 5px;
+}
+
+button#the_al_button.mod_ogte_refreshrequired {
+    border-color: red;
+    border-width: 5px;
+    border-style: dashed;
+    animation: borderAnimation 2s infinite alternate; /* Apply the animation */
+}
+
+@keyframes borderAnimation {
+    0% {
+        border-style: solid; /* Start with solid border */
+    }
+    50% {
+        border-style: dotted; /* Transition to dotted border at 50% */
+    }
+    100% {
+        border-style: solid; /* Back to solid border at 100% */
+    }
+}
