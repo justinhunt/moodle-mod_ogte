@@ -58,7 +58,8 @@ $PAGE->set_pagelayout('course');
 if ($id) {
     $list = $DB->get_record(constants::M_LISTSTABLE, array('id'=>$id), '*', MUST_EXIST);
     if(!$list){
-        print_error('could not find list of id:' . $id);
+        throw new \moodle_exception('could not find list of id:' . $id);
+
     }
     $edit = true;
 } else {
@@ -128,11 +129,13 @@ if ($data = $mform->get_data()) {
     require_sesskey();
 
     $thelist = $data;
+    //check if its proper nouns
+    if($thelist->ispropernouns) {
+        if($DB->record_exists(constants::M_LISTSTABLE, ['lang'=>$thelist->lang,'ispropernouns'=>1])){
+            redirect($redirecturl,'You can only have one list of proper nouns per language');
+        }
+    }
 
-    //$thelist->moduleid = $moduleinstance->id;
-    //$thelist->listlevel = $data->listlevel;
-    //$thelist->targetwords=  $data->targetwords;
-    //$thelist->fonticon=  $data->fonticon;
     $thelist->timemodified=time();
 
     //first insert a new list if we need to
@@ -143,14 +146,12 @@ if ($data = $mform->get_data()) {
 
         //try to insert it
         if (!$thelist->id = $DB->insert_record(constants::M_LISTSTABLE,$thelist)){
-            print_error("Could not insert ogte list!");
-            redirect($redirecturl);
+            throw new \moodle_exception("Could not insert ogte list!");
         }
     }else{
         //now update the db once we have saved files and stuff
         if (!$DB->update_record(constants::M_LISTSTABLE,$thelist)){
-            print_error("Could not update ogte list!");
-            redirect($redirecturl);
+            throw new \moodle_exception("Could not update ogte list!");
         }
     }
 

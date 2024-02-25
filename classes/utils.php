@@ -327,9 +327,9 @@ class utils{
         global $DB;
         $listlevels=[];
         if($listid){
-            $alllists = $DB->get_records(constants::M_LISTSTABLE,['id'=>$listid]);
+            $alllists = $DB->get_records(constants::M_LISTSTABLE,['id'=>$listid,'ispropernouns'=>0]);
         }else{
-            $alllists = $DB->get_records(constants::M_LISTSTABLE,[]);
+            $alllists = $DB->get_records(constants::M_LISTSTABLE,['ispropernouns'=>0]);
         }
         foreach($alllists as $list){
             if(self::is_json($list->props)){
@@ -447,7 +447,7 @@ class utils{
                 if (is_array($ignores) && in_array($cleanword, $ignores)) {
                     $retwords[] = \html_writer::span($word, 'mod_ogte_ignored', ['data-index' => $wordcount]);
                     $ignored++;
-                }elseif(is_numeric($cleanword)){
+                }elseif(self::is_numeric_with_unit($cleanword)){
                     $retwords[]=\html_writer::span($word, 'mod_ogte_number', ['data-index'=>$wordcount]);
                     $numbers++;
                 }else{
@@ -508,6 +508,39 @@ class utils{
                 'outoflist_percent'=>self::makePercent($outoflist,$wordcount),
                 'ignored_percent'=>self::makePercent($ignored,$wordcount)];
         }
+    }
+
+    public static function is_numeric_with_unit($str) {
+
+        //if it's a number return true
+        if(is_numeric($str)){
+            return true;
+        }
+
+        //if it's a currency return true
+        $currencypattern='/^[$€£¥₹]\s*\d+(?:\.\d+)?$/';
+        if (preg_match($currencypattern, $str)) {
+            return true;
+        }
+
+        //now check for units
+        // Regular expression to match numeric part and unit part
+        $unitpattern = '/^([\d.]+)\s*(' . constants::M_UNITS . ')$/i';
+
+        // Perform the regular expression match
+        if (!preg_match($unitpattern, $str, $matches)) {
+            return false;
+        }
+
+        // Extract numeric part and unit part
+        $numeric_part = $matches[1];
+        $unit = $matches[2];
+        if(\core_text::strlen($numeric_part) > 0 && \core_text::strlen($unit) > 0){
+            return true;
+        }else{
+            return false;
+        }
+
     }
 
     public static function makePercent($count,$total){
