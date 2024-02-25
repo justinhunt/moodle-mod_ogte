@@ -414,6 +414,10 @@ class utils{
         $list = $DB->get_record(constants::M_LISTSTABLE,['id'=>$listid]);
         $levels = json_decode($list->props);
         $selectedlevel= $levels[$listlevel];
+
+        //do we have proper nouns
+        $propernounlist = $DB->get_record(constants::M_LISTSTABLE,['ispropernouns'=>1,'lang'=>$list->lang]);
+
         $sql = 'SELECT listrank
                    FROM {'. constants::M_WORDSTABLE .'} w
                    WHERE
@@ -457,8 +461,18 @@ class utils{
                     $listrank = $DB->get_field_sql($sql, ['theword' => $cleanword, 'listid' => $listid],IGNORE_MULTIPLE);
                     //if its not there, its not in the list
                     if (!$listrank) {
-                        $retwords[] = \html_writer::span($word, 'mod_ogte_outoflist', ['data-index' => $wordcount,'data-listrank'=>0]);
+                        //it could be a proper noun
+                        $propernounid = null;
+                        if ($propernounlist) {
+                            $propernounid = $DB->get_field_sql($sql, ['theword' => $cleanword, 'listid' => $propernounlist->id], IGNORE_MULTIPLE);
+                        }
+                        if (!empty($propernounid)) {
+                            $retwords[] = \html_writer::span($word, 'mod_ogte_outoflist mod_ogte_propernoun', ['data-index' => $wordcount, 'data-listrank' => 0]);
+                        }else {
+                            $retwords[] = \html_writer::span($word, 'mod_ogte_outoflist', ['data-index' => $wordcount, 'data-listrank' => 0]);
+                        }
                         $outoflist++;
+
                     //if its in the list, tag the word with level data, and check if its within or outside of the selected level
                     } else {
                         //tag the word with level data
