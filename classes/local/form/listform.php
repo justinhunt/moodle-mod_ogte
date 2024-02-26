@@ -124,6 +124,9 @@ class listform extends \moodleform {
         $mform->setDefault('lang', constants::M_LANG_ENUS);
         $mform->addRule('lang', get_string('required'), 'required', null, 'client');
 
+        //Proper Nouns list
+        $mform->addElement('advcheckbox', 'ispropernouns', get_string('propernouns', constants::M_COMPONENT),  get_string('propernouns_details', constants::M_COMPONENT));
+
         //status
         /*
         $liststatus_opts = [constants::M_LISTSTATUS_EMPTY=>'empty',constants::M_LISTSTATUS_READY=>'ready'];
@@ -145,7 +148,7 @@ class listform extends \moodleform {
             ['name'=>'leveltwo','top'=>175,'bottom'=>76],
             ['name'=>'levelthree','top'=>275,'bottom'=>176],
             ['name'=>'levelfour','top'=>375,'bottom'=>276],
-            ['name'=>'levelfiv','top'=>475,'bottom'=>376],
+            ['name'=>'levelfive','top'=>475,'bottom'=>376],
             ['name'=>'levelsix','top'=>675,'bottom'=>476],
             ['name'=>'levelseven','top'=>875,'bottom'=>676]
         ];

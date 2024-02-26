@@ -245,7 +245,8 @@ $string['nonfiction']="Non Fiction";
 $string['back']="Back";
 $string['send-to-editor']="Send to Article Leveler";
 $string['popoveractions']='Action: {$a}';
-
+$string['propernouns']='Is Proper Nouns List';
+$string['propernouns_details']='You can only specify one list as a proper noun list per language. This list will be used to identify proper nouns in the text. Proper nouns are words that are names of people, places, or things.';
 
 
 
