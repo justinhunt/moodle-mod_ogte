@@ -144,6 +144,7 @@ class provider implements
 
         $sql = "SELECT
                     jen.id,
+                    cm.id as cmid,
                     jen.userid,
                     jen.modified,
                     jen.text,
@@ -166,8 +167,7 @@ class provider implements
         $ogtes = $DB->get_recordset_sql($sql, $params);
         foreach ($ogtes as $ogte) {
             list($course, $cm) = get_course_and_cm_from_cmid($ogte->cmid, 'ogte');
-            $ogteobj = new \entry($ogte, $cm, $course);
-            $context = $ogteobj->get_context();
+            $context = \context_module::instance($ogte->cmid);
 
             $ogteentry = \core_privacy\local\request\helper::get_context_data($context, $contextlist->get_user());
             \core_privacy\local\request\helper::export_context_files($context, $contextlist->get_user());
