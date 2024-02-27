@@ -112,6 +112,7 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
             that.strings.doignore = "Ignore";
             that.strings.entersomething = "Enter something";
             that.strings.texttoolong5000 = "Text too long (5000 characters max)";
+            that.strings.texttoolong50000 = "Text too long (50000 characters max)";
             that.strings.ignored = "Ignored";
             that.strings.outoflist = "Out of List";
             that.strings.outoflevel = "Out of Level";
@@ -124,10 +125,12 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
                 { "key": 'doignore', "component": 'mod_ogte' },
                 { "key": 'entersomething', "component": 'mod_ogte'},
                 { "key": 'texttoolong5000', "component": 'mod_ogte' },
+                { "key": 'texttoolong50000', "component": 'mod_ogte' },
                 { "key": 'ignored', "component": 'mod_ogte' },
                 { "key": 'outoflist', "component": 'mod_ogte'},
                 { "key": 'outoflevel', "component": 'mod_ogte' },
                 { "key": 'outoflevelfreq', "component": 'mod_ogte'},
+                { "key": 'propernouns', "component": 'mod_ogte' },
                 { "key": 'popoveractions', "component": 'mod_ogte'},
                 
             ]).done(function (s) {
@@ -137,10 +140,12 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
                 that.strings.doignore = s[i++];
                 that.strings.entersomething = s[i++];
                 that.strings.texttoolong5000 = s[i++];
+                that.strings.texttoolong50000 = s[i++];
                 that.strings.ignored = s[i++];
                 that.strings.outoflist = s[i++];
                 that.strings.outoflevel = s[i++];
                 that.strings.outoflevelfreq = s[i++];
+                that.strings.propernouns = s[i++];
                 that.strings.popoveractions = s[i++];
             });
         },
@@ -434,7 +439,7 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
                 that.doPopover(this,e);
             });
 */
-            passagebox.on('click','span', function (e) {
+            passagebox.on('dblclick','span', function (e) {
                 that.doPopover(this,e);
             });
 
@@ -470,7 +475,7 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
                     return;
                 }
                 if (thepassage.length > 50000) {
-                    themessage.text(app.strings['texttoolong5000']);
+                    themessage.text(app.strings['texttoolong50000']);
                     return;
                 }
 

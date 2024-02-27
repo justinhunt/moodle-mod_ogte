@@ -440,6 +440,7 @@ class utils{
         $outoflevel=0;
         $wordcount=0;
         $ignored=0;
+        $propernouns=0;
         $numbers=0;
         $retwords = [];
         foreach($words as $word){
@@ -468,6 +469,7 @@ class utils{
                         }
                         if (!empty($propernounid)) {
                             $retwords[] = \html_writer::span($word, 'mod_ogte_outoflist mod_ogte_propernoun', ['data-index' => $wordcount, 'data-listrank' => 0]);
+                            $propernouns++;
                         }else {
                             $retwords[] = \html_writer::span($word, 'mod_ogte_outoflist', ['data-index' => $wordcount, 'data-listrank' => 0]);
                         }
@@ -515,8 +517,10 @@ class utils{
                 'outoflevel'=>$outoflevel,
                 'outoflist'=>$outoflist,
                 'ignored'=>$ignored,
+                'propernouns'=>$propernouns,
                 'rawwordcount'=>$wordcount + $numbers,
                 'wordcount'=>$wordcount,
+                'propernouns_percent'=>self::makePercent($propernouns,$wordcount),
                 'inlevel_percent'=>self::makePercent($inlevel,$wordcount),
                 'outoflevel_percent'=>self::makePercent($outoflevel,$wordcount),
                 'outoflist_percent'=>self::makePercent($outoflist,$wordcount),
