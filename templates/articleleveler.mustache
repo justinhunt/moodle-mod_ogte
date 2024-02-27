@@ -7,15 +7,18 @@
             <span class="ogte-panel-instructions">{{#str}}articleleveler_instructions, mod_ogte{{/str}}</span><br/>
             <div id="the_ogte_go_panel" class="ogte-gopanel form-row">
                 <!-- The word list select -->
+<
                 <div>
+                    {{#str}}wordlist, mod_ogte{{/str}}
                     <select id="the_listselect" class="form-control" name="listselect">
                         {{#listoptions}}
                         <option value="{{key}}">{{label}}</option>
                         {{/listoptions}}
                     </select>
                 </div>
-                <!-- The word list level select -->
+                <!-- The word list level select -->D
                 <div>
+                    {{#str}}wordlevel, mod_ogte{{/str}}
                     <select id="the_levelselect" class="form-control"  name="levelselect">
                         {{#leveloptions}}
                         <option value="{{key}}">{{label}}</option>
@@ -27,16 +30,17 @@
                     <button id="the_al_button" class="btn btn-success" type="button">{{#str}}go, mod_ogte{{/str}}</button>
                 </div>
             </div>
-            <div class="ignorelist-container">
-                <span class="ignorelist-label">{{#str}}ignorelist, mod_ogte{{/str}}</span><br/>
-                    <input id="the_ignorelist" type="text" class="ogte-wide" placeholder="{{#str}}spacelistofwords, mod_ogte{{/str}}"/>
-                </div>
 
             <div id="the_al_message" style="width: 80%; max-width: 800px; text-align: center"></div>
 
-            <div id="the_al_levelstats" style="display: none" class="mod-ogte-stats"></div>
+            <div id="the_al_levelstats" class="mod-ogte-stats ogte-wide">
+                {{> mod_ogte/levelstatstable}}
+            </div>
             <div contentEditable="true" id="the_al_passage" class="ogte-passage-editor ogte-wide">{{passage}}</div>
-            <div id="the_al_articlestats" style="display: none" class="mod-ogte-stats"></div>
+            <div id="the_al_articlestats" class="mod-ogte-stats ogte-wide">
+                {{> mod_ogte/textstatstable}}
+            </div>
+
             <div id="ogte-actions" class="ogte-actions">
                 <!-- actions -->
                     <div id="the_al_status" class="mod-ogte-passage-opts">
@@ -53,6 +57,8 @@
                         </div>
                     </div>
 
+                    <input id="the_ignorelist" type="hidden" class="ogte-wide" placeholder="{{#str}}spacelistofwords, mod_ogte{{/str}}"/>
+
                     <!-- the form (if present) for saving the new entry -->
                     {{#form}}
                         <hr />
@@ -66,17 +72,93 @@
         <!--blocks-->
         <div id="ogte-blocks" class="ogte-blocks">
             <div class="ogte-blocks-group-1">
-                <div id="the_outoflistwords" class="ogte-outof_container" style="display: none"></div>
-                <div id="the_outoflevelwords" class="ogte-outof_container" style="display: none"></div>
+                <div id="the_outoflistwords" class="ogte-outof_container">
+                    <div class="ogte-block-uncovered">
+                        <div class="ogte-block-title">
+                            <span>{{#str}}outoflist, mod_ogte{{/str}}</span>
+                        </div>
+                        <div class="ogte-block-uncovered-head">
+                            <table cellspacing="0" cellpadding="0" width="100%" class="outof_table">
+                                <thead>
+                                <tr>
+                                    <th>{{#str}}word, mod_ogte{{/str}}</th>
+                                    {{#haslevels}}
+                                    <th>{{#str}}level, mod_ogte{{/str}}</th>
+                                    {{/haslevels}}
+                                    <th>{{#str}}frequency, mod_ogte{{/str}}</th>
+                                </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div id="the_outoflevelwords" class="ogte-outof_container">
+                    <div class="ogte-block-uncovered">
+                        <div class="ogte-block-title">
+                            <span>{{#str}}outoflevel, mod_ogte{{/str}}</span>
+                        </div>
+                        <div class="ogte-block-uncovered-head">
+                            <table cellspacing="0" cellpadding="0" width="100%" class="outof_table">
+                                <thead>
+                                <tr>
+                                    <th>{{#str}}word, mod_ogte{{/str}}</th>
+                                    {{#haslevels}}
+                                    <th>{{#str}}level, mod_ogte{{/str}}</th>
+                                    {{/haslevels}}
+                                    <th>{{#str}}frequency, mod_ogte{{/str}}</th>
+                                </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="ogte-blocks-group-2">
-                <div id="the_ignoredwords" class="ogte-outof_container" style="display: none"></div>
-                <div id="the_outoflevelfreq" class="ogte-outof_container" style="display: none"></div>
+
+          <div class="ogte-blocks-group-2">
+            <div id="the_ignoredwords" class="ogte-outof_container">
+                <div class="ogte-block-uncovered">
+                    <div class="ogte-block-title">
+                        <span>{{#str}}ignored, mod_ogte{{/str}}</span>
+                    </div>
+                    <div class="ogte-block-uncovered-head">
+                        <table cellspacing="0" cellpadding="0" width="100%" class="outof_table">
+                            <thead>
+                            <tr>
+                                <th>{{#str}}word, mod_ogte{{/str}}</th>
+                                {{#haslevels}}
+                                <th>{{#str}}level, mod_ogte{{/str}}</th>
+                                {{/haslevels}}
+                                <th>{{#str}}frequency, mod_ogte{{/str}}</th>
+                            </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div id="the_outoflevelfreq" class="ogte-outof_container">
+                <div class="ogte-block-uncovered">
+                    <div class="ogte-block-title">
+                        <span>{{#str}}outoflevelfreq, mod_ogte{{/str}}</span>
+                    </div>
+                    <div class="ogte-block-uncovered-head">
+                        <table cellspacing="0" cellpadding="0" width="100%" class="outof_table">
+                            <thead>
+                            <tr>
+                                <th>{{#str}}word, mod_ogte{{/str}}</th>
+                                {{#haslevels}}
+                                <th>{{#str}}level, mod_ogte{{/str}}</th>
+                                {{/haslevels}}
+                                <th>{{#str}}frequency, mod_ogte{{/str}}</th>
+                            </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
+     </div>
     </div>
 </div>
-
 
 
 

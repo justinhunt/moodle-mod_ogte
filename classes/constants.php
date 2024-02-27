@@ -92,4 +92,11 @@ const M_LANG_ISIS = 'is-IS';
 const M_LANG_MKMK = 'mk-MK';
 const M_LANG_SRRS = 'sr-RS';
 
+const M_UNITS_ARRAY = array('m', 'cm', 'mm', 'km', 'km/h', 'mph', '°C', '°F', 'K', 'N', 'g', 'kg', 'g/m²', 'L', 'ml', 'mL/min', 'gal', 'ft', 'in', 'lb', 'oz', 'Hz', 'kHz', 'MHz', 'GHz');
+
+const M_UNITS = 'm|cm|mm|km|kmh|mph|C|F|K|N|g|kg|gm|L|ml|mLmin|gal|ft|in|lb|oz|Hz|kHz|MHz|GHz';
+//because of cleaning, the units get a bit mangled, so we use the mangled ones here
+////km/h => kmh and g/m² => gm2 and mL/min => mlmin and °C =>C and °F =>F
+
+
 }

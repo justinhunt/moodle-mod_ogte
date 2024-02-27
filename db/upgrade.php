@@ -73,6 +73,23 @@ function xmldb_ogte_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2023112500, 'ogte');
     }
 
+    if($oldversion < 2024022500){
+        // fields to change the notnull definition for] viewstart and viewend
+        $table = new xmldb_table(constants::M_LISTSTABLE);
+        $fields=[];
+        $fields[] = new xmldb_field('ispropernouns', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, 0);
+
+        // Alter fields
+        foreach ($fields as $field) {
+            if (!$dbman->field_exists($table, $field)) {
+                $dbman->add_field($table, $field);
+            }
+        }
+
+
+        upgrade_mod_savepoint(true, 2024022500, 'ogte');
+    }
+
 
     return true;
 }

@@ -112,6 +112,7 @@ $string['article-topic-here'] = 'Article topic here';
 $string['paste-text-here'] = 'Paste text here';
 $string['entersomething'] = 'Please enter something in the text area.';
 $string['texttoolong5000'] = 'The text is too long. Passages must be 5000 characters are shorter.';
+$string['texttoolong50000'] = 'The text is too long. Passages must be 50000 characters are shorter.';
 $string['text-too-long-200'] = 'The prompt is too long. Prompts must be 200 characters are shorter.';
 $string['articlegenerator'] = 'Text Generator';
 $string['articlerewriter'] = 'Text Rewriter';
@@ -245,11 +246,10 @@ $string['nonfiction']="Non Fiction";
 $string['back']="Back";
 $string['send-to-editor']="Send to Article Leveler";
 $string['popoveractions']='Action: {$a}';
-
 $string['rewritten-article-difficulty']="Rewritten Article Difficulty";
-
-
-
-
+$string['propernouns']='Is Proper Nouns List';
+$string['propernouns_details']='You can only specify one list as a proper noun list per language. This list will be used to identify proper nouns in the text. Proper nouns are words that are names of people, places, or things.';
+$string['wordlist']="Word List";
+$string['wordlevel']="Word Level";
 
 
