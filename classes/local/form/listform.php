@@ -125,7 +125,7 @@ class listform extends \moodleform {
         $mform->addRule('lang', get_string('required'), 'required', null, 'client');
 
         //Proper Nouns list
-        $mform->addElement('advcheckbox', 'ispropernouns', get_string('propernouns', constants::M_COMPONENT),  get_string('propernouns_details', constants::M_COMPONENT));
+        $mform->addElement('advcheckbox', 'ispropernouns', get_string('ispropernouns', constants::M_COMPONENT),  get_string('propernouns_details', constants::M_COMPONENT));
 
         //status
         /*
