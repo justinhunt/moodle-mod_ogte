@@ -1,54 +1,64 @@
-<span class="ogte-panel-instructions">{{#str}}articlerewrite_instructions, mod_ogte{{/str}}</span><br/>
 <div class="container">
-    <div class="row">
-        <div class="col-lg">
-            <h4>{{#str}}original-article, mod_ogte{{/str}}</h4>
-            <textarea id="{{uniqid}}_ar_originaltext" class="mod-ogte-textarea" placeholder="{{#str}}paste-text-here, mod_ogte{{/str}}">{{passage}}</textarea><br/>
-            <div id="{{uniqid}}_ar_originalstats" class="mod-ogte-stats"></div>
-            <fieldset>
-                <legend>Rewritten Article Difficulty</legend>
-                <input type="radio" id="one" name="difficulty" value="1">
-                <label for="one">One (simplest)</label>
-                <input type="radio" id="two" name="difficulty" value="2">
-                <label for="two">Two</label>
+    <h3 class="ogte-section-title">{{#str}}articlerewriter, mod_ogte{{/str}}</h3>
+    <span class="ogte-panel-instructions">{{#str}}articlerewrite_instructions, mod_ogte{{/str}}</span><br/>
+    <div class="container">
+        <div class="row article-rewriter-row">
+            <div class="column-always-visible">
+                <h4>{{#str}}original-article, mod_ogte{{/str}}</h4>
+                <textarea id="{{uniqid}}_ar_originaltext" class="mod-ogte-textarea ogte-wide" placeholder="{{#str}}paste-text-here, mod_ogte{{/str}}">{{passage}}</textarea><br/>
+                <div id="{{uniqid}}_ar_originalstats" class="mod-ogte-stats ogte_rewriter_stats"></div>
 
-                <input type="radio" id="three" name="difficulty" value="3" checked>
-                <label for="three">Three</label>
-                <input type="radio" id="four" name="difficulty" value="4">
-                <label for="four">Four</label>
-                <input type="radio" id="five" name="difficulty" value="5">
-                <label for="five">Five</label>
-            </fieldset>
-            <button id="{{uniqid}}_ar_button" type="button" style="width: 100%; max-width: 800px">{{#str}}rewrite-article, mod_ogte{{/str}}</button>
-
-        </div>
-        <div class="col-lg">
-
-            <div id="{{uniqid}}_ar_rewritten"  style="display: none">
-                <h4>{{#str}}rewritten-article, mod_ogte{{/str}}</h4>
-                <div id="{{uniqid}}_ar_spinner" style="text-align: center; width: 100%; display: none;"><i class="fa fa-spinner fa-spin fa-lg"></i></div>
-                <textarea id="the_ar_result" class="mod-ogte-textarea" style="display: none;"></textarea>
-                <div id="{{uniqid}}_ar_resultstats" class="mod-ogte-stats" style="display: none;"></div>
-                <!-- actions -->
-                <div id="ogte_rewriter_actions" class="mod-ogte-passage-opts" style="display: none">
-                    <div class="ogte-spacer"></div>
-                    <div class="ogte_article_action_button ogte_article_download_button">
-                        <a class="btn btn-secondary ogte_downloadbutton" data-download-target="#the_ar_result"></a>
+                <fieldset id="difficulty-choice">
+                    <legend>{{#str}}rewritten-article-difficulty, mod_ogte{{/str}}</legend>
+                    <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                    <label class="btn btn-secondary active">
+                        <input type="radio" name="difficulty" value="1" checked> One (simplest)
+                    </label>
+                    <label class="btn btn-secondary">
+                        <input type="radio" name="difficulty" value="2"> Two
+                    </label>
+                    <label class="btn btn-secondary">
+                        <input type="radio" name="difficulty" value="3"> Three
+                    </label>
+                    <label class="btn btn-secondary">
+                        <input type="radio" name="difficulty" value="4"> Four
+                    </label>
+                    <label class="btn btn-secondary">
+                        <input type="radio" name="difficulty" value="5"> Five
+                    </label>
                     </div>
-                    <div class="ogte_article_action_button ogte_article_copy_button">
-                        <a class="btn btn-secondary ogte_clipboardbutton" data-clipboard-action="copy" data-clipboard-target="#the_ar_result"></a>
-                        <span class="ogte_copied" style="display: none">{{#str}}copied, mod_ogte{{/str}}</span>
-                    </div>
-                </div>
-                <div class=" ogte_sendtoeditor_button text-center" id="ogte_ar_sendtoeditor_button" >
-                    <a class="btn btn-secondary ogte_ar_sendtoeditor_button" data-send-target="#the_ar_result">{{#str}}send-to-editor, mod_ogte{{/str}}</a>
-                </div>
+                </fieldset>
+
+                <button class="btn btn-primary" id="{{uniqid}}_ar_button" type="button" style="width: 100%; max-width: 800px">{{#str}}rewrite-article, mod_ogte{{/str}}</button>
+
             </div>
+            <div class="column-initially-hidden">
 
+                <div id="{{uniqid}}_ar_rewritten"  style="display: none">
+                    <h4>{{#str}}rewritten-article, mod_ogte{{/str}}</h4>
+                    <div id="{{uniqid}}_ar_spinner" style="text-align: center; width: 100%; display: none;"><i class="fa fa-spinner fa-spin fa-lg"></i></div>
+                    <textarea id="the_ar_result" class="mod-ogte-textarea ogte-wide" style="display: none;"></textarea>
+                    <div id="{{uniqid}}_ar_resultstats" class="mod-ogte-stats ogte_rewriter_stats" style="display: none;"></div>
+                    <!-- actions -->
+                    <div id="ogte_rewriter_actions" class="mod-ogte-passage-opts" style="display: none">
+                        <div class="ogte-spacer"></div>
+                        <div class="ogte_article_action_button ogte_article_download_button">
+                            <a class="btn btn-secondary ogte_downloadbutton" data-download-target="#the_ar_result"></a>
+                        </div>
+                        <div class="ogte_article_action_button ogte_article_copy_button">
+                            <a class="btn btn-secondary ogte_clipboardbutton" data-clipboard-action="copy" data-clipboard-target="#the_ar_result"></a>
+                            <span class="ogte_copied" style="display: none">{{#str}}copied, mod_ogte{{/str}}</span>
+                        </div>
+                    </div>
+                    <div class=" ogte_sendtoeditor_button text-center" id="ogte_ar_sendtoeditor_button" >
+                        <a class="btn btn-secondary ogte_ar_sendtoeditor_button" data-send-target="#the_ar_result">{{#str}}send-to-editor, mod_ogte{{/str}}</a>
+                    </div>
+                </div>
+
+            </div>
         </div>
     </div>
 </div>
-
 {{^element.frozen}}
     {{#js}}
         // <script>

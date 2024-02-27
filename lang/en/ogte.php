@@ -113,9 +113,9 @@ $string['paste-text-here'] = 'Paste text here';
 $string['entersomething'] = 'Please enter something in the text area.';
 $string['texttoolong5000'] = 'The text is too long. Passages must be 5000 characters are shorter.';
 $string['text-too-long-200'] = 'The prompt is too long. Prompts must be 200 characters are shorter.';
-$string['articlegenerator'] = 'Article Generator';
-$string['articlerewriter'] = 'Article Rewriter';
-$string['articlechecker'] = 'Article Checker';
+$string['articlegenerator'] = 'Text Generator';
+$string['articlerewriter'] = 'Text Rewriter';
+$string['articlechecker'] = 'Text Checker';
 
 $string['displaysubs'] = '{$a->subscriptionname} : expires {$a->expiredate}';
 $string['noapiuser'] = "No API user entered. OGTE will not work correctly.";
@@ -168,9 +168,9 @@ $string['clearwordslist']='Clear Words';
 $string['confirmclearwords']="Are you sure you want to delete ALL the words from this list?";
 $string['confirmclearwordstitle']="Clearing Words from List";
 $string['listprops']="Props";
-$string['articleleveler']="Article Leveler";
+$string['articleleveler']="Text Leveler";
 $string['level-article']="Level Passage";
-$string['go']="GO";
+$string['go']="Go";
 $string['article-text-here']="Passage text goes here";
 
 $string['csvdelimiter']="CSV Delimiter";
@@ -246,6 +246,7 @@ $string['back']="Back";
 $string['send-to-editor']="Send to Article Leveler";
 $string['popoveractions']='Action: {$a}';
 
+$string['rewritten-article-difficulty']="Rewritten Article Difficulty";
 
 
 
