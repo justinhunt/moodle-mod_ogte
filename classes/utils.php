@@ -468,12 +468,12 @@ class utils{
                             $propernounid = $DB->get_field_sql($sql, ['theword' => $cleanword, 'listid' => $propernounlist->id], IGNORE_MULTIPLE);
                         }
                         if (!empty($propernounid)) {
-                            $retwords[] = \html_writer::span($word, 'mod_ogte_outoflist mod_ogte_propernoun', ['data-index' => $wordcount, 'data-listrank' => 0]);
+                            $retwords[] = \html_writer::span($word, 'mod_ogte_propernoun', ['data-index' => $wordcount, 'data-listrank' => 0]);
                             $propernouns++;
                         }else {
                             $retwords[] = \html_writer::span($word, 'mod_ogte_outoflist', ['data-index' => $wordcount, 'data-listrank' => 0]);
+                            $outoflist++;
                         }
-                        $outoflist++;
 
                     //if its in the list, tag the word with level data, and check if its within or outside of the selected level
                     } else {
