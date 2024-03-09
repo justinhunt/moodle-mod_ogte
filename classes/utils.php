@@ -312,7 +312,7 @@ class utils{
     public static function get_list_options(){
         global $DB;
         $listopts=[];
-        $alllists = $DB->get_records(constants::M_LISTSTABLE,[]);
+        $alllists = $DB->get_records(constants::M_LISTSTABLE,['ispropernouns'=>0]);
         foreach($alllists as $list){
             if(self::is_json($list->props)){
                 if(self::is_json($list->props)){
