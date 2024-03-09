@@ -26,6 +26,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+use \mod_ogte\constants;
+use \mod_ogte\utils;
+
 
 /**
  * Given an object containing all the necessary data,
@@ -877,39 +880,91 @@ function ogte_pluginfile($course, $cm, $context, $filearea, $args, $forcedownloa
     if ($context->contextlevel != CONTEXT_MODULE) {
         return false;
     }
+    
+    switch($filearea){
+        case 'entry':
+            require_course_login($course, true, $cm);
+            if (!$course->visible && !has_capability('moodle/course:viewhiddencourses', $context)) {
+                return false;
+            }
+            // Args[0] should be the entry id.
+            $entryid = intval(array_shift($args));
+            $entry = $DB->get_record('ogte_entries', array('id' => $entryid), 'id, userid', MUST_EXIST);
 
-    require_course_login($course, true, $cm);
+            $canmanage = has_capability('mod/ogte:manageentries', $context);
+            if (!$canmanage && !has_capability('mod/ogte:addentries', $context)) {
+                // Even if it is your own entry.
+                return false;
+            }
 
-    if (!$course->visible && !has_capability('moodle/course:viewhiddencourses', $context)) {
-        return false;
+            // Students can only see their own entry.
+            if (!$canmanage && $USER->id !== $entry->userid) {
+                return false;
+            }
+
+            if ($filearea !== 'entry') {
+                return false;
+            }
+
+            $fs = get_file_storage();
+            $relativepath = implode('/', $args);
+            $fullpath = "/$context->id/mod_ogte/$filearea/$entryid/$relativepath";
+            $file = $fs->get_file_by_hash(sha1($fullpath));
+
+            // Finally send the file.
+            send_stored_file($file, null, 0, $forcedownload, $options);
+
+
+
+            break;
+        case 'exportlist':
+
+
+        require_login($course, false, $cm);
+        require_capability('mod/ogte:manage', $context);
+        $listid = intval(array_shift($args));
+        $list = $DB->get_record(constants::M_LISTSTABLE,['id'=>$listid]);
+        if(!$list){return false;}
+        $delim = ','; //csv delimiter
+        $filerows=[];
+
+        //make a nice filename
+        $filename = clean_filename(strip_tags(format_string($list->name)).'.csv');
+        $filename = preg_replace('/\s+/', '_', $filename);
+
+        //make content
+        $headwords =$DB->get_records_sql("SELECT DISTINCT headword FROM {" . constants::M_WORDSTABLE . "} WHERE list = ?", array($listid));
+        foreach($headwords as $headword){
+            $words=$DB->get_records_sql("SELECT * FROM {" . constants::M_WORDSTABLE . "} WHERE list = ? AND headword = ?", array($listid, $headword->headword));
+            $wordstring = [];
+            foreach($words as $word){
+                if(count($wordstring)==0){
+                    $wordstring[] = $word->listrank;
+                    $wordstring[] = $word->headword;
+                }
+                if($word->word!==$word->headword){
+                    $wordstring[] = $word->word;
+                }
+            }
+            if(count($wordstring)>0){
+                $filerows[] = implode($delim, $wordstring);
+            }
+        }
+
+        //make the file to return
+        if(count($filerows)==0){return false;}
+        $filecontent = implode("\r\n", $filerows);
+
+        //return to the browser that called us
+        send_file($filecontent, $filename, 0, 0, true, true);
+        break;
+
+
+        default:
+            return false;
     }
 
-    // Args[0] should be the entry id.
-    $entryid = intval(array_shift($args));
-    $entry = $DB->get_record('ogte_entries', array('id' => $entryid), 'id, userid', MUST_EXIST);
 
-    $canmanage = has_capability('mod/ogte:manageentries', $context);
-    if (!$canmanage && !has_capability('mod/ogte:addentries', $context)) {
-        // Even if it is your own entry.
-        return false;
-    }
-
-    // Students can only see their own entry.
-    if (!$canmanage && $USER->id !== $entry->userid) {
-        return false;
-    }
-
-    if ($filearea !== 'entry') {
-        return false;
-    }
-
-    $fs = get_file_storage();
-    $relativepath = implode('/', $args);
-    $fullpath = "/$context->id/mod_ogte/$filearea/$entryid/$relativepath";
-    $file = $fs->get_file_by_hash(sha1($fullpath));
-
-    // Finally send the file.
-    send_stored_file($file, null, 0, $forcedownload, $options);
 }
 
 function ogte_format_entry_text($entry, $course = false, $cm = false) {
