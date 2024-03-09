@@ -880,7 +880,7 @@ function ogte_pluginfile($course, $cm, $context, $filearea, $args, $forcedownloa
     if ($context->contextlevel != CONTEXT_MODULE) {
         return false;
     }
-    
+
     switch($filearea){
         case 'entry':
             require_course_login($course, true, $cm);

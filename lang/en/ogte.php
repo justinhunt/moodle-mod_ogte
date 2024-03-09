@@ -252,5 +252,7 @@ $string['propernouns']='Proper Nouns';
 $string['propernouns_details']='You can only specify one list as a proper noun list per language. This list will be used to identify proper nouns in the text. Proper nouns are words that are names of people, places, or things.';
 $string['wordlist']="Word List";
 $string['wordlevel']="Word Level";
+$string['export']="Export";
+$string['exportlist']="Export";
 
 

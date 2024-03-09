@@ -89,9 +89,9 @@ class renderer extends \plugin_renderer_base {
             get_string('timecreated', constants::M_COMPONENT),
 			get_string('actions', constants::M_COMPONENT)
 		);
-		$table->headspan = array(1,1,1,1,1,1,3);
+		$table->headspan = array(1,1,1,1,1,1,4);
 		$table->colclasses = array(
-			'listname', 'listdescription','listlang','listheadwords','listallwords', 'timecreated','upload', 'edit','delete'
+			'listname', 'listdescription','listlang','listheadwords','listallwords', 'timecreated','upload', 'edit','delete','export'
 		);
 
 
@@ -157,11 +157,17 @@ class renderer extends \plugin_renderer_base {
             $deletelink = \html_writer::link($deleteurl, get_string('deletelist', constants::M_COMPONENT));
 			$deletecell = new \html_table_cell($deletelink);
 
+            //list export
+            $modulecontext = \context_module::instance($cm->id);
+            $exporturl = \moodle_url::make_pluginfile_url($modulecontext->id, constants::M_COMPONENT, 'exportlist', $list->id, "/", 'export.csv', true);
+            $exportlink = \html_writer::link($exporturl, get_string('exportlist', constants::M_COMPONENT));
+            $exportcell = new \html_table_cell($exportlink);
+
 			$row->cells = array(
                     $listnamecell, $listdescriptioncell,$listlangcell,$listheadwordscell,$listallwordscell,
                  $listtimecreatedcell,
                 $list->headwords > 0? $clearwordscell : $importcell,
-                $editcell, $deletecell
+                $editcell, $deletecell, $exportcell
 			);
 			$table->data[] = $row;
 		}
