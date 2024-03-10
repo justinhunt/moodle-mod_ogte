@@ -95,7 +95,7 @@ $config = get_config(constants::M_COMPONENT);
 if(empty($config->apiuser) || empty($config->apisecret)){
     $errormessage = get_string('nocredentials',constants::M_COMPONENT,
         $CFG->wwwroot . constants::M_PLUGINSETTINGS);
-    return $renderer->show_problembox($errormessage);
+    echo $renderer->show_problembox($errormessage);
 }else {
     //fetch token
     $token = utils::fetch_token($config->apiuser,$config->apisecret);
@@ -103,7 +103,7 @@ if(empty($config->apiuser) || empty($config->apisecret)){
     //check token authenticated and no errors in it
     $errormessage = utils::fetch_token_error($token);
     if(!empty($errormessage)){
-        return $renderer->show_problembox($errormessage);
+        echo $renderer->show_problembox($errormessage);
     }
 }
 
