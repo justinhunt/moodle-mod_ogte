@@ -64,25 +64,10 @@ if (! $cw = $DB->get_record("course_sections", array("id" => $cm->section))) {
     throw new \moodle_exception('invalidcoursemodule');
 }
 
+$renderer = $PAGE->get_renderer(constants::M_COMPONENT);
 $ogtename = format_string($ogte->name, true, array('context' => $context));
 
-//get token
-//first confirm we are authorised before we try to get the token
-$config = get_config(constants::M_COMPONENT);
-if(empty($config->apiuser) || empty($config->apisecret)){
-    $errormessage = get_string('nocredentials',constants::M_COMPONENT,
-        $CFG->wwwroot . constants::M_PLUGINSETTINGS);
-    return $this->show_problembox($errormessage);
-}else {
-    //fetch token
-    $token = utils::fetch_token($config->apiuser,$config->apisecret);
 
-    //check token authenticated and no errors in it
-    $errormessage = utils::fetch_token_error($token);
-    if(!empty($errormessage)){
-        return $this->show_problembox($errormessage);
-    }
-}
 
 // Header.
 $PAGE->set_url('/mod/ogte/view.php', array('id' => $id));
@@ -90,7 +75,7 @@ $PAGE->navbar->add($ogtename);
 $PAGE->set_title($ogtename);
 $PAGE->set_heading($course->fullname);
 
-$renderer = $PAGE->get_renderer(constants::M_COMPONENT);
+
 
 echo $renderer->header();
 
@@ -103,6 +88,24 @@ $currentgroup = groups_get_activity_group($cm, true);
 
 $intro = format_module_intro('ogte', $ogte, $cm->id);
 echo $renderer->box($intro);
+
+//get token
+//first confirm we are authorised before we try to get the token
+$config = get_config(constants::M_COMPONENT);
+if(empty($config->apiuser) || empty($config->apisecret)){
+    $errormessage = get_string('nocredentials',constants::M_COMPONENT,
+        $CFG->wwwroot . constants::M_PLUGINSETTINGS);
+    return $renderer->show_problembox($errormessage);
+}else {
+    //fetch token
+    $token = utils::fetch_token($config->apiuser,$config->apisecret);
+
+    //check token authenticated and no errors in it
+    $errormessage = utils::fetch_token_error($token);
+    if(!empty($errormessage)){
+        return $renderer->show_problembox($errormessage);
+    }
+}
 
 //template data
 $tdata=[];
