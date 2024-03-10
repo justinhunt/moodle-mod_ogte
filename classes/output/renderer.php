@@ -236,4 +236,15 @@ class renderer extends \plugin_renderer_base {
 
     }
 
+    /**
+     * Return HTML to display message about problem
+     */
+    public function show_problembox($msg) {
+        $output = '';
+        $output .= $this->output->box_start(constants::M_COMPONENT . '_problembox');
+        $output .= $this->notification($msg, 'warning');
+        $output .= $this->output->box_end();
+        return $output;
+    }
+
 }
