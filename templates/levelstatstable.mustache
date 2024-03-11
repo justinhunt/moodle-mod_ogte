@@ -5,18 +5,44 @@
         </td>
     </tr>
     <tr>
-        <td><span class="ogte_stats_td_hd">{{#str}}totalwords, mod_ogte{{/str}}</span>{{wordcount}}</td>
-        <td><span class="ogte_stats_td_hd">{{#str}}inlevel, mod_ogte{{/str}}</span><div>
-            {{inlevel}} <span class="ogte_stats_td_sub">({{inlevel_percent}}%)</span></div></td>
-        <td><span class="ogte_stats_td_hd mod_ogte_outoflevel">{{#str}}outoflevel, mod_ogte{{/str}}</span>
-            <div>{{outoflevel}} <span class="ogte_stats_td_sub">({{outoflevel_percent}}%)</span></div></td>
-        <td class="mod_ogte_outoflist"><span class="ogte_stats_td_hd mod_ogte_outoflist">{{#str}}outoflist, mod_ogte{{/str}}</span>
-            <div>{{outoflist}} <span class="ogte_stats_td_sub">({{outoflist_percent}}%)</span></div></td>
-        <td class="mod_ogte_propernouns"><span class="ogte_stats_td_hd mod_ogte_propernouns">{{#str}}propernouns, mod_ogte{{/str}}</span>
-            <div>{{propernouns}} <span class="ogte_stats_td_sub">({{propernouns_percent}}%)</span></div></td>
-        <td class="mod_ogte_ignored"><span class="ogte_stats_td_hd mod_ogte_ignored">{{#str}}ignored, mod_ogte{{/str}}</span>
-            <div>{{ignored}} <span class="ogte_stats_td_sub">({{ignored_percent}}%)</span></div></td>
-        <td><span class="ogte_stats_td_hd">{{#str}}coverage, mod_ogte{{/str}}</span>
-            {{coverage}}%</td>
+        <!--<td><span class="ogte_stats_td_hd">{{#str}}totalwords, mod_ogte{{/str}}</span>{{wordcount}}</td>-->
+        <td>
+            <div class="ogte_stats-letter">A</div>
+            <span class="ogte_stats_td_hd">{{#str}}inlevel, mod_ogte{{/str}}</span>
+            <div>
+                {{inlevel}} <span class="ogte_stats_td_sub">({{inlevel_percent}}%)</span>
+            </div>
+        </td>
+        <td>
+            <div class="ogte_stats-letter">B</div>
+            <span class="ogte_stats_td_hd mod_ogte_outoflevel">{{#str}}outoflevel, mod_ogte{{/str}}</span>
+            <div>{{outoflevel}} <span class="ogte_stats_td_sub">({{outoflevel_percent}}%)</span></div>
+        </td>
+        <td class="mod_ogte_outoflist">
+            <div class="ogte_stats-letter">C</div>
+            <span class="ogte_stats_td_hd mod_ogte_outoflist">{{#str}}outoflist, mod_ogte{{/str}}</span>
+            <div>{{outoflist}} <span class="ogte_stats_td_sub">({{outoflist_percent}}%)</span></div>
+        </td>
+        <td class="mod_ogte_propernouns">
+            <div class="ogte_stats-letter">D</div>
+            <span class="ogte_stats_td_hd mod_ogte_propernouns">{{#str}}propernouns, mod_ogte{{/str}}</span>
+            <div>{{propernouns}} <span class="ogte_stats_td_sub">({{propernouns_percent}}%)</span></div>
+        </td>
+        <td class="mod_ogte_ignored">
+            <div class="ogte_stats-letter">E</div>
+            <span class="ogte_stats_td_hd mod_ogte_ignored">{{#str}}ignored, mod_ogte{{/str}}</span>
+            <div>{{ignored}} <span class="ogte_stats_td_sub">({{ignored_percent}}%)</span></div>
+        </td>
+        <td>
+            <div class="ogte_stats-letter-container">
+                <div class="ogte_stats-letter">A</div>
+                <div class="ogte_stats-letter-plus">+</div>
+                <div class="ogte_stats-letter">C</div>
+                <div class="ogte_stats-letter-plus">+</div>
+                <div class="ogte_stats-letter">D</div>
+            </div>
+            <span class="ogte_stats_td_hd">{{#str}}coverage, mod_ogte{{/str}}</span>
+            {{coverage}}%
+        </td>
     </tr>
 </table>
