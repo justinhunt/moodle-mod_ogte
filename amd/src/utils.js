@@ -14,6 +14,7 @@ define(['jquery', 'core/log','core/ajax'], function ($, log,ajax) {
         setCloudPoodllToken: function(token){
           this.token=token;
         },
+
         countWords: function(sentence) {
             // Remove any leading or trailing spaces
             sentence = sentence.trim();
@@ -105,7 +106,7 @@ define(['jquery', 'core/log','core/ajax'], function ($, log,ajax) {
             //put the html into a temp div so we can use jquery to query it
             var tempElement = $('<div>').html(jsonpassage);
             //for each of our stats categories we perform a loop
-            var categories = ['outoflist','outoflevel','ignored'];
+            var categories = ['outoflist','outoflevel','ignored','propernoun'];
             var results = {};
             for (var i =0; i<categories.length;i++){
                 var result=[];

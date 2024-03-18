@@ -480,6 +480,10 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
                 }
 
                 var ignore = ignorelist.val();
+
+                //add proper nouns to ignore list
+                var propernouns = utils.getProperNouns(thepassage);
+
                 var listid = listselect.val();
                 var listlevel = levelselect.val();
                 var ogteid=app.opts.ogteid;

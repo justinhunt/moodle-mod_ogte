@@ -254,5 +254,8 @@ $string['wordlist']="Word List";
 $string['wordlevel']="Word Level";
 $string['export']="Export";
 $string['exportlist']="Export";
+$string['ngslproject']="New General Service List Project";
+$string['texteditor']="Text Editor";
+
 
 

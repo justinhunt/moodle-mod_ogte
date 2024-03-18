@@ -507,7 +507,13 @@ class utils{
         if($wordcount == 0){
             return ['passage'=>$passage,'status'=>'error','message'=>'no words found','coverage'=>0];
         }else{
-            $coverage = round(($inlevel/($wordcount-$ignored))*100);
+            $adjustedwordcount = $wordcount - $ignored - $propernouns;
+            if($adjustedwordcount < 1){
+                $coverage=0;
+            }else{
+                $coverage = round(($inlevel/($wordcount - $ignored - $propernouns))*100);
+            }
+
             return ['passage'=>implode(' ',$retwords),
                 'status'=>'success',
                 'message'=>'coverage returned',
