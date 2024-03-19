@@ -34,8 +34,6 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
     var refreshRequiredClass = 'mod_ogte_refreshrequired';
     var punctuationRegex = /[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]+$/;
 
-
-
         var app= {
 
         strings:{},
@@ -63,19 +61,20 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
 
             //JSON rating
             var jsonrating_string = hiddenJSONRatingBox.val();
-            log.debug('is json?');
             if (this.isJSON(jsonrating_string)) {
-                log.debug('yes json');
                 var jsonrating = JSON.parse(jsonrating_string);
-                log.debug('is level stats');
                 if (jsonrating.hasOwnProperty('passage')) {
-                    log.debug('yes level stats');
                     this.updateAllFromJSONRating(jsonrating);
                 }
             }
             //List and Level ID
-            var listid = hiddenListIdBox.val();
-            var levelid = hiddenLevelIdBox.val();
+            var listid='';
+            var levelid='';
+            if( hiddenListIdBox.length>0 && hiddenLevelIdBox.length>0) {
+                listid = hiddenListIdBox.val();
+                levelid = hiddenLevelIdBox.val();
+            }
+
             if (listid !== '' && levelid !== '') {
                 listselect.val(listid);
                 levelselect.val(levelid);
@@ -153,7 +152,6 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
 
         //Update Stats and Analysis
         updateAllFromJSONRating: function (jsonrating) {
-            log.debug('updateAllFromJSONRating');
             themessage.text('');
             passagebox.html(jsonrating.passage);
 
@@ -265,7 +263,6 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
         // Function to update the options in the second dropdown based on the selection in the first dropdown
         updateLevelDropdown: function () {
             const selectedList = listselect.val();
-            log.debug('selected list: ' + selectedList);
             // Clear existing options
             levelselect.empty();
 
