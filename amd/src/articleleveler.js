@@ -80,6 +80,7 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
                 listselect.val(listid);
                 levelselect.val(levelid);
             }else{
+                listselect.prop("selectedIndex", 0);
                 var listid = listselect.val();
                 this.updateLevelDropdown(listid);
             }
