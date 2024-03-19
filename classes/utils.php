@@ -511,7 +511,7 @@ class utils{
             if($adjustedwordcount < 1){
                 $coverage=0;
             }else{
-                $coverage = round(($inlevel/($wordcount - $ignored - $propernouns))*100);
+                $coverage = round(($inlevel + $ignored + $propernouns)/$wordcount *100);
             }
 
             return ['passage'=>implode(' ',$retwords),
