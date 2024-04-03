@@ -23,6 +23,7 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
     var levelselect= $('#the_levelselect');
     var addtoIgnoreButton = $('#the_addtoignore');
     var downloadButton = $('.ogte_downloadbutton');
+    var clearButton = $('.ogte_clearbutton');
     var sendToEditorButton = $('.ogte_ar_sendtoeditor_button')
     var ignorelist = $('#the_ignorelist');
     var statusmessage =$('#the_al_status_message');
@@ -106,7 +107,7 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
                 str.get_string(thestring,'mod_ogte').done(function(s){that.strings[thestring]=s;});
             }
 
-            //Promises are promises and jsonrating cant wait around for them, so we hack it
+            //Promises are promises and jsonrating cant wait around for them sometimes, so we hack it
             that.strings.alreadyignored = "Already Ignored";
             that.strings.selecttoignore = "Select to Ignore";
             that.strings.doignore = "Ignore";
@@ -117,6 +118,10 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
             that.strings.outoflist = "Out of List";
             that.strings.outoflevel = "Out of Level";
             that.strings.outoflevelfreq =  "% Out of Level";
+            that.strings.confirmcleartextarea =  "Confirm: clear the text area";
+            that.strings.reallycleartextarea =  "Do you really want to clear the text area?";
+            that.strings.cleartextarea =  "Clear Text Area";
+            that.strings.cancel =  "Cancel";
 
             // Set up strings
             str.get_strings([
@@ -132,6 +137,10 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
                 { "key": 'outoflevelfreq', "component": 'mod_ogte'},
                 { "key": 'propernouns', "component": 'mod_ogte' },
                 { "key": 'popoveractions', "component": 'mod_ogte'},
+                { "key": 'confirmcleartextarea', "component": 'mod_ogte'},
+                { "key": 'reallycleartextarea', "component": 'mod_ogte'},
+                { "key": 'cleartextarea', "component": 'mod_ogte'},
+                { "key": 'cancel', "component": 'core'},
                 
             ]).done(function (s) {
                 var i = 0;
@@ -147,7 +156,83 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
                 that.strings.outoflevelfreq = s[i++];
                 that.strings.propernouns = s[i++];
                 that.strings.popoveractions = s[i++];
+                that.strings.confirmcleartextarea = s[i++];
+                that.strings.reallycleartextarea = s[i++];
+                that.strings.cleartextarea = s[i++];
+                that.strings.cancel = s[i++];
             });
+        },
+
+        clearAllStats: function(){
+            templates.render('mod_ogte/levelstatstable', {}).done(function(html, js) {
+
+                // Update the page.
+                levelstats.fadeOut("fast", function() {
+                    templates.replaceNodeContents(levelstats, html, js);
+                    levelstats.fadeIn("fast");
+                }.bind(this));
+            }.bind(this)).fail(notification.exception);
+
+
+            templates.render('mod_ogte/textstatstable', {}).done(function(html, js) {
+
+                // Update the page.
+                articlestats.fadeOut("fast", function() {
+                    templates.replaceNodeContents(articlestats, html, js);
+                    articlestats.fadeIn("fast");
+                }.bind(this));
+
+            }.bind(this)).fail(notification.exception);
+
+
+            templates.render('mod_ogte/block_uncovered',
+                {words: false,haswords: false, haslevels: false, title: this.strings.outoflist}).done(function(html, js) {
+
+                // Update the page.
+                outoflistwords_block.fadeOut("fast", function() {
+                    templates.replaceNodeContents(outoflistwords_block, html, js);
+                    outoflistwords_block.fadeIn("fast");
+                }.bind(this));
+
+            }.bind(this)).fail(notification.exception);
+
+            //out of level words block
+            outoflevelwords_block.show();
+            templates.render('mod_ogte/block_uncovered',
+                {words: false, haswords: false, haslevels: true, title: this.strings.outoflevel}).done(function(html, js) {
+
+                // Update the page.
+                outoflevelwords_block.fadeOut("fast", function() {
+                    templates.replaceNodeContents(outoflevelwords_block, html, js);
+                    outoflevelwords_block.fadeIn("fast");
+                }.bind(this));
+
+            }.bind(this)).fail(notification.exception);
+
+            //ignored words block
+            ignoredwords_block.show();
+            templates.render('mod_ogte/block_uncovered',
+                {words: false, haswords: false, haslevels: false,title: this.strings.ignored}).done(function(html, js) {
+
+                // Update the page.
+                ignoredwords_block.fadeOut("fast", function() {
+                    templates.replaceNodeContents(ignoredwords_block, html, js);
+                    ignoredwords_block.fadeIn("fast");
+                }.bind(this));
+
+            }.bind(this)).fail(notification.exception);
+
+            //out of level frequency block
+            templates.render('mod_ogte/block_outoflevelfreq',
+                {levels: false,haslevels: false, title: this.strings.outoflevelfreq}).done(function(html, js) {
+
+                // Update the page.
+                outoflevelfreq_block.fadeOut("fast", function() {
+                    templates.replaceNodeContents(outoflevelfreq_block, html, js);
+                    outoflevelfreq_block.fadeIn("fast");
+                }.bind(this));
+
+            }.bind(this)).fail(notification.exception);
         },
 
         //Update Stats and Analysis
@@ -165,7 +250,6 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
                     templates.replaceNodeContents(levelstats, html, js);
                     levelstats.fadeIn("fast");
                 }.bind(this));
-
             }.bind(this)).fail(notification.exception);
 
             //add text stats to the page
@@ -395,6 +479,24 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
                     filename=filename.trim().replace(/ /g,"_");
                 }
                 utils.downloadTextContent(text, filename);
+            });
+
+            //handle clear button clicks
+            clearButton.on('click', function (e) {
+                var that = this;
+                notification.confirm(app.strings.confirmcleartextarea, app.strings.reallycleartextarea,app.strings.cleartextarea,app.strings.cancel,function () {
+                        var target_selector = $(that).attr('data-clear-target');
+                        $(target_selector).html('');
+                        //depending on the target, we want to do more than just clear the text
+                        log.debug('clearing target: ' + target_selector);
+                        switch(target_selector){
+                            case '#the_al_passage':
+                                hiddenTextBox.val('');
+                                app.clearAllStats();
+                                break;
+                            default:
+                        }
+                });
             });
 
             sendToEditorButton.on('click',function(){

@@ -181,8 +181,10 @@ span.mod_ogte_outoflevel:after {
 .ogte-blocks {
     width: 300px;
 }
-.ogte-block-uncovered {
-   /* height: 279px; */
+.ogte-block-uncovered-head {
+    max-height: 279px;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 .ogte-block-title {
     background-color: #BAE7FA;
@@ -204,10 +206,12 @@ span.mod_ogte_outoflevel:after {
 }
 .ogte-outof_container  {
     margin-top: 5px;
-    overflow-x: hidden;
     min-height: 100px;
+    /*
+    overflow-x: hidden;
     overflow-y: auto;
     max-height: 279px;
+     */
 }
 
 .ogte-gopanel {
@@ -228,7 +232,8 @@ span.mod_ogte_outoflevel:after {
 }
 
 .btn.btn-secondary.ogte_clipboardbutton,
-.btn.btn-secondary.ogte_downloadbutton {
+.btn.btn-secondary.ogte_downloadbutton,
+.btn.btn-secondary.ogte_clearbutton {
     height: 32px;
     width: 40px;
     border-radius: 5px;
@@ -239,7 +244,8 @@ span.mod_ogte_outoflevel:after {
     font-weight: 500;
 }
 .ogte_article_copy_button,
-.ogte_article_download_button {
+.ogte_article_download_button,
+.ogte_article_clear_button {
     width: 60px;
 }
 .ogte-ignore-opts,.ogte-spacer {
@@ -259,7 +265,9 @@ span.mod_ogte_outoflevel:after {
 .ogte_article_download_button .btn {
     background-image: url([[pix:mod_ogte|ogte-download-icon]]);
 }
-
+.ogte_article_clear_button .btn {
+    background-image: url([[pix:mod_ogte|ogte-clear-icon]]);
+}
 .ogte_article_copy_button .btn {
     background-image: url([[pix:mod_ogte|ogte-copy-icon]]);
 }

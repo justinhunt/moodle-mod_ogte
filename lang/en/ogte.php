@@ -169,7 +169,7 @@ $string['clearwordslist']='Clear Words';
 $string['confirmclearwords']="Are you sure you want to delete ALL the words from this list?";
 $string['confirmclearwordstitle']="Clearing Words from List";
 $string['listprops']="Props";
-$string['articleleveler']="Text Leveler";
+$string['articleleveler']="Text Profiler";
 $string['level-article']="Level Passage";
 $string['go']="Go";
 $string['article-text-here']="Passage text goes here";
@@ -255,7 +255,9 @@ $string['wordlevel']="Word Level";
 $string['export']="Export";
 $string['exportlist']="Export";
 $string['ngslproject']="New General Service List Project";
-$string['texteditor']="Text Editor";
-
+$string['texteditor']="Text Tools";
+$string['confirmcleartextarea']="Confirm: clear the text area";
+$string['reallycleartextarea']="Do you really want to clear the text area?";
+$string['cleartextarea']="Clear Text Area";
 
 
