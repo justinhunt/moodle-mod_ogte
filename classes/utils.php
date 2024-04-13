@@ -422,6 +422,7 @@ class utils{
             "'re" => " are",
             "'ve" => " have",
             "'m" => " am",
+            "'em" => " them",
             "in'" => "ing", // Handle contractions like "blowin'"
         );
 
