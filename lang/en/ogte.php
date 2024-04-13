@@ -245,7 +245,7 @@ $string['createtextwithai']="Create Text with AI";
 $string['fiction']="Fiction";
 $string['nonfiction']="Non Fiction";
 $string['back']="Back";
-$string['send-to-editor']="Send to Article Leveler";
+$string['send-to-editor']="Send to Text Profiler";
 $string['popoveractions']='Action: {$a}';
 $string['rewritten-article-difficulty']="Rewritten Article Difficulty";
 $string['ispropernouns']='Is Proper Nouns List';
@@ -261,6 +261,6 @@ $string['confirmcleartextarea']="Confirm: clear the text area";
 $string['reallycleartextarea']="Do you really want to clear the text area?";
 $string['cleartextarea']="Clear Text Area";
 $string['sitefaq']="FAQ";
-$string['sitefaq_instructions']="This is the FAQ page. If you can not find the answer to your question here please contact us.";
+$string['sitefaq_instructions']="Below you will find answers to common questions about NGSL (The New General Service List) and the various tools on this site.";
 
 
