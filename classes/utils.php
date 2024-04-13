@@ -491,7 +491,9 @@ class utils{
                             break;
 
                         case "'m":
+                        case "'em":
                             //stuff'm => stuff
+                            //beat'em => beat
                             $cleanword  = substr($cleanword, 0, $thepos); //. $replacement;
                             break;
 
