@@ -415,6 +415,16 @@ class utils{
         $levels = json_decode($list->props);
         $selectedlevel= $levels[$listlevel];
 
+        // Define common contraction patterns
+        $contractions = array(
+            "n't" => "not",
+            "'ll" => " will",
+            "'re" => " are",
+            "'ve" => " have",
+            "'m" => " am",
+            "in'" => "ing", // Handle contractions like "blowin'"
+        );
+
         //do we have proper nouns
         $propernounlist = $DB->get_record(constants::M_LISTSTABLE,['ispropernouns'=>1,'lang'=>$list->lang]);
 
@@ -444,8 +454,58 @@ class utils{
         $numbers=0;
         $retwords = [];
         foreach($words as $word){
-            $cleanword = trim(preg_replace('/[^a-zA-Z0-9]/', '', strip_tags($word)));
-            //$cleanword = self::clean_text($word);
+            //apostrophes are important because of contractions so we first make sure we have a single type
+            $pattern = "[‘’‛´ʹʹʹʹˋˋʹ＇＇ʹ‘‘ʹ‛‛ʹ]";  # Unicode characters representing apostrophe-like marks
+            $word = preg_replace($pattern, "'", $word);
+            $cleanword = trim(preg_replace('/[^\'a-zA-Z0-9]/', '', strip_tags($word)));
+
+            //handle apostrophes
+            foreach ($contractions as $pattern => $replacement) {
+                $thepos = strpos($cleanword, $pattern);
+                if ($thepos !== false) {
+                    switch($pattern){
+                        case "n't":
+                            $nts=["can't"=>"can","won't"=>"will","shan't"=>"shall"];
+                            if(array_key_exists($cleanword,$nts) ){
+                                //can't => can
+                                $cleanword = $nts[$cleanword];
+                            }else{
+                                //shouldn't => should
+                                $cleanword  = substr($cleanword, 0, $thepos) ;//. $replacement;
+                            }
+                            break;
+
+                        case "'ll":
+                            //we'll => we
+                            $cleanword  = substr($cleanword, 0, $thepos); //. $replacement;
+                            break;
+
+                        case "'re":
+                            //they're => they
+                            $cleanword  = substr($cleanword, 0, $thepos); //. $replacement;
+                            break;
+
+                        case "'ve":
+                            //we've => we
+                            $cleanword  = substr($cleanword, 0, $thepos); //. $replacement;
+                            break;
+
+                        case "'m":
+                            //stuff'm => stuff
+                            $cleanword  = substr($cleanword, 0, $thepos); //. $replacement;
+                            break;
+
+                        case "in'":
+                            //blowin' => blowing
+                            $cleanword = substr($cleanword, 0, $thepos) . $replacement;
+                            break;
+                        default:
+                            $cleanword =substr($cleanword, 0, $thepos);
+                    }
+                }
+            }
+
+
             $cleanword= strtolower($cleanword);
             if(!empty($cleanword)) {
                 //check if its being ignored
