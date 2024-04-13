@@ -350,6 +350,20 @@ class utils{
         }
     }
 
+    public static function fetch_word_family($word,$listid){
+        global $DB;
+        $headword =$DB->get_field(constants::M_WORDSTABLE,'headword',['word'=>$word]);
+        if(!$headword){
+            return [$word];
+        };
+        $words = $DB->get_fieldset_select(constants::M_WORDSTABLE,'word','headword=:headword AND list=:listid',['headword'=>$headword,'listid'=>$listid]);
+        if($words && is_array($words) && count($words)>0) {
+            return $words;
+        }else{
+            return [$word];
+        }
+    }
+
     public static function get_lang_options(){
         return array(
             constants::M_LANG_ARAE => constants::M_LANG_ARAE,
@@ -415,18 +429,6 @@ class utils{
         $levels = json_decode($list->props);
         $selectedlevel= $levels[$listlevel];
 
-        // Define common contraction patterns
-        $contractions = array(
-            "'s" => " is",
-            "'d" => " had",
-            "n't" => "not",
-            "'ll" => " will",
-            "'re" => " are",
-            "'ve" => " have",
-            "'m" => " am",
-            "'em" => " them",
-            "in'" => "ing", // Handle contractions like "blowin'"
-        );
 
         //do we have proper nouns
         $propernounlist = $DB->get_record(constants::M_LISTSTABLE,['ispropernouns'=>1,'lang'=>$list->lang]);
@@ -442,9 +444,20 @@ class utils{
         $ignores = preg_split('/[\s]+/', $ignore, -1, PREG_SPLIT_NO_EMPTY);
         if(is_array($ignores)){
             $ignores = array_map(function($word){
-                    $word = trim(preg_replace('/[^a-zA-Z0-9]/', '', strip_tags($word)));
+                    $word = preg_replace(constants::M_APOSTROPHES, "'", $word);
+                    $word = trim(preg_replace('/[^\'a-zA-Z0-9]/', '', strip_tags($word)));
+                    $word=self::handle_apostrophes($word);
                     return strtolower($word);
                 }, $ignores);
+            $ignores= array_unique($ignores);
+
+            //get family of each ignored word and add to list
+            //eg if "run" is ignored, we also ignore "running" and "runs"
+            foreach($ignores as $ignore){
+                $ignorefamily = self::fetch_word_family($ignore,$listid);
+                $ignores = array_merge($ignores,$ignorefamily);
+            }
+            //remove duplicates
             $ignores= array_unique($ignores);
         }
 
@@ -457,68 +470,12 @@ class utils{
         $numbers=0;
         $retwords = [];
         foreach($words as $word){
-            //apostrophes are important because of contractions so we first make sure we have a single type
-            $pattern = "[‘’‛´ʹʹʹʹˋˋʹ＇＇ʹ‘‘ʹ‛‛ʹ]";  # Unicode characters representing apostrophe-like marks
-            $word = preg_replace($pattern, "'", $word);
+            //standardize apostrophes in word
+            $word = preg_replace(constants::M_APOSTROPHES, "'", $word);
             $cleanword = trim(preg_replace('/[^\'a-zA-Z0-9]/', '', strip_tags($word)));
 
             //handle apostrophes
-            foreach ($contractions as $pattern => $replacement) {
-                $thepos = strpos($cleanword, $pattern);
-                if ($thepos !== false) {
-                    switch($pattern){
-                        case "n't":
-                            $nts=["can't"=>"can","won't"=>"will","shan't"=>"shall"];
-                            if(array_key_exists($cleanword,$nts) ){
-                                //can't => can
-                                $cleanword = $nts[$cleanword];
-                            }else{
-                                //shouldn't => should
-                                $cleanword  = substr($cleanword, 0, $thepos) ;//. $replacement;
-                            }
-                            break;
-
-                        case "'ll":
-                            //we'll => we
-                            $cleanword  = substr($cleanword, 0, $thepos); //. $replacement;
-                            break;
-
-                        case "'re":
-                            //they're => they
-                            $cleanword  = substr($cleanword, 0, $thepos); //. $replacement;
-                            break;
-
-                        case "'ve":
-                            //we've => we
-                            $cleanword  = substr($cleanword, 0, $thepos); //. $replacement;
-                            break;
-
-                        case "'d":
-                            //he'd => he
-                            $cleanword  = substr($cleanword, 0, $thepos); //. $replacement;
-                            break;
-
-                        case "'s":
-                            //Bob's => Bob
-                            $cleanword  = substr($cleanword, 0, $thepos); //. $replacement;
-                            break;
-
-                        case "'m":
-                        case "'em":
-                            //stuff'm => stuff
-                            //beat'em => beat
-                            $cleanword  = substr($cleanword, 0, $thepos); //. $replacement;
-                            break;
-
-                        case "in'":
-                            //blowin' => blowing
-                            $cleanword = substr($cleanword, 0, $thepos) . $replacement;
-                            break;
-                        default:
-                            $cleanword =substr($cleanword, 0, $thepos);
-                    }
-                }
-            }
+            $cleanword = self::handle_apostrophes($cleanword);
 
 
             $cleanword= strtolower($cleanword);
@@ -608,6 +565,80 @@ class utils{
                 'outoflist_percent'=>self::makePercent($outoflist,$wordcount),
                 'ignored_percent'=>self::makePercent($ignored,$wordcount)];
         }
+    }
+    
+    public static function handle_apostrophes($theword){
+        // Define common contraction patterns
+        $contractions = array(
+            "'s" => " is",
+            "'d" => " had",
+            "n't" => "not",
+            "'ll" => " will",
+            "'re" => " are",
+            "'ve" => " have",
+            "'m" => " am",
+            "'em" => " them",
+            "in'" => "ing",
+        );
+        
+        //handle apostrophes
+        foreach ($contractions as $pattern => $replacement) {
+            $thepos = strpos($theword, $pattern);
+            if ($thepos !== false) {
+                switch($pattern){
+                    case "n't":
+                        $nts=["can't"=>"can","won't"=>"will","shan't"=>"shall"];
+                        if(array_key_exists($theword,$nts) ){
+                            //can't => can
+                            $theword = $nts[$theword];
+                        }else{
+                            //shouldn't => should
+                            $theword  = substr($theword, 0, $thepos) ;//. $replacement;
+                        }
+                        break;
+
+                    case "'ll":
+                        //we'll => we
+                        $theword  = substr($theword, 0, $thepos); //. $replacement;
+                        break;
+
+                    case "'re":
+                        //they're => they
+                        $theword  = substr($theword, 0, $thepos); //. $replacement;
+                        break;
+
+                    case "'ve":
+                        //we've => we
+                        $theword  = substr($theword, 0, $thepos); //. $replacement;
+                        break;
+
+                    case "'d":
+                        //he'd => he
+                        $theword  = substr($theword, 0, $thepos); //. $replacement;
+                        break;
+
+                    case "'s":
+                        //Bob's => Bob
+                        $theword  = substr($theword, 0, $thepos); //. $replacement;
+                        break;
+
+                    case "'m":
+                    case "'em":
+                        //stuff'm => stuff
+                        //beat'em => beat
+                        $theword  = substr($theword, 0, $thepos); //. $replacement;
+                        break;
+
+                    case "in'":
+                        //blowin' => blowing
+                        $theword = substr($theword, 0, $thepos) . $replacement;
+                        break;
+                    default:
+                        $theword =substr($theword, 0, $thepos);
+                }
+            }
+        }
+        return $theword;
     }
 
     public static function is_numeric_with_unit($str) {

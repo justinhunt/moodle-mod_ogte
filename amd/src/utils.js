@@ -81,7 +81,8 @@ define(['jquery', 'core/log','core/ajax'], function ($, log,ajax) {
 
             // Count the number of sentences
             const sentences = text.split(/[.!?]+/);
-            const sentenceCount = sentences.length - 1; // Ignore the last element
+            var sentenceCount = sentences.length - 1; // Ignore the last element
+            if(sentenceCount<1 && wordCount>0){sentenceCount=1;}//if no punctuation, then we have one sentence
 
             // Calculate the average sentence length
             var totalSentenceLength =0;
@@ -89,7 +90,11 @@ define(['jquery', 'core/log','core/ajax'], function ($, log,ajax) {
                 totalSentenceLength += this.countWords(sentences[i]);
             }
             // const totalSentenceLength = sentences.reduce((acc, sentence) => acc + sentence.length, 0);
-            const averageSentenceLength = (totalSentenceLength / sentenceCount).toFixed(1);
+            if(sentenceCount>0) {
+                const averageSentenceLength = (totalSentenceLength / sentenceCount).toFixed(1);
+            }else{
+                const averageSentenceLength = 0;
+            }
 
             var stats = {
                 charCount: totalChars,
