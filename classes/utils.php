@@ -417,6 +417,8 @@ class utils{
 
         // Define common contraction patterns
         $contractions = array(
+            "'s" => " is",
+            "'d" => " had",
             "n't" => "not",
             "'ll" => " will",
             "'re" => " are",
@@ -488,6 +490,16 @@ class utils{
 
                         case "'ve":
                             //we've => we
+                            $cleanword  = substr($cleanword, 0, $thepos); //. $replacement;
+                            break;
+
+                        case "'d":
+                            //he'd => he
+                            $cleanword  = substr($cleanword, 0, $thepos); //. $replacement;
+                            break;
+
+                        case "'s":
+                            //Bob's => Bob
                             $cleanword  = substr($cleanword, 0, $thepos); //. $replacement;
                             break;
 
