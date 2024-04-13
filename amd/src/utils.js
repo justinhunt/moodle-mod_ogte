@@ -90,10 +90,9 @@ define(['jquery', 'core/log','core/ajax'], function ($, log,ajax) {
                 totalSentenceLength += this.countWords(sentences[i]);
             }
             // const totalSentenceLength = sentences.reduce((acc, sentence) => acc + sentence.length, 0);
+            var averageSentenceLength = 0;
             if(sentenceCount>0) {
-                const averageSentenceLength = (totalSentenceLength / sentenceCount).toFixed(1);
-            }else{
-                const averageSentenceLength = 0;
+                averageSentenceLength = (totalSentenceLength / sentenceCount).toFixed(1);
             }
 
             var stats = {
