@@ -86,8 +86,8 @@ $currentgroup = groups_get_activity_group($cm, true);
 // groups_print_activity_menu($cm, $CFG->wwwroot . "/mod/ogte/view.php?id=$cm->id");
 
 
-$intro = format_module_intro('ogte', $ogte, $cm->id);
-echo $renderer->box($intro);
+//$intro = format_module_intro('ogte', $ogte, $cm->id);
+//echo $renderer->box($intro);
 
 //get token
 //first confirm we are authorised before we try to get the token

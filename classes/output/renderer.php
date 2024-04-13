@@ -205,20 +205,29 @@ class renderer extends \plugin_renderer_base {
     }
 
     function embed_tabsandeditor($cmid,$token){
-        global $COURSE, $CFG;
+        global $COURSE, $CFG, $DB;
         $ret ='';
         $cm = get_coursemodule_from_id('ogte', $cmid);
         $ogteid = $cm->instance;
+
         //this fails on front page .. why?
         $context = \context_module::instance($cmid);
         if(!isloggedin() && !empty($CFG->guestloginbutton) and !empty($CFG->autologinguests)){
             redirect(new \moodle_url('/course/view.php?id=1'));
         }
 
+        //Site intro
+        if (! $ogte = $DB->get_record("ogte", array("id" => $ogteid))) {
+            throw new \moodle_exception('invalidcoursemodule');
+        }
+
+        $siteintro = format_module_intro('ogte', $ogte, $cm->id);
+
         //here there is no form. It is for display on top page of site
         $params =['cloudpoodlltoken'=>$token,'ogteid'=>$ogteid,
             'listoptions'=>utils::get_list_options(),'leveloptions'=>[],
-            'listlevels'=>utils::get_level_options(),'passage'=>'','form'=>false];
+            'listlevels'=>utils::get_level_options(),'passage'=>'','sitefaq'=>$siteintro,'form'=>false];
+
 
 
         //we put the opts in html on the page because moodle/AMD doesn't like lots of opts in js

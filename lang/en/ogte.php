@@ -62,6 +62,7 @@ $string['ogte:use'] = 'Use ogte';
 $string['ogte:manage'] = 'Manage ogte';
 $string['ogtename'] = 'OGTE name';
 $string['ogtequestion'] = 'OGTE question';
+$string['ogteintro'] = 'OGTE Intro';
 $string['mailsubject'] = 'OGTE feedback';
 $string['modulename'] = 'OGTE';
 $string['modulename_help'] = 'The ogte activity enables teachers to obtain students feedback
@@ -259,5 +260,7 @@ $string['texteditor']="Text Tools";
 $string['confirmcleartextarea']="Confirm: clear the text area";
 $string['reallycleartextarea']="Do you really want to clear the text area?";
 $string['cleartextarea']="Clear Text Area";
+$string['sitefaq']="FAQ";
+$string['sitefaq_instructions']="This is the FAQ page. If you can not find the answer to your question here please contact us.";
 
 

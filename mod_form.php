@@ -40,24 +40,8 @@ class mod_ogte_mod_form extends moodleform_mod {
         $mform->setType('name', PARAM_TEXT);
         $mform->addRule('name', null, 'required', null, 'client');
 
-        $this->standard_intro_elements(get_string('ogtequestion', 'ogte'));
+        $this->standard_intro_elements(get_string('ogteintro', 'ogte'));
 
-        // $options = array();
-        // $options[0] = get_string('alwaysopen', 'ogte');
-        // for ($i = 1; $i <= 13; $i++) {
-            // $options[$i] = get_string('numdays', '', $i);
-        // }
-        // for ($i = 2; $i <= 16; $i++) {
-            // $days = $i * 7;
-            // $options[$days] = get_string('numweeks', '', $i);
-        // }
-        // $options[365] = get_string('numweeks', '', 52);
-        // $mform->addElement('select', 'days', get_string('daysavailable', 'ogte'), $options);
-        // if ($COURSE->format == 'weeks') {
-            // $mform->setDefault('days', '7');
-        // } else {
-            // $mform->setDefault('days', '0');
-        // }
         
         $link = $DB->get_records("ogte", array("course" => $COURSE->id));
         $current_id = optional_param('update', '', PARAM_INT);    // Course Module ID.
