@@ -60,6 +60,9 @@ $PAGE->set_url('/mod/ogte/edit.php', array('id' => $id, 'entryid' => $entryid));
 $PAGE->navbar->add(get_string('edit'));
 $PAGE->set_title(format_string($ogte->name));
 $PAGE->set_heading($course->fullname);
+
+//do this so we get the same style as the OGTE theme but can nav etc in boost
+$PAGE->force_theme('ogte');
 $renderer = $PAGE->get_renderer(constants::M_COMPONENT);
 
 //get the existing entry if it exists
