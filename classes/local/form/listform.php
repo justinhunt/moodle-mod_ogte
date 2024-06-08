@@ -90,7 +90,7 @@ class listform extends \moodleform {
      * and then calls custom_definition();
      */
     public final function definition() {
-        global $CFG;
+        global $CFG, $COURSE;
 
       //  $this->filemanageroptions = $this->_customdata['filemanageroptions'];
 
@@ -100,10 +100,10 @@ class listform extends \moodleform {
 
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);
-
+/*
         $mform->addElement('hidden', 'courseid');
         $mform->setType('courseid', PARAM_INT);
-
+*/
         $mform->addElement('hidden', 'moduleid');
         $mform->setType('moduleid', PARAM_INT);
 
@@ -111,6 +111,13 @@ class listform extends \moodleform {
         $mform->addElement('text', 'name', get_string('listname', constants::M_COMPONENT), array('size'=>70));
         $mform->setType('name', PARAM_TEXT);
         $mform->addRule('name', get_string('required'), 'required', null, 'client');
+
+        //site or course
+        $siteorcourse_opts = [0=>get_string('listsite',constants::M_COMPONENT),1=>get_string('listcourse',constants::M_COMPONENT)];
+        $mform->addElement('select', 'siteorcourse', get_string('listsiteorcourse', constants::M_COMPONENT),$siteorcourse_opts);
+        $mform->setType('siteorcourse', PARAM_INT);
+        $mform->setDefault('siteorcourse', 0);
+        $mform->addRule('siteorcourse', get_string('required'), 'required', null, 'client');
 
         //description
         $mform->addElement('textarea', 'description', get_string('listdescription', constants::M_COMPONENT), array('size'=>70));

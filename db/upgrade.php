@@ -74,7 +74,7 @@ function xmldb_ogte_upgrade($oldversion=0) {
     }
 
     if($oldversion < 2024022500){
-        // fields to change the notnull definition for] viewstart and viewend
+        //Adding a proper nouns flag (proper nouns are not shown in lists dropdowns, used internally)
         $table = new xmldb_table(constants::M_LISTSTABLE);
         $fields=[];
         $fields[] = new xmldb_field('ispropernouns', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, 0);
@@ -85,9 +85,24 @@ function xmldb_ogte_upgrade($oldversion=0) {
                 $dbman->add_field($table, $field);
             }
         }
-
-
         upgrade_mod_savepoint(true, 2024022500, 'ogte');
+    }
+
+    if($oldversion < 2024060800){
+        // Adding courseid (if 0 it's a site list)
+        $table = new xmldb_table(constants::M_LISTSTABLE);
+        $fields=[];
+        $fields[] = new xmldb_field('courseid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 0);
+
+        // Alter fields
+        foreach ($fields as $field) {
+            if (!$dbman->field_exists($table, $field)) {
+                $dbman->add_field($table, $field);
+            }
+        }
+
+
+        upgrade_mod_savepoint(true, 2024060800, 'ogte');
     }
 
 

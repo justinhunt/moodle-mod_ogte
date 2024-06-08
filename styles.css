@@ -144,10 +144,28 @@ span.mod_ogte_outoflevel:after {
     margin-bottom: 8px;
 }
 
+.mod_ogte_noentries{
+    margin-bottom: 8px;
+}
+
 .mod_ogte_tab-content  {
     margin-top: 8px;
     max-width: 1200px;
 }
+
+.mod_ogte_nav-pills-container,
+.ogte-main-title {
+    max-width: 1200px;
+}
+.ogte-viewentries-panel-footer {
+    margin-top: 8px;
+    text-align: right;
+}
+
+div#mod_ogte_passages_table_wrapper {
+    margin: 8px;
+}
+
 .ogte-passage-editor{
     height: auto;
     min-height: 150px;

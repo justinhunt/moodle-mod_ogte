@@ -263,5 +263,8 @@ $string['reallycleartextarea']="Do you really want to clear the text area?";
 $string['cleartextarea']="Clear Text Area";
 $string['sitefaq']="FAQ";
 $string['sitefaq_instructions']="Below you will find answers to common questions about NGSL (The New General Service List) and the various tools on this site.";
-
+$string['listsiteorcourse']="Site/Course";
+$string['listcourse']="Course";
+$string['listsite']="Site";
+$string['backtoviewpage']="Back to View Page";
 

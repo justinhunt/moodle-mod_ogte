@@ -194,16 +194,15 @@ if(empty($config->apiuser) || empty($config->apisecret)){
 $form->set_data($data);
 $renderer = $PAGE->get_renderer(constants::M_COMPONENT);
 echo $renderer->header();
-echo $renderer->heading(format_string($ogte->name));
 
 //echo our ai and level widgets and tabs
-$listlevels =utils::get_level_options();
+$listlevels =utils::get_level_options($course->id);
 $leveloptions=isset($data->listid) && isset($listlevels[$data->listid]) ? $listlevels[$data->listid]:[];
 
 //here we sneakily add the form to the template data as well as list options
 //in the case where there is no form (for display on top page of site) then template gracefully ignores its absence
 $params =['cloudpoodlltoken'=>$token,'ogteid'=>$cm->instance,
-    'listoptions'=>utils::get_list_options(),'leveloptions'=>$leveloptions,
+    'listoptions'=>utils::get_list_options($course->id),'leveloptions'=>$leveloptions,
     'listlevels'=>$listlevels,'passage'=>$data->text,'form'=>$form->render()];
 
 

@@ -309,13 +309,13 @@ class utils{
         return [$headwords,$allwords];
     }
 
-    public static function get_list_options(){
+    public static function get_list_options($courseid){
         global $DB;
         $listopts=[];
         $alllists = $DB->get_records(constants::M_LISTSTABLE,['ispropernouns'=>0]);
         foreach($alllists as $list){
-            if(self::is_json($list->props)){
-                if(self::is_json($list->props)){
+            if($list->courseid==0 || $list->courseid==$courseid) {
+                if (self::is_json($list->props)) {
                     $listopts[] = ['key' => $list->id, 'label' => $list->name];
                 }
             }
@@ -323,7 +323,7 @@ class utils{
         return $listopts;
     }
 
-    public static function get_level_options($listid=0){
+    public static function get_level_options($courseid,$listid=0){
         global $DB;
         $listlevels=[];
         if($listid){
@@ -332,14 +332,14 @@ class utils{
             $alllists = $DB->get_records(constants::M_LISTSTABLE,['ispropernouns'=>0]);
         }
         foreach($alllists as $list){
-            if(self::is_json($list->props)){
-                if(self::is_json($list->props)){
+            if($list->courseid==0 || $list->courseid==$courseid) {
+                if (self::is_json($list->props)) {
                     $listprops = json_decode($list->props);
-                    $onelistlevels=[];
+                    $onelistlevels = [];
                     foreach ($listprops as $index => $level) {
-                        $onelistlevels[] = ['key' => $index, 'label' => $level->name,'listname'=>$list->name ];
+                        $onelistlevels[] = ['key' => $index, 'label' => $level->name, 'listname' => $list->name];
                     }
-                    $listlevels[$list->id]=$onelistlevels;
+                    $listlevels[$list->id] = $onelistlevels;
                 }
             }
         }

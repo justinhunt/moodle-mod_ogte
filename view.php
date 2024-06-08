@@ -76,6 +76,8 @@ $PAGE->set_title($ogtename);
 $PAGE->set_heading($course->fullname);
 
 
+//prepare datatable(before header printed)
+$renderer->setup_datatables(constants::M_ID_ENTRIESTABLE);
 
 echo $renderer->header();
 
@@ -130,7 +132,7 @@ if ($ogte->mode == 1){
 */
 
 // Display entries
-$lists=utils::get_level_options();
+$lists=utils::get_level_options($course->id);
 $entries = $DB->get_records(constants::M_ENTRIESTABLE, array('userid' => $USER->id, 'ogte' => $ogte->id));
 if($entries) {
     $theentries =[];
@@ -139,7 +141,7 @@ if($entries) {
         $arrayitem = (Array)$entry;
         $arrayitem['index']=($i+1);
         //get list and level info
-        $thelevels=utils::get_level_options($entry->listid);
+        $thelevels=utils::get_level_options($course->id,$entry->listid);
         if(array_key_exists($entry->levelid, $thelevels)) {
             $arrayitem['listinfo'] = $thelevels[$entry->levelid]['listname'] . ' - ' . $thelevels[$entry->levelid]['label'];
         }else{

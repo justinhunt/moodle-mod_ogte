@@ -3,8 +3,10 @@
     {{#haveentries}}
         {{{addnewbutton}}}
         {{> mod_ogte/entriestable}}
-        <a href="{{{downloadallurlpdf}}}" class="btn btn-secondary">{{#str}}downloadallpdf, mod_ogte{{/str}}</a>
-        <a href="{{{downloadallurltxt}}}" class="btn btn-secondary">{{#str}}downloadalltxt, mod_ogte{{/str}}</a>
+        <div class="ogte-viewentries-panel-footer">
+            <a href="{{{downloadallurlpdf}}}" class="btn btn-secondary">{{#str}}downloadallpdf, mod_ogte{{/str}}</a>
+            <a href="{{{downloadallurltxt}}}" class="btn btn-secondary">{{#str}}downloadalltxt, mod_ogte{{/str}}</a>
+        </div>
     {{/haveentries}}
     {{^haveentries}}
         <div class="mod_ogte_noentries">{{#str}}noentries, mod_ogte{{/str}}</div>
