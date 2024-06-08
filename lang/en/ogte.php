@@ -105,6 +105,7 @@ $string['correct-grammar'] = 'Correct Grammar';
 $string['corrected-passage'] = 'Corrected Passage';
 $string['generate-article'] = 'Generate article';
 $string['rewrite-article'] = 'Rewrite article';
+$string['rewriting-article'] = '  .. Rewriting..';
 $string['rewritten-article'] = 'Rewritten article';
 $string['original-article'] = 'Original article';
 $string['original-passage'] = 'Original passage';

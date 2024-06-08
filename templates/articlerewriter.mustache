@@ -72,33 +72,31 @@
                 var spinner= $('#{{uniqid}}_ar_spinner');
                 var sendtoeditor= $('#ogte_ar_sendtoeditor_button');
 
+                //labels
+                var label_rewrite = '{{#str}}rewrite-article, mod_ogte{{/str}}';
+                var label_rewriting = '<i class="fa fa-spinner fa-spin fa-lg"></i><br />';
+
 
                 utils.setCloudPoodllToken('{{cloudpoodlltoken}}');
 
                 $('#{{uniqid}}_ar_button').on('click',function(){
-                    //show a spinner and the title in results col
-                    rewritten.show();
-                    theresult.hide();
-                    spinner.show();
-                    resultstats.hide();
-                    sendtoeditor.show();
 
+                    var thebutton = $(this);
                     var usetext = $('#{{uniqid}}_ar_originaltext').val();
                     var difficulty = $('input[name="difficulty"]:checked').val();
 
                     //no super long readings or empty ones
                     if(!usetext || usetext.trim()==='') {
-                        theresult.val('{{#str}}entersomething, mod_ogte{{/str}}');
-                        theresult.show();
-                        spinner.hide();
+                        notification.alert('{{#str}}entersomething, mod_ogte{{/str}}');
                         return;
                     }
                     if(usetext.length > 5000){
-                        theresult.val('{{#str}}texttoolong5000, mod_ogte{{/str}}');
-                        theresult.show();
-                        spinner.hide();
+                        notification.alert('{{#str}}texttoolong5000, mod_ogte{{/str}}');
                         return;
                     }
+
+                    //change button caption to a spinner
+                    thebutton.html(label_rewriting);
 
                     //add stats to original
                     var textStatsData = utils.analyzeText(usetext);
@@ -110,10 +108,15 @@
 
                     }.bind(this)).fail(notification.exception);
 
+
                     utils.call_ai(usetext,'en-US',difficulty,'rewrite_article',function(newarticle){
+                        //restore button caption
+                        thebutton.text(label_rewrite);
+
+                        //show results panel
+                        rewritten.show();
                         theresult.val(newarticle);
                         theresult.show();
-
 
                         //add stats to result
                         var textStatsData = utils.analyzeText(newarticle);
@@ -125,13 +128,12 @@
 
                         }.bind(this)).fail(notification.exception);
 
-                        //hide a spinner and show results
-                        theresult.show();
+                        //show actions and send to editor button
                         actions.show();
-                        spinner.hide();
-
+                        sendtoeditor.show();
 
                     });
+
                 });
 
             });
