@@ -72,13 +72,7 @@ class entry_created extends \core\event\base {
         return new \moodle_url('/mod/ogte/edit.php', array('id' => $this->contextinstanceid));
     }
 
-    /**
-     * replace add_to_log() statement.
-     *
-     * @return array of parameters to be passed to legacy add_to_log() function.
-     */
-    protected function get_legacy_logdata() {
-        $url = new \moodle_url('edit.php', array('id' => $this->contextinstanceid));
-        return array($this->courseid, 'ogte', 'add entry', $url->out(), $this->objectid, $this->contextinstanceid);
+    public static function get_objectid_mapping() {
+        return array('db' => 'ogte_entries', 'restore' => 'ogte_entry');
     }
 }
