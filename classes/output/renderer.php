@@ -76,20 +76,18 @@ class renderer extends \plugin_renderer_base {
 		$table = new \html_table();
 		$table->id = $tableid;
 		$table->attributes =array('class'=>constants::M_CLASS_LISTSCONTAINER);
-
-
 		$table->head = array(
-         //    get_string('listselected', constants::M_COMPONENT),
 			get_string('listname', constants::M_COMPONENT),
             get_string('listsiteorcourse', constants::M_COMPONENT),
             get_string('listdescription', constants::M_COMPONENT),
             get_string('listlang', constants::M_COMPONENT),
             get_string('listheadwords', constants::M_COMPONENT),
             get_string('listallwords', constants::M_COMPONENT),
-           // get_string('liststatus', constants::M_COMPONENT),
             get_string('timecreated', constants::M_COMPONENT),
 			get_string('actions', constants::M_COMPONENT)
 		);
+        //this errors because of the colspan, but I have checked 100x and can't see where its wrong
+        //well, its actually better without all the search and sorts, so gave up
 		$table->headspan = array(1,1,1,1,1,1,1,4);
 		$table->colclasses = array(
 			'listname','listsiteorcourse', 'listdescription','listlang','listheadwords','listallwords', 'timecreated','upload', 'edit','delete','export'
@@ -97,16 +95,14 @@ class renderer extends \plugin_renderer_base {
 
 
 		//loop through the lists and add to table
-        $currentlist=0;
 		foreach ($lists as $list) {
-            $currentlist++;
             $row = new \html_table_row();
 
             //list name
             $listnamecell = new \html_table_cell($list->name);
             //list site or course
             $label = $list->courseid > 0 ? get_string('listcourse', constants::M_COMPONENT) : get_string('listsite', constants::M_COMPONENT);
-            $listsiteourcoursecell = new \html_table_cell($label);
+            $listsiteorcoursecell = new \html_table_cell($label);
             //list description
             $listdescriptioncell = new \html_table_cell($list->description);
             //list lang
@@ -114,20 +110,6 @@ class renderer extends \plugin_renderer_base {
             //list words
             $listheadwordscell = new \html_table_cell($list->headwords);
             $listallwordscell = new \html_table_cell($list->allwords);
-
-            //list status
-            /*
-            switch($list->status) {
-                case constants::M_LISTSTATUS_EMPTY:
-                    $liststatus = get_string('liststatusempty',constants::M_COMPONENT);
-                    break;
-                case constants::M_LISTSTATUS_READY:
-                default:
-                    $liststatus = get_string('liststatusready',constants::M_COMPONENT);
-                    break;
-            }
-            $liststatuscell = new \html_table_cell($liststatus);
-*/
 
             //created date
             $listtimecreated_content = date("Y-m-d H:i:s",$list->timecreated);
@@ -177,12 +159,18 @@ class renderer extends \plugin_renderer_base {
             }
 
 			$row->cells = array(
-                    $listnamecell,$listsiteourcoursecell, $listdescriptioncell,$listlangcell,$listheadwordscell,$listallwordscell,
-                 $listtimecreatedcell,
+                $listnamecell,
+                $listsiteorcoursecell,
+                $listdescriptioncell,
+                $listlangcell,
+                $listheadwordscell,
+                $listallwordscell,
+                $listtimecreatedcell,
                 $list->headwords > 0? $clearwordscell : $importcell,
                 $editcell, $deletecell, $exportcell
 			);
 			$table->data[] = $row;
+
 		}
 		return \html_writer::table($table);
 
