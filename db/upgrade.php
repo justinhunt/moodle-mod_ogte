@@ -105,6 +105,21 @@ function xmldb_ogte_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2024060800, 'ogte');
     }
 
+    if($oldversion < 2024070500){
+        //Adding a proper nouns flag (proper nouns are not shown in lists dropdowns, used internally)
+        $table = new xmldb_table(constants::M_LISTSTABLE);
+        $fields=[];
+        $fields[] = new xmldb_field('hasmultiwordterms', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, 0);
+
+        // Alter fields
+        foreach ($fields as $field) {
+            if (!$dbman->field_exists($table, $field)) {
+                $dbman->add_field($table, $field);
+            }
+        }
+        upgrade_mod_savepoint(true, 2024070500, 'ogte');
+    }
+
 
     return true;
 }

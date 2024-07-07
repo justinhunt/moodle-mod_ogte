@@ -267,4 +267,6 @@ $string['listsiteorcourse']="Site/Course";
 $string['listcourse']="Course";
 $string['listsite']="Site";
 $string['backtoviewpage']="Back to View Page";
+$string['hasmultiwordterms']="Has Multiword Terms";
+$string['hasmultiwordterms_details']="Check this box if the list contains multiword terms. Multiword terms are words that are made up of more than one word. e.g 'a lot of' or 'mother in law'.";
 

@@ -134,6 +134,9 @@ class listform extends \moodleform {
         //Proper Nouns list
         $mform->addElement('advcheckbox', 'ispropernouns', get_string('ispropernouns', constants::M_COMPONENT),  get_string('propernouns_details', constants::M_COMPONENT));
 
+        //Proper Nouns list
+        $mform->addElement('advcheckbox', 'hasmultiwordterms', get_string('hasmultiwordterms', constants::M_COMPONENT),  get_string('hasmultiwordterms_details', constants::M_COMPONENT));
+
         //status
         /*
         $liststatus_opts = [constants::M_LISTSTATUS_EMPTY=>'empty',constants::M_LISTSTATUS_READY=>'ready'];

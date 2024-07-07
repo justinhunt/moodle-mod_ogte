@@ -432,6 +432,9 @@ class utils{
 
         //do we have proper nouns
         $propernounlist = $DB->get_record(constants::M_LISTSTABLE,['ispropernouns'=>1,'lang'=>$list->lang]);
+        
+        //does the list have multi-word-terms
+        $hasmultiwordterms = $DB->get_record(constants::M_LISTSTABLE,['hasmultiwordterms'=>1,'lang'=>$list->lang]);
 
         $sql = 'SELECT listrank
                    FROM {'. constants::M_WORDSTABLE .'} w
@@ -440,6 +443,22 @@ class utils{
                         w.list = :listid';
 
         $passage = self::clean_text($passage);
+        
+        //if the list has multi word terms we need to pre-parse the passage, spot such terms and replace spaces with underscores
+        if($hasmultiwordterms){
+            $multiwordterms = self::fetch_multiwordterms($listid);
+            foreach($multiwordterms as $term){
+                //dealing with capitals here is a bit tricky,
+                // though its hacky we just do it three times and hope we get a strike
+                //all lower case term
+                $passage = str_replace($term,str_replace(' ','_',$term),$passage);
+                //capital first letter term
+                $passage = str_replace(ucfirst($term),str_replace(' ','_',ucfirst($term)),$passage);
+                //capital first letter of each word term
+                $passage = str_replace(ucwords($term),str_replace(' ','_',ucwords($term)),$passage);
+            }
+        }
+
         $words = preg_split('/[\s]+/', $passage, -1, PREG_SPLIT_NO_EMPTY);
         $ignores = preg_split('/[\s]+/', $ignore, -1, PREG_SPLIT_NO_EMPTY);
         if(is_array($ignores)){
@@ -470,23 +489,48 @@ class utils{
         $numbers=0;
         $retwords = [];
         foreach($words as $word){
+
             //standardize apostrophes in word
             $word = preg_replace(constants::M_APOSTROPHES, "'", $word);
-            $cleanword = trim(preg_replace('/[^\'a-zA-Z0-9]/', '', strip_tags($word)));
+
+            //first we clean the word of any junk (commas, full stops etc) and lower case it
+            //but if the list has multiwords we need to replace underscores in the word with spaces
+            //we just added them to get through the word splitting process
+            if($hasmultiwordterms){
+                $preword = $word;
+                $word = str_replace('_',' ',$word);
+                $ismultiwordterm= $preword != $word;
+                $cleanword = trim(preg_replace('/[^\'a-zA-Z0-9 ]/', '', strip_tags($word)));
+                //if we are currently dealing with a real multiword term, eg "a lot of" we are going to need to return
+                //the individual words in the term, so we can tag them all. This makes it a bit messy so we need words_in_term array and count
+                //we return each of "a", "lot" and "of" as separate words with tags for level and word count.
+                if($ismultiwordterm){
+                    $words_in_term = preg_split('/[\s]+/', $word, -1, PREG_SPLIT_NO_EMPTY);
+                    $words_in_term_count = count($words_in_term);
+                }else{
+                    $words_in_term_count=1;
+                }
+            }else{
+                $ismultiwordterm=false;
+                $words_in_term_count=1;
+                $cleanword = trim(preg_replace('/[^\'a-zA-Z0-9]/', '', strip_tags($word)));
+            }
 
             //handle apostrophes
             $cleanword = self::handle_apostrophes($cleanword);
-
-
+            //lower case the clean word (all words in list are lowercase)
             $cleanword= strtolower($cleanword);
+
             if(!empty($cleanword)) {
                 //check if its being ignored
                 if (is_array($ignores) && in_array($cleanword, $ignores)) {
+                    //for now we don't ignore multi-words, but it is easy to add if we decide to
                     $retwords[] = \html_writer::span($word, 'mod_ogte_ignored', ['data-index' => $wordcount]);
-                    $ignored++;
+                    $ignored+= $words_in_term_count;
                 }elseif(self::is_numeric_with_unit($cleanword)){
+                    //for now we don't ignore numerics, but it is easy to add if we decide to
                     $retwords[]=\html_writer::span($word, 'mod_ogte_number', ['data-index'=>$wordcount]);
-                    $numbers++;
+                    $numbers+= $words_in_term_count;
                 }else{
                     //search for the word listrank and process depending on the level
                     //due to some lists having capitalized versions of the same word, multiple entries are not impossible
@@ -500,13 +544,27 @@ class utils{
                             $propernounid = $DB->get_field_sql($sql, ['theword' => $cleanword, 'listid' => $propernounlist->id], IGNORE_MULTIPLE);
                         }
                         if (!empty($propernounid)) {
-                            $retwords[] = \html_writer::span($word, 'mod_ogte_propernoun', ['data-index' => $wordcount, 'data-listrank' => 0]);
-                            $propernouns++;
+                            //for single word terms, just return. For multi-word terms, loop through each word in term and return them
+                            if(!$ismultiwordterm) {
+                                $retwords[] = \html_writer::span($word, 'mod_ogte_propernoun', ['data-index' => $wordcount, 'data-listrank' => 0]);
+                            }else{
+                                for($i=0;$i<$words_in_term_count;$i++){
+                                    $retwords[] = \html_writer::span($words_in_term[$i], 'mod_ogte_propernoun', ['data-index' => $wordcount+$i, 'data-listrank' => 0]);
+                                }
+                            }
+                            $propernouns+= $words_in_term_count;
                         }else {
-                            $retwords[] = \html_writer::span($word, 'mod_ogte_outoflist', ['data-index' => $wordcount, 'data-listrank' => 0]);
-                            $outoflist++;
-                        }
+                            //for single word terms, just return. For multi-word terms, loop through each word in term and return them
+                            if(!$ismultiwordterm) {
+                                $retwords[] = \html_writer::span($word, 'mod_ogte_outoflist', ['data-index' => $wordcount, 'data-listrank' => 0]);
+                            }else{
+                                for($i=0;$i<$words_in_term_count;$i++){
+                                    $retwords[] = \html_writer::span($words_in_term[$i],'mod_ogte_outoflist', ['data-index' => $wordcount+$i, 'data-listrank' => 0]);
+                                }
 
+                            }
+                            $outoflist+= $words_in_term_count;
+                        }
 
                     //if its in the list, tag the word with level data, and check if its within or outside of the selected level
                     } else {
@@ -520,15 +578,32 @@ class utils{
                         }
                         //check if its within or outside the selected level
                         if ($listrank > $selectedlevel->top) {
-                            $retwords[] = \html_writer::span($word, 'mod_ogte_outoflevel',$atts);
-                            $outoflevel++;
+                            //for single word terms, just return. For multi-word terms, loop through each word in term and return them
+                            if(!$ismultiwordterm) {
+                                $retwords[] = \html_writer::span($word, 'mod_ogte_outoflevel', $atts);
+                            }else{
+                                for($i=0;$i<$words_in_term_count;$i++){
+                                    $atts['data-index'] = $wordcount+$i;
+                                    $retwords[] = \html_writer::span($words_in_term[$i], 'mod_ogte_outoflevel', $atts);
+                                }
+
+                            }
+                            $outoflevel+= $words_in_term_count;
                         }else{
-                            $retwords[] = \html_writer::span($word, 'mod_ogte_inlevel',$atts);
-                            $inlevel++;
+                            //for single word terms, just return. For multi-word terms, loop through each word in term and return them
+                            if(!$ismultiwordterm) {
+                                $retwords[] = \html_writer::span($word, 'mod_ogte_inlevel', $atts);
+                            }else{
+                                for($i=0;$i<$words_in_term_count;$i++){
+                                    $atts['data-index'] = $wordcount+$i;
+                                    $retwords[] = \html_writer::span($words_in_term[$i], 'mod_ogte_inlevel', $atts);
+                                }
+                            }
+                            $inlevel+= $words_in_term_count;
                         }
                     }
                 }
-                $wordcount++;
+                $wordcount+= $words_in_term_count;
             }else{
                 $retwords[] = $word;
             }
@@ -639,6 +714,18 @@ class utils{
             }
         }
         return $theword;
+    }
+
+    public static function fetch_multiwordterms($list){
+        global $DB;
+        $sql = 'SELECT word
+            FROM {'. constants::M_WORDSTABLE .'} w
+            WHERE
+                 w.word LIKE "% %" AND
+                 w.list = :listid';
+        $multiwordterms = $DB->get_fieldset_sql($sql, ['listid' => $list]);
+        return $multiwordterms;
+
     }
 
     public static function is_numeric_with_unit($str) {
