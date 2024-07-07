@@ -417,6 +417,9 @@ class utils{
 
         //do we have proper nouns
         $propernounlist = $DB->get_record(constants::M_LISTSTABLE,['ispropernouns'=>1,'lang'=>$list->lang]);
+        
+        //does the list have multi-word-terms
+        $hasmultiwordterms = $DB->get_record(constants::M_LISTSTABLE,['hasmultiwordterms'=>1,'lang'=>$list->lang]);
 
         $sql = 'SELECT listrank
                    FROM {'. constants::M_WORDSTABLE .'} w
@@ -425,6 +428,15 @@ class utils{
                         w.list = :listid';
 
         $passage = self::clean_text($passage);
+        
+        //if the list has multi word terms we need to pre-parse the passage, spot such terms and replace spaces with underscores
+        if($hasmultiwordterms){
+            $multiwordterms = self::fetch_multiwordterms($listid);
+            foreach($multiwordterms as $term){
+                $passage = str_replace($term,str_replace(' ','_',$term),$passage);
+            }
+        }
+
         $words = preg_split('/[\s]+/', $passage, -1, PREG_SPLIT_NO_EMPTY);
         $ignores = preg_split('/[\s]+/', $ignore, -1, PREG_SPLIT_NO_EMPTY);
         if(is_array($ignores)){
@@ -444,9 +456,18 @@ class utils{
         $numbers=0;
         $retwords = [];
         foreach($words as $word){
-            $cleanword = trim(preg_replace('/[^a-zA-Z0-9]/', '', strip_tags($word)));
-            //$cleanword = self::clean_text($word);
+            //first we clean the word of any junk (commas, full stops etc) and lower case it
+            //but if the list has multiwords we need to replace underscores in the word with spaces
+            //we just added them to get through the word splitting process
+            if($hasmultiwordterms){
+                $word = str_replace('_',' ',$word);
+                $cleanword = trim(preg_replace('/[^a-zA-Z0-9 ]/', '', strip_tags($word)));
+            }else{
+                $cleanword = trim(preg_replace('/[^a-zA-Z0-9]/', '', strip_tags($word)));
+            }
+            
             $cleanword= strtolower($cleanword);
+
             if(!empty($cleanword)) {
                 //check if its being ignored
                 if (is_array($ignores) && in_array($cleanword, $ignores)) {
@@ -526,6 +547,18 @@ class utils{
                 'outoflist_percent'=>self::makePercent($outoflist,$wordcount),
                 'ignored_percent'=>self::makePercent($ignored,$wordcount)];
         }
+    }
+
+    public static function fetch_multiwordterms($list){
+        global $DB;
+        $sql = 'SELECT word
+            FROM {'. constants::M_WORDSTABLE .'} w
+            WHERE
+                 w.word LIKE "% %" AND
+                 w.list = :listid';
+        $multiwordterms = $DB->get_fieldset_sql($sql, ['listid' => $list]);
+        return $multiwordterms;
+
     }
 
     public static function is_numeric_with_unit($str) {
