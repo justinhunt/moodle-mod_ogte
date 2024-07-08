@@ -429,7 +429,6 @@ class utils{
         $levels = json_decode($list->props);
         $selectedlevel= $levels[$listlevel];
 
-
         //do we have proper nouns
         $propernounlist = $DB->get_record(constants::M_LISTSTABLE,['ispropernouns'=>1,'lang'=>$list->lang]);
         
@@ -444,18 +443,25 @@ class utils{
 
         $passage = self::clean_text($passage);
         
-        //if the list has multi word terms we need to pre-parse the passage, spot such terms and replace spaces with underscores
-        if($hasmultiwordterms){
+        //if the list has multiword terms we need to pre-parse the passage, spot such terms and replace spaces with underscores
+        if($hasmultiwordterms) {
             $multiwordterms = self::fetch_multiwordterms($listid);
+            if ($propernounlist){
+                $multiwordpropernouns = self::fetch_multiwordterms($propernounlist->id);
+                $multiwordterms = array_merge($multiwordterms, $multiwordpropernouns);
+            }
+
             foreach($multiwordterms as $term){
                 //dealing with capitals here is a bit tricky,
-                // though its hacky we just do it three times and hope we get a strike
+                // though its hacky we just do it four times and hope we get a strike
                 //all lower case term
                 $passage = str_replace($term,str_replace(' ','_',$term),$passage);
                 //capital first letter term
                 $passage = str_replace(ucfirst($term),str_replace(' ','_',ucfirst($term)),$passage);
                 //capital first letter of each word term
                 $passage = str_replace(ucwords($term),str_replace(' ','_',ucwords($term)),$passage);
+                //capitalize all letters in Term
+                $passage = str_replace(strtoupper($term),str_replace(' ','_',strtoupper($term)),$passage);
             }
         }
 
@@ -500,10 +506,11 @@ class utils{
                 $preword = $word;
                 $word = str_replace('_',' ',$word);
                 $ismultiwordterm= $preword != $word;
+                //when we do the clean up we leave spaces in, because there are spaces between words in multiword terms
                 $cleanword = trim(preg_replace('/[^\'a-zA-Z0-9 ]/', '', strip_tags($word)));
-                //if we are currently dealing with a real multiword term, eg "a lot of" we are going to need to return
-                //the individual words in the term, so we can tag them all. This makes it a bit messy so we need words_in_term array and count
-                //we return each of "a", "lot" and "of" as separate words with tags for level and word count.
+                //if we are currently dealing with a real multiword term, eg "a lot of" we are going to need to return to the profiler tool
+                //the individual words in the term, so we can tag them all. This makes it a bit messy so we need a words_in_term array and count
+                //e.g we return each of "a", "lot" and "of" as separate words each with attributes for level and word count.
                 if($ismultiwordterm){
                     $words_in_term = preg_split('/[\s]+/', $word, -1, PREG_SPLIT_NO_EMPTY);
                     $words_in_term_count = count($words_in_term);
