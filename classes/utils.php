@@ -429,10 +429,13 @@ class utils{
         $levels = json_decode($list->props);
         $selectedlevel= $levels[$listlevel];
 
+
         //do we have proper nouns
         $propernounlist = $DB->get_record(constants::M_LISTSTABLE,['ispropernouns'=>1,'lang'=>$list->lang]);
         
         //does the list have multi-word-terms
+        //TO DO -  assume multiwordterms is true, because we will need it for propernouns, if "fetch_multiwordterms" is empty, it will still work
+        //and the code will be simpler (fewer if statements)
         $hasmultiwordterms = $DB->get_record(constants::M_LISTSTABLE,['hasmultiwordterms'=>1,'lang'=>$list->lang]);
 
         $sql = 'SELECT listrank
