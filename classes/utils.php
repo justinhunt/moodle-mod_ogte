@@ -499,7 +499,7 @@ class utils{
         $retwords = [];
         foreach($words as $word){
 
-            //standardize apostrophes in word
+            //standardize apostrophes in each word
             $word = preg_replace(constants::M_APOSTROPHES, "'", $word);
 
             //first we clean the word of any junk (commas, full stops etc) and lower case it
@@ -528,8 +528,12 @@ class utils{
 
             //handle apostrophes
             $cleanword = self::handle_apostrophes($cleanword);
+
             //lower case the clean word (all words in list are lowercase)
             $cleanword= strtolower($cleanword);
+
+            //strip any apostrophes that remain at start and end of word
+            $cleanword =trim($cleanword, "'");
 
             if(!empty($cleanword)) {
                 //check if its being ignored
