@@ -441,7 +441,7 @@ class utils{
         $sql = 'SELECT listrank
                    FROM {'. constants::M_WORDSTABLE .'} w
                    WHERE
-                        w.word = :theword AND
+                        LOWER(w.word) = :theword AND
                         w.list = :listid';
 
         $passage = self::clean_text($passage);
@@ -526,11 +526,11 @@ class utils{
                 $cleanword = trim(preg_replace('/[^\'a-zA-Z0-9]/', '', strip_tags($word)));
             }
 
-            //handle apostrophes
-            $cleanword = self::handle_apostrophes($cleanword);
-
             //lower case the clean word (all words in list are lowercase)
             $cleanword= strtolower($cleanword);
+
+            //handle apostrophes
+            $cleanword = self::handle_apostrophes($cleanword);
 
             //strip any apostrophes that remain at start and end of word
             $cleanword =trim($cleanword, "'");
@@ -661,6 +661,9 @@ class utils{
         $contractions = array(
             "'s" => " is",
             "'d" => " had",
+          // "won't" => "will not",
+          // "can't" => "can not",
+          // "shan't" => "shall not",
             "n't" => "not",
             "'ll" => " will",
             "'re" => " are",
@@ -682,40 +685,40 @@ class utils{
                             $theword = $nts[$theword];
                         }else{
                             //shouldn't => should
-                            $theword  = substr($theword, 0, $thepos) ;//. $replacement;
+                            $theword  = substr($theword, 0, $thepos) ;
                         }
                         break;
 
                     case "'ll":
                         //we'll => we
-                        $theword  = substr($theword, 0, $thepos); //. $replacement;
+                        $theword  = substr($theword, 0, $thepos);
                         break;
 
                     case "'re":
                         //they're => they
-                        $theword  = substr($theword, 0, $thepos); //. $replacement;
+                        $theword  = substr($theword, 0, $thepos);
                         break;
 
                     case "'ve":
                         //we've => we
-                        $theword  = substr($theword, 0, $thepos); //. $replacement;
+                        $theword  = substr($theword, 0, $thepos);
                         break;
 
                     case "'d":
                         //he'd => he
-                        $theword  = substr($theword, 0, $thepos); //. $replacement;
+                        $theword  = substr($theword, 0, $thepos);
                         break;
 
                     case "'s":
                         //Bob's => Bob
-                        $theword  = substr($theword, 0, $thepos); //. $replacement;
+                        $theword  = substr($theword, 0, $thepos);
                         break;
 
                     case "'m":
                     case "'em":
                         //stuff'm => stuff
                         //beat'em => beat
-                        $theword  = substr($theword, 0, $thepos); //. $replacement;
+                        $theword  = substr($theword, 0, $thepos);
                         break;
 
                     case "in'":

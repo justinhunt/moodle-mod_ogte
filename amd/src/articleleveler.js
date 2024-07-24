@@ -520,11 +520,27 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
             });
 
             //prevent the editable div from creating more divs on copy and paste
+            /*
             passagebox.on('paste', function (e) {
                 e.preventDefault();
                 var text = (e.originalEvent || e).clipboardData.getData('text/plain');
                 // Insert plain text without additional divs
                 $(this).text(text);
+                //also update our hidden text box
+                hiddenTextBox.val($(this).text());
+            });
+            */
+
+            passagebox.on('paste', function (e) {
+                e.preventDefault();
+                var text = (e.originalEvent || e).clipboardData.getData('text/plain');
+
+                //though execCommand is deprecated, it works better than all the other stuff I tried
+                //ie getting cursor postions, and offsets on window and getSelection and ranges and nodes
+                //don't bother with all that stuff. It's going to be much better to implement a proper right text editor like this one
+                //https://github.com/yabwe/medium-editor
+                document.execCommand('inserttext', false, text);
+
                 //also update our hidden text box
                 hiddenTextBox.val($(this).text());
             });
