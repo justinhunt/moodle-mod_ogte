@@ -250,8 +250,10 @@ class utils{
         //in js we gt the text with element.innertext()
         //this turns new lines into \n, we want that to survive clean_text and other text cleanup
         //so we can restore it as <br> later
+        //innertest gives us: cr => \n + cr + blank line => \n\n\n 
+        //but if we turn that to <br> we get <br><br><br> which is not what we want
+        $passage = str_replace("\n\n\n","\n\n", $passage);
         $passage = str_replace("\r\n", ' ' .constants::M_FAKENEWLINE . ' ', $passage);
-        //$passage = str_replace("\n\n", ' ' .constants::M_FAKENEWLINE . ' ', $passage);
         $passage = str_replace("\n", ' ' .constants::M_FAKENEWLINE . ' ', $passage);
         return $passage;
     }
