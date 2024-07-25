@@ -536,7 +536,7 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
                 var text = (e.originalEvent || e).clipboardData.getData('text/plain');
 
                 //though execCommand is deprecated, it works better than all the other stuff I tried
-                //ie getting cursor postions, and offsets on window and getSelection and ranges and nodes
+                //ie getting cursor positions, and offsets on window and getSelection and ranges and nodes
                 //don't bother with all that stuff. It's going to be much better to implement a proper right text editor like this one
                 //https://github.com/yabwe/medium-editor
                 document.execCommand('inserttext', false, text);
@@ -590,8 +590,8 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
                     themessage.text(app.strings['entersomething']);
                     return;
                 }
-                if (thepassage.length > 50000) {
-                    themessage.text(app.strings['texttoolong50000']);
+                if (thepassage.length > 500000) {
+                    themessage.text(app.strings['texttoolong500000']);
                     return;
                 }
 

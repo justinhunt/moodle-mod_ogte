@@ -246,6 +246,16 @@ class utils{
         return '';
     }
 
+    public static function markup_newlines($passage){
+        //in js we gt the text with element.innertext()
+        //this turns new lines into \n, we want that to survive clean_text and other text cleanup
+        //so we can restore it as <br> later
+        $passage = str_replace("\r\n", ' ' .constants::M_FAKENEWLINE . ' ', $passage);
+        $passage = str_replace("\n\n", ' ' .constants::M_FAKENEWLINE . ' ', $passage);
+        $passage = str_replace("\n", ' ' .constants::M_FAKENEWLINE . ' ', $passage);
+        return $passage;
+    }
+
     public static function clean_text($passage){
         //remove slashes
         $passage = stripslashes($passage );
@@ -444,6 +454,9 @@ class utils{
                         LOWER(w.word) = :theword AND
                         w.list = :listid';
 
+        //rewrite new line markers to survive subsequent text clean up                
+        $passage = self::markup_newlines($passage);
+        //text clean up                
         $passage = self::clean_text($passage);
         
         //if the list has multiword terms we need to pre-parse the passage, spot such terms and replace spaces with underscores
@@ -496,10 +509,12 @@ class utils{
         $ignored=0;
         $propernouns=0;
         $numbers=0;
+        $newlines=0;
         $retwords = [];
         foreach($words as $word){
 
             //standardize apostrophes in each word
+            //this takes all the wonky things that look like apostrophes and turns them into real apostrophes
             $word = preg_replace(constants::M_APOSTROPHES, "'", $word);
 
             //first we clean the word of any junk (commas, full stops etc) and lower case it
@@ -526,10 +541,11 @@ class utils{
                 $cleanword = trim(preg_replace('/[^\'a-zA-Z0-9]/', '', strip_tags($word)));
             }
 
-            //lower case the clean word (all words in list are lowercase)
+            //lower case the clean word (all words in list are supposed to be lowercase)
             $cleanword= strtolower($cleanword);
 
-            //handle apostrophes
+            //handle apostrophes. 
+            //This is where we deal with "don't" "won't" etc
             $cleanword = self::handle_apostrophes($cleanword);
 
             //strip any apostrophes that remain at start and end of word
@@ -538,13 +554,20 @@ class utils{
             if(!empty($cleanword)) {
                 //check if its being ignored
                 if (is_array($ignores) && in_array($cleanword, $ignores)) {
-                    //for now we don't ignore multi-words, but it is easy to add if we decide to
+                    //for now we don't "ignore" multi-words, but it is easy to add if we decide to
                     $retwords[] = \html_writer::span($word, 'mod_ogte_ignored', ['data-index' => $wordcount]);
                     $ignored+= $words_in_term_count;
                 }elseif(self::is_numeric_with_unit($cleanword)){
-                    //for now we don't ignore numerics, but it is easy to add if we decide to
+                    //for now we don't "ignore" numerics, but it is easy to add if we decide to
                     $retwords[]=\html_writer::span($word, 'mod_ogte_number', ['data-index'=>$wordcount]);
                     $numbers+= $words_in_term_count;
+
+               //restore new words and remove from calculation
+                }elseif($cleanword===constants::M_FAKENEWLINE){
+                    //return an html new line
+                    $retwords[]=\html_writer::empty_tag('br');
+                    $newlines+= $words_in_term_count;//always 1 right?
+
                 }else{
                     //search for the word listrank and process depending on the level
                     //due to some lists having capitalized versions of the same word, multiple entries are not impossible
@@ -623,9 +646,9 @@ class utils{
             }
         }
         //adjust for numbers
-        $wordcount = $wordcount - $numbers;
+        $wordcount = $wordcount - $numbers - $newlines;
 
-        if($wordcount == 0){
+        if($wordcount <= 0){
             return ['passage'=>$passage,'status'=>'error','message'=>'no words found','coverage'=>0];
         }else{
             $adjustedwordcount = $wordcount - $ignored - $propernouns;

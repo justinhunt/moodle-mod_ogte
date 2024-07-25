@@ -115,6 +115,7 @@ $string['paste-text-here'] = 'Paste text here';
 $string['entersomething'] = 'Please enter something in the text area.';
 $string['texttoolong5000'] = 'The text is too long. Passages must be 5000 characters are shorter.';
 $string['texttoolong50000'] = 'The text is too long. Passages must be 50000 characters are shorter.';
+$string['texttoolong500000'] = 'The text is too long. Passages must be 500000 characters are shorter.';
 $string['text-too-long-200'] = 'The prompt is too long. Prompts must be 200 characters are shorter.';
 $string['articlegenerator'] = 'Text Generator';
 $string['articlerewriter'] = 'Text Rewriter';

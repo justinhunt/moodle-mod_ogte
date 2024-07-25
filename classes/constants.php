@@ -100,5 +100,5 @@ const M_UNITS = 'm|cm|mm|km|kmh|mph|C|F|K|N|g|kg|gm|L|ml|mLmin|gal|ft|in|lb|oz|H
 ////km/h => kmh and g/m² => gm2 and mL/min => mlmin and °C =>C and °F =>F
 
 const M_APOSTROPHES = "/[‘’‛´ʹʹʹʹˋˋʹ＇＇ʹ‘‘ʹ‛‛ʹ]/u";  # Unicode characters representing apostrophe-like marks
-
+const M_FAKENEWLINE="1newline";
 }
