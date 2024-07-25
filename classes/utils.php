@@ -251,7 +251,7 @@ class utils{
         //this turns new lines into \n, we want that to survive clean_text and other text cleanup
         //so we can restore it as <br> later
         $passage = str_replace("\r\n", ' ' .constants::M_FAKENEWLINE . ' ', $passage);
-        $passage = str_replace("\n\n", ' ' .constants::M_FAKENEWLINE . ' ', $passage);
+        //$passage = str_replace("\n\n", ' ' .constants::M_FAKENEWLINE . ' ', $passage);
         $passage = str_replace("\n", ' ' .constants::M_FAKENEWLINE . ' ', $passage);
         return $passage;
     }
