@@ -440,11 +440,15 @@ class utils{
         $list = $DB->get_record(constants::M_LISTSTABLE,['id'=>$listid]);
         $levels = json_decode($list->props);
         $selectedlevel= $levels[$listlevel];
+        $alreadyfound=[];
+        $alreadynotfound=[];
+        $alreadypropernoun=[];
+        $alreadynotpropernoun=[];
 
 
         //do we have proper nouns
         $propernounlist = $DB->get_record(constants::M_LISTSTABLE,['ispropernouns'=>1,'lang'=>$list->lang]);
-        
+
         //does the list have multi-word-terms
         //TO DO -  assume multiwordterms is true, because we will need it for propernouns, if "fetch_multiwordterms" is empty, it will still work
         //and the code will be simpler (fewer if statements)
@@ -455,6 +459,18 @@ class utils{
                    WHERE
                         LOWER(w.word) = :theword AND
                         w.list = :listid';
+
+        //if we change the word column index type to fulltext
+        //we can use this SQL and get much faster results but we also need to clear the mysql stop words list
+        //thats a bit tricky in a plugin, but for a dedicated site its ok
+        /*
+        $sql = 'SELECT listrank
+                        FROM {'. constants::M_WORDSTABLE .'} w
+                        WHERE
+                             MATCH (w.word) AGAINST (:theword IN BOOLEAN MODE)
+                              AND
+                              w.list = :listid';                     
+        */
 
         //rewrite new line markers to survive subsequent text clean up                
         $passage = self::markup_newlines($passage);
@@ -513,6 +529,7 @@ class utils{
         $numbers=0;
         $newlines=0;
         $retwords = [];
+        $starttime= microtime(true);
         foreach($words as $word){
 
             //standardize apostrophes in each word
@@ -574,13 +591,38 @@ class utils{
                     //search for the word listrank and process depending on the level
                     //due to some lists having capitalized versions of the same word, multiple entries are not impossible
                     //we just take the first one
-                    $listrank = $DB->get_field_sql($sql, ['theword' => $cleanword, 'listid' => $listid],IGNORE_MULTIPLE);
+                    if(in_array($cleanword,$alreadynotfound) || 
+                        array_key_exists($cleanword,$alreadypropernoun) || 
+                        in_array($cleanword,$alreadynotpropernoun)){
+                            $listrank=false;
+                    }elseif(array_key_exists($cleanword,$alreadyfound)){
+                        $listrank=$alreadyfound[$cleanword];
+                    }else{
+                        $listrank = $DB->get_field_sql($sql, ['theword' => $cleanword, 'listid' => $listid],IGNORE_MULTIPLE);
+                        if($listrank){
+                            $alreadyfound[$cleanword]=$listrank;
+                        }else{
+                            $alreadynotfound[]=$cleanword;
+                        }
+                    }
+                    
                     //if its not there, its not in the list
                     if (!$listrank) {
                         //it could be a proper noun
                         $propernounid = null;
                         if ($propernounlist) {
-                            $propernounid = $DB->get_field_sql($sql, ['theword' => $cleanword, 'listid' => $propernounlist->id], IGNORE_MULTIPLE);
+                            if( in_array($cleanword,$alreadynotpropernoun)){
+                                 $propernounid=false;
+                            }elseif(array_key_exists($cleanword,$alreadypropernoun)){
+                                $propernounid=$alreadypropernoun[$cleanword];
+                            }else{
+                                $propernounid = $DB->get_field_sql($sql, ['theword' => $cleanword, 'listid' => $propernounlist->id], IGNORE_MULTIPLE);
+                                if($propernounid){
+                                    $alreadypropernoun[$cleanword]=$propernounid;
+                                }else{
+                                    $alreadynotpropernoun[]=$cleanword; 
+                                }
+                            }
                         }
                         if (!empty($propernounid)) {
                             //for single word terms, just return. For multi-word terms, loop through each word in term and return them
@@ -649,6 +691,8 @@ class utils{
         }
         //adjust for numbers
         $wordcount = $wordcount - $numbers - $newlines;
+        $endtime= microtime(true);
+        $totaltime=$endtime-$starttime;
 
         if($wordcount <= 0){
             return ['passage'=>$passage,'status'=>'error','message'=>'no words found','coverage'=>0];
@@ -677,7 +721,8 @@ class utils{
                 'inlevel_percent'=>self::makePercent($inlevel,$wordcount),
                 'outoflevel_percent'=>self::makePercent($outoflevel,$wordcount),
                 'outoflist_percent'=>self::makePercent($outoflist,$wordcount),
-                'ignored_percent'=>self::makePercent($ignored,$wordcount)];
+                'ignored_percent'=>self::makePercent($ignored,$wordcount),
+                'totaltime'=>$totaltime];
         }
     }
     

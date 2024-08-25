@@ -7,7 +7,7 @@ define(['jquery', 'core/log','core/templates', 'mod_ogte/dependencyloader', 'the
 
     log.debug('OGTE Popover helper: initialising');
 
-    return {
+    var ph = {
 
         lastitem: false,
         dispose: false, //Bv4 = dispose  Bv3 = destroy
@@ -17,7 +17,6 @@ define(['jquery', 'core/log','core/templates', 'mod_ogte/dependencyloader', 'the
 
         init: function () {
             this.register_events();
-
         },
 
         register_events: function () {
@@ -77,11 +76,12 @@ define(['jquery', 'core/log','core/templates', 'mod_ogte/dependencyloader', 'the
         },
 
         doPopup: function (item,itemword, ignoring) {
-            var that = this;
+            var that= this;
+            
             //if we are already showing this item then dispose of it, set last item to null and go home
             if (this.lastitem === item) {
                 $(this.lastitem).popover(this.disposeWord());
-                that.showing = false;
+                this.showing = false;
                 this.lastitem = false;
                 return;
             }
@@ -89,7 +89,7 @@ define(['jquery', 'core/log','core/templates', 'mod_ogte/dependencyloader', 'the
             //dispose of previous popover, and remember this one
             if (this.lastitem) {
                 $(this.lastitem).popover(this.disposeWord());
-                that.showing = false;
+                this.showing = false;
                 this.lastitem = false;
             }
             this.lastitem = item;
@@ -119,5 +119,6 @@ define(['jquery', 'core/log','core/templates', 'mod_ogte/dependencyloader', 'the
         //word = word, ignore = true/false
         onIgnore: function(word,ignore){console.log('onIgnore');},
 
-    };//end of return value
+    };//end of thehelper declaration
+    return ph;
 });
