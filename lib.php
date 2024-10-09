@@ -933,7 +933,7 @@ function ogte_pluginfile($course, $cm, $context, $filearea, $args, $forcedownloa
         $filename = preg_replace('/\s+/', '_', $filename);
 
         //make content
-        $headwords =$DB->get_records_sql("SELECT DISTINCT headword FROM {" . constants::M_WORDSTABLE . "} WHERE list = ?", array($listid));
+        $headwords =$DB->get_records_sql("SELECT DISTINCT headword FROM {" . constants::M_WORDSTABLE . "} WHERE list = ? SORT BY ", array($listid));
         foreach($headwords as $headword){
             $words=$DB->get_records_sql("SELECT * FROM {" . constants::M_WORDSTABLE . "} WHERE list = ? AND headword = ?", array($listid, $headword->headword));
             $wordstring = [];

@@ -5,6 +5,7 @@
         <th scope="col">{{#str}}title, mod_ogte{{/str}}</th>
         <th scope="col">{{#str}}excerpt, mod_ogte{{/str}}</th>
         <th scope="col">{{#str}}list, mod_ogte{{/str}}</th>
+        <th scope="col">{{#str}}coverage, mod_ogte{{/str}}</th>
         <th scope="col">{{#str}}actions, mod_ogte{{/str}}</th>
     </tr>
     </thead>
@@ -15,6 +16,7 @@
                 <td>{{title}}</td>
                 <td>{{#shortentext}} 20, {{{text}}} {{/shortentext}}</td>
                 <td>{{{listinfo}}}</td>
+                <td>{{{coverage}}}%</td>
                 <td style="display: flex">
                     <a class="mod_ogte_entryaction" href="{{{editurl}}}" alt="{{#str}}viewentry, mod_ogte{{/str}}"><div class="ogte-action-icon">{{#pix}}i/edit{{/pix}}</div></a>
                     <a class="mod_ogte_entryaction" href="{{{deleteurl}}}" alt="{{#str}}deleteentry, mod_ogte{{/str}}"><div class="ogte-action-icon">{{#pix}}i/delete{{/pix}}</div></a>

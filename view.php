@@ -147,6 +147,14 @@ if($entries) {
         }else{
             $arrayitem['listinfo'] ='';
         }
+        //get coverage
+        $arrayitem['coverage'] ='--';
+        if(!empty($entry->jsonrating) && utils::is_json($entry->jsonrating)){
+            $rating = json_decode($entry->jsonrating);
+            if(isset($rating->coverage)){
+             $arrayitem['coverage'] =$rating->coverage;
+            }
+        }
 
         $editurl=new moodle_url('/mod/ogte/edit.php', array('id'=>$cm->id, 'entryid'=>$entry->id,'sesskey'=>$sesskey ,'action'=>'edit'));
         $downloadurl_pdf=new moodle_url('/mod/ogte/download.php', array('id'=>$cm->id, 'entryid'=>$entry->id,'sesskey'=>$sesskey ,'action'=>'download','format'=>'pdf'));

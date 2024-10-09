@@ -196,6 +196,7 @@ if(empty($config->apiuser) || empty($config->apisecret)){
 
 $form->set_data($data);
 $renderer = $PAGE->get_renderer(constants::M_COMPONENT);
+$PAGE->requires->css(new \moodle_url('https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css'));
 echo $renderer->header();
 
 //echo our ai and level widgets and tabs
