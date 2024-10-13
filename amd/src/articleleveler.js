@@ -579,7 +579,8 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
 
             thebutton.on('click', function () {
                 //show a spinner
-                themessage.html('<i class="fa fa-spinner fa-spin fa-sm"></i>');
+                thebutton.html('<i class="fa fa-spinner fa-spin fa-sm"></i>');
+                themessage.text('');
 
                 //get text and clean it up
                 //TO DO there will be more cleaning to do.
@@ -600,6 +601,7 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
                 var listlevel = levelselect.val();
                 var ogteid=app.opts.ogteid;
                 utils.levelPassage(thepassage, ignore, listid, listlevel, ogteid).then(function (ajaxresult) {
+                    thebutton.text('GO');
                     var theresponse = JSON.parse(ajaxresult);
                     if (theresponse) {
                         hiddenJSONRatingBox.val(ajaxresult);
@@ -607,6 +609,7 @@ define(['jquery', 'core/log','core/notification','core/str','core/templates','mo
                         //if we were showing that a refresh was required, we remove that now, it's been refreshed
                         thebutton.removeClass(refreshRequiredClass);
                     } else {
+                        themessage.text('Failed to level text. Sorry.');
                         log.debug('ajax call to level coverage failed');
                     }
                 });//end of level passage

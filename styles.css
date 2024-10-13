@@ -341,3 +341,7 @@ button#the_al_button.mod_ogte_refreshrequired {
         border-style: solid; /* Back to solid border at 100% */
     }
 }
+
+body .fancybox__backdrop {
+    opacity: .5;
+}
