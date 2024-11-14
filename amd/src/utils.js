@@ -1,4 +1,5 @@
 define(['jquery', 'core/log','core/ajax'], function ($, log,ajax) {
+define(['jquery', 'core/log','core/ajax'], function ($, log,ajax) {
     "use strict"; // jshint ;_;
     /*
     This file helps you get Polly URLs at runtime
@@ -263,15 +264,6 @@ define(['jquery', 'core/log','core/ajax'], function ($, log,ajax) {
             xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
             xhr.send(xhrparams);
         },
-
-
-
-
-
-
-
-
-
 
     init: function(token, region, owner){
             this.token =token;

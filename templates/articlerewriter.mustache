@@ -87,16 +87,10 @@
 
                     //no super long readings or empty ones
                     if(!usetext || usetext.trim()==='') {
-                        notification.alert('{{#str}}entersomething, mod_ogte{{/str}}');
-                        return;
-                    }
-                    if(usetext.length > 5000){
-                        notification.alert('{{#str}}texttoolong5000, mod_ogte{{/str}}');
+                        notification.alert('{{#str}}textproblem, mod_ogte{{/str}}','{{#str}}entersomething, mod_ogte{{/str}}');
                         return;
                     }
 
-                    //change button caption to a spinner
-                    thebutton.html(label_rewriting);
 
                     //add stats to original
                     var textStatsData = utils.analyzeText(usetext);
@@ -107,6 +101,14 @@
                         }.bind(this));
 
                     }.bind(this)).fail(notification.exception);
+
+                    if(usetext.length > 15000){
+                        notification.alert('{{#str}}textproblem, mod_ogte{{/str}}','{{#str}}texttoolong15000, mod_ogte{{/str}}');
+                        return;
+                    }
+
+                    //change button caption to a spinner
+                    thebutton.html(label_rewriting);
 
 
                     utils.call_ai(usetext,'en-US',difficulty,'rewrite_article',function(newarticle){
