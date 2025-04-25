@@ -51,7 +51,7 @@ class mod_ogte_generator extends testing_module_generator {
     }
 
 
-    public function create_instance($record = null, array $options = null) {
+    public function create_instance($record = null,?array $options = null) {
         $record = (object)(array)$record;
 
         if (!isset($record->name)) {
