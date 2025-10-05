@@ -64,8 +64,13 @@ $string['ogtename'] = 'OGTE name';
 $string['ogtequestion'] = 'OGTE question';
 $string['mailsubject'] = 'OGTE feedback';
 $string['modulename'] = 'OGTE';
-$string['modulename_help'] = 'The ogte activity enables teachers to obtain students feedback
- about a specific topic';
+$string['modulename_help'] = 'The Online Graded Text Editor allows teachers to author and assess passages of text designed for use as reading activities with students. Features include:
+    
+* AI Text passage generation
+    
+* AI Passage Simplification
+    
+* Passage difficulty evaluation (NGSL etc)    ';
 $string['modulename_link'] = 'mod/ogte/view';
 $string['modulenameplural'] = 'OGTEs';
 $string['needsregrade'] = 'Entry has changed since last feedback was saved.';
