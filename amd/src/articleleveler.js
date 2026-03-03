@@ -1,623 +1,628 @@
 
-define(['jquery', 'core/log','core/notification','core/str','core/templates','mod_ogte/utils','mod_ogte/clipboardhelper','mod_ogte/popoverhelper'],
-    function($, log,notification,str, templates, utils, clipboardhelper,popoverhelper) {
-    "use strict"; // jshint ;_;
-    /*
-    This file combines with the articleleveler.mustache template to create the article leveler
-     */
+define(['jquery', 'core/log', 'core/notification', 'core/str', 'core/templates', 'mod_ogte/utils', 'mod_ogte/clipboardhelper', 'mod_ogte/popoverhelper'],
+    function ($, log, notification, str, templates, utils, clipboardhelper, popoverhelper) {
+        "use strict"; // jshint ;_;
+        /*
+        This file combines with the articleleveler.mustache template to create the article leveler
+         */
 
-    log.debug('OGTE Article: initialising');
+        log.debug('OGTE Article: initialising');
 
-    var hiddenTextBox = $("input[name='text']");
-    var hiddenListIdBox = $("input[name='listid']");
-    var hiddenLevelIdBox = $("input[name='levelid']");
-    var hiddenIgnoresBox = $("input[name='ignores']");
-    var hiddenTitleBox = $("input[name='title']");
-    var hiddenJSONRatingBox = $("input[name='jsonrating']");
-    var passagebox= $('#the_al_passage');
-    var levelstats= $('#the_al_levelstats');
-    var articlestats= $('#the_al_articlestats');
-    var themessage= $('#the_al_message');
-    var thebutton= $('#the_al_button');
-    var listselect= $('#the_listselect');
-    var levelselect= $('#the_levelselect');
-    var addtoIgnoreButton = $('#the_addtoignore');
-    var downloadButton = $('.ogte_downloadbutton');
-    var clearButton = $('.ogte_clearbutton');
-    var sendToEditorButton = $('.ogte_ar_sendtoeditor_button')
-    var ignorelist = $('#the_ignorelist');
-    var statusmessage =$('#the_al_status_message');
-    var outoflistwords_block =$('#the_outoflistwords');
-    var outoflevelwords_block =$('#the_outoflevelwords');
-    var ignoredwords_block =$('#the_ignoredwords');
-    var outoflevelfreq_block =$('#the_outoflevelfreq');
-    var ignoredClass = 'mod_ogte_ignored';
-    var refreshRequiredClass = 'mod_ogte_refreshrequired';
-    var punctuationRegex = /[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]+$/;
+        var hiddenTextBox = $("input[name='text']");
+        var hiddenListIdBox = $("input[name='listid']");
+        var hiddenLevelIdBox = $("input[name='levelid']");
+        var hiddenIgnoresBox = $("input[name='ignores']");
+        var hiddenTitleBox = $("input[name='title']");
+        var hiddenJSONRatingBox = $("input[name='jsonrating']");
+        var passagebox = $('#the_al_passage');
+        var levelstats = $('#the_al_levelstats');
+        var articlestats = $('#the_al_articlestats');
+        var themessage = $('#the_al_message');
+        var thebutton = $('#the_al_button');
+        var listselect = $('#the_listselect');
+        var levelselect = $('#the_levelselect');
+        var addtoIgnoreButton = $('#the_addtoignore');
+        var downloadButton = $('.ogte_downloadbutton');
+        var clearButton = $('.ogte_clearbutton');
+        var sendToEditorButton = $('.ogte_ar_sendtoeditor_button')
+        var ignorelist = $('#the_ignorelist');
+        var statusmessage = $('#the_al_status_message');
+        var outoflistwords_block = $('#the_outoflistwords');
+        var outoflevelwords_block = $('#the_outoflevelwords');
+        var ignoredwords_block = $('#the_ignoredwords');
+        var outoflevelfreq_block = $('#the_outoflevelfreq');
+        var ignoredClass = 'mod_ogte_ignored';
+        var refreshRequiredClass = 'mod_ogte_refreshrequired';
+        var punctuationRegex = /[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]+$/;
 
-        var app= {
+        var app = {
 
-        strings:{},
-        opts: {},
+            strings: {},
+            opts: {},
 
-        //initialize
-        init: function (props) {
-            log.debug('initializing article leveler');
+            //initialize
+            init: function (props) {
+                log.debug('initializing article leveler');
 
-            //pick up opts from html
-            var theid = '#' + props.optsid;
-            var configcontrol = $(theid).get(0);
-            if (configcontrol) {
-                this.opts = JSON.parse(configcontrol.value);
-                $(theid).remove();
-            } else {
-                //if there is no config we might as well give up
-                log.debug('No config found on page. Giving up.');
-                return;
-            }
-
-            this.init_strings();
-            this.registerEvents();
-            clipboardhelper.init({});
-
-            //JSON rating
-            var jsonrating_string = hiddenJSONRatingBox.val();
-            if (this.isJSON(jsonrating_string)) {
-                var jsonrating = JSON.parse(jsonrating_string);
-                if (jsonrating.hasOwnProperty('passage')) {
-                    this.updateAllFromJSONRating(jsonrating);
+                //pick up opts from html
+                var theid = '#' + props.optsid;
+                var configcontrol = $(theid).get(0);
+                if (configcontrol) {
+                    this.opts = JSON.parse(configcontrol.value);
+                    $(theid).remove();
+                } else {
+                    //if there is no config we might as well give up
+                    log.debug('No config found on page. Giving up.');
+                    return;
                 }
-            }
-            //List and Level ID
-            var listid='';
-            var levelid='';
-            if( hiddenListIdBox.length>0 && hiddenLevelIdBox.length>0) {
-                listid = hiddenListIdBox.val();
-                levelid = hiddenLevelIdBox.val();
-            }
 
-            if (listid !== '' && levelid !== '') {
-                listselect.val(listid);
-                levelselect.val(levelid);
-            }else{
-                listselect.prop("selectedIndex", 0);
-                var listid = listselect.val();
-                this.updateLevelDropdown(listid);
-            }
-            //Ignores
-            var ignores = hiddenIgnoresBox.val();
-            if (ignores !== '') {
-                ignorelist.val(ignores);
-            }
+                this.init_strings();
+                this.registerEvents();
+                clipboardhelper.init({});
 
-            //init the popover now that we have set the correct callback event handling thingies
-            popoverhelper.init();
-            popoverhelper.onIgnore= this.doIgnore;
-        },
+                //JSON rating
+                var jsonrating_string = hiddenJSONRatingBox.val();
+                if (this.isJSON(jsonrating_string)) {
+                    var jsonrating = JSON.parse(jsonrating_string);
+                    if (jsonrating.hasOwnProperty('passage')) {
+                        this.updateAllFromJSONRating(jsonrating);
+                    }
+                }
+                //List and Level ID
+                var listid = '';
+                var levelid = '';
+                if (hiddenListIdBox.length > 0 && hiddenLevelIdBox.length > 0) {
+                    listid = hiddenListIdBox.val();
+                    levelid = hiddenLevelIdBox.val();
+                }
 
+                if (listid !== '' && levelid !== '') {
+                    listselect.val(listid);
+                    levelselect.val(levelid);
+                } else {
+                    listselect.prop("selectedIndex", 0);
+                    var listid = listselect.val();
+                    this.updateLevelDropdown(listid);
+                }
+                //Ignores
+                var ignores = hiddenIgnoresBox.val();
+                if (ignores !== '') {
+                    ignorelist.val(ignores);
+                }
 
-        //init strings
-        init_strings: function(){
-            var that =this;
-            var strs=['alreadyignored','selecttoignore','doignore', 'entersomething','texttoolong5000',
-                'ignored','outoflist','outoflevel','outoflevelfreq'];
-            for (var key in strs) {
-                ///log.debug('getting string: ' + strs[key]);
-                var thestring = strs[key];
-                str.get_string(thestring,'mod_ogte').done(function(s){that.strings[thestring]=s;});
-            }
-
-            //Promises are promises and jsonrating cant wait around for them sometimes, so we hack it
-            that.strings.alreadyignored = "Already Ignored";
-            that.strings.selecttoignore = "Select to Ignore";
-            that.strings.doignore = "Ignore";
-            that.strings.entersomething = "Enter something";
-            that.strings.texttoolong5000 = "Text too long (5000 characters max)";
-            that.strings.texttoolong50000 = "Text too long (50000 characters max)";
-            that.strings.ignored = "Ignored";
-            that.strings.outoflist = "Out of List";
-            that.strings.outoflevel = "Out of Level";
-            that.strings.outoflevelfreq =  "% Out of Level";
-            that.strings.confirmcleartextarea =  "Confirm: clear the text area";
-            that.strings.reallycleartextarea =  "Do you really want to clear the text area?";
-            that.strings.cleartextarea =  "Clear Text Area";
-            that.strings.cancel =  "Cancel";
-
-            // Set up strings
-            str.get_strings([
-                { "key": "alreadyignored", "component": 'mod_ogte'},
-                { "key": "selecttoignore", "component": 'mod_ogte'},
-                { "key": 'doignore', "component": 'mod_ogte' },
-                { "key": 'entersomething', "component": 'mod_ogte'},
-                { "key": 'texttoolong5000', "component": 'mod_ogte' },
-                { "key": 'texttoolong50000', "component": 'mod_ogte' },
-                { "key": 'ignored', "component": 'mod_ogte' },
-                { "key": 'outoflist', "component": 'mod_ogte'},
-                { "key": 'outoflevel', "component": 'mod_ogte' },
-                { "key": 'outoflevelfreq', "component": 'mod_ogte'},
-                { "key": 'propernouns', "component": 'mod_ogte' },
-                { "key": 'popoveractions', "component": 'mod_ogte'},
-                { "key": 'confirmcleartextarea', "component": 'mod_ogte'},
-                { "key": 'reallycleartextarea', "component": 'mod_ogte'},
-                { "key": 'cleartextarea', "component": 'mod_ogte'},
-                { "key": 'cancel', "component": 'core'},
-                
-            ]).done(function (s) {
-                var i = 0;
-                that.strings.alreadyignored = s[i++];
-                that.strings.selecttoignore = s[i++];
-                that.strings.doignore = s[i++];
-                that.strings.entersomething = s[i++];
-                that.strings.texttoolong5000 = s[i++];
-                that.strings.texttoolong50000 = s[i++];
-                that.strings.ignored = s[i++];
-                that.strings.outoflist = s[i++];
-                that.strings.outoflevel = s[i++];
-                that.strings.outoflevelfreq = s[i++];
-                that.strings.propernouns = s[i++];
-                that.strings.popoveractions = s[i++];
-                that.strings.confirmcleartextarea = s[i++];
-                that.strings.reallycleartextarea = s[i++];
-                that.strings.cleartextarea = s[i++];
-                that.strings.cancel = s[i++];
-            });
-        },
-
-        clearAllStats: function(){
-            templates.render('mod_ogte/levelstatstable', {}).done(function(html, js) {
-
-                // Update the page.
-                levelstats.fadeOut("fast", function() {
-                    templates.replaceNodeContents(levelstats, html, js);
-                    levelstats.fadeIn("fast");
-                }.bind(this));
-            }.bind(this)).fail(notification.exception);
+                //init the popover now that we have set the correct callback event handling thingies
+                popoverhelper.init();
+                popoverhelper.onIgnore = this.doIgnore;
+            },
 
 
-            templates.render('mod_ogte/textstatstable', {}).done(function(html, js) {
+            //init strings
+            init_strings: function () {
+                var that = this;
+                var strs = ['alreadyignored', 'selecttoignore', 'doignore', 'entersomething', 'texttoolong5000',
+                    'ignored', 'outoflist', 'outoflevel', 'outoflevelfreq'];
+                for (var key in strs) {
+                    ///log.debug('getting string: ' + strs[key]);
+                    var thestring = strs[key];
+                    str.get_string(thestring, 'mod_ogte').done(function (s) { that.strings[thestring] = s; });
+                }
 
-                // Update the page.
-                articlestats.fadeOut("fast", function() {
-                    templates.replaceNodeContents(articlestats, html, js);
-                    articlestats.fadeIn("fast");
-                }.bind(this));
+                //Promises are promises and jsonrating cant wait around for them sometimes, so we hack it
+                that.strings.alreadyignored = "Already Ignored";
+                that.strings.selecttoignore = "Select to Ignore";
+                that.strings.doignore = "Ignore";
+                that.strings.entersomething = "Enter something";
+                that.strings.texttoolong5000 = "Text too long (5000 characters max)";
+                that.strings.texttoolong50000 = "Text too long (50000 characters max)";
+                that.strings.ignored = "Ignored";
+                that.strings.outoflist = "Out of List";
+                that.strings.outoflevel = "Out of Level";
+                that.strings.outoflevelfreq = "% Out of Level";
+                that.strings.confirmcleartextarea = "Confirm: clear the text area";
+                that.strings.reallycleartextarea = "Do you really want to clear the text area?";
+                that.strings.cleartextarea = "Clear Text Area";
+                that.strings.cancel = "Cancel";
 
-            }.bind(this)).fail(notification.exception);
+                // Set up strings
+                str.get_strings([
+                    { "key": "alreadyignored", "component": 'mod_ogte' },
+                    { "key": "selecttoignore", "component": 'mod_ogte' },
+                    { "key": 'doignore', "component": 'mod_ogte' },
+                    { "key": 'entersomething', "component": 'mod_ogte' },
+                    { "key": 'texttoolong5000', "component": 'mod_ogte' },
+                    { "key": 'texttoolong50000', "component": 'mod_ogte' },
+                    { "key": 'ignored', "component": 'mod_ogte' },
+                    { "key": 'outoflist', "component": 'mod_ogte' },
+                    { "key": 'outoflevel', "component": 'mod_ogte' },
+                    { "key": 'outoflevelfreq', "component": 'mod_ogte' },
+                    { "key": 'propernouns', "component": 'mod_ogte' },
+                    { "key": 'popoveractions', "component": 'mod_ogte' },
+                    { "key": 'confirmcleartextarea', "component": 'mod_ogte' },
+                    { "key": 'reallycleartextarea', "component": 'mod_ogte' },
+                    { "key": 'cleartextarea', "component": 'mod_ogte' },
+                    { "key": 'cancel', "component": 'core' },
 
+                ]).done(function (s) {
+                    var i = 0;
+                    that.strings.alreadyignored = s[i++];
+                    that.strings.selecttoignore = s[i++];
+                    that.strings.doignore = s[i++];
+                    that.strings.entersomething = s[i++];
+                    that.strings.texttoolong5000 = s[i++];
+                    that.strings.texttoolong50000 = s[i++];
+                    that.strings.ignored = s[i++];
+                    that.strings.outoflist = s[i++];
+                    that.strings.outoflevel = s[i++];
+                    that.strings.outoflevelfreq = s[i++];
+                    that.strings.propernouns = s[i++];
+                    that.strings.popoveractions = s[i++];
+                    that.strings.confirmcleartextarea = s[i++];
+                    that.strings.reallycleartextarea = s[i++];
+                    that.strings.cleartextarea = s[i++];
+                    that.strings.cancel = s[i++];
+                });
+            },
 
-            templates.render('mod_ogte/block_uncovered',
-                {words: false,haswords: false, haslevels: false, title: this.strings.outoflist}).done(function(html, js) {
-
-                // Update the page.
-                outoflistwords_block.fadeOut("fast", function() {
-                    templates.replaceNodeContents(outoflistwords_block, html, js);
-                    outoflistwords_block.fadeIn("fast");
-                }.bind(this));
-
-            }.bind(this)).fail(notification.exception);
-
-            //out of level words block
-            outoflevelwords_block.show();
-            templates.render('mod_ogte/block_uncovered',
-                {words: false, haswords: false, haslevels: true, title: this.strings.outoflevel}).done(function(html, js) {
-
-                // Update the page.
-                outoflevelwords_block.fadeOut("fast", function() {
-                    templates.replaceNodeContents(outoflevelwords_block, html, js);
-                    outoflevelwords_block.fadeIn("fast");
-                }.bind(this));
-
-            }.bind(this)).fail(notification.exception);
-
-            //ignored words block
-            ignoredwords_block.show();
-            templates.render('mod_ogte/block_uncovered',
-                {words: false, haswords: false, haslevels: false,title: this.strings.ignored}).done(function(html, js) {
-
-                // Update the page.
-                ignoredwords_block.fadeOut("fast", function() {
-                    templates.replaceNodeContents(ignoredwords_block, html, js);
-                    ignoredwords_block.fadeIn("fast");
-                }.bind(this));
-
-            }.bind(this)).fail(notification.exception);
-
-            //out of level frequency block
-            templates.render('mod_ogte/block_outoflevelfreq',
-                {levels: false,haslevels: false, title: this.strings.outoflevelfreq}).done(function(html, js) {
-
-                // Update the page.
-                outoflevelfreq_block.fadeOut("fast", function() {
-                    templates.replaceNodeContents(outoflevelfreq_block, html, js);
-                    outoflevelfreq_block.fadeIn("fast");
-                }.bind(this));
-
-            }.bind(this)).fail(notification.exception);
-        },
-
-        //Update Stats and Analysis
-        updateAllFromJSONRating: function (jsonrating) {
-            themessage.text('');
-            passagebox.html(jsonrating.passage);
-
-            // Add level stats to the page
-            jsonrating.listname=app.opts.listlevels[jsonrating.listid][jsonrating.levelid].listname;
-            jsonrating.levelname=app.opts.listlevels[jsonrating.listid][jsonrating.levelid].label;
-            templates.render('mod_ogte/levelstatstable', jsonrating).done(function(html, js) {
-
-                // Update the page.
-                levelstats.fadeOut("fast", function() {
-                    templates.replaceNodeContents(levelstats, html, js);
-                    levelstats.fadeIn("fast");
-                }.bind(this));
-            }.bind(this)).fail(notification.exception);
-
-            //add text stats to the page
-            var textStatsData = utils.analyzeText(jsonrating.passage);
-            templates.render('mod_ogte/textstatstable', textStatsData).done(function(html, js) {
+            clearAllStats: function () {
+                templates.render('mod_ogte/levelstatstable', {}).done(function (html, js) {
 
                     // Update the page.
-                articlestats.fadeOut("fast", function() {
+                    levelstats.fadeOut("fast", function () {
+                        templates.replaceNodeContents(levelstats, html, js);
+                        levelstats.fadeIn("fast");
+                    }.bind(this));
+                }.bind(this)).fail(notification.exception);
+
+
+                templates.render('mod_ogte/textstatstable', {}).done(function (html, js) {
+
+                    // Update the page.
+                    articlestats.fadeOut("fast", function () {
                         templates.replaceNodeContents(articlestats, html, js);
-                    articlestats.fadeIn("fast");
+                        articlestats.fadeIn("fast");
                     }.bind(this));
 
-            }.bind(this)).fail(notification.exception);
-
-            //add more coverage stats to the page as blocks
-            var ignoredAndOutOfData = utils.analyzeOutListLevelsIgnored(jsonrating.passage);
-
-            //out of list words block
-            outoflistwords_block.show();
-            templates.render('mod_ogte/block_uncovered',
-                {words: ignoredAndOutOfData.outoflist,haswords: ignoredAndOutOfData.outoflist.length>0, haslevels: false, title: this.strings.outoflist}).done(function(html, js) {
-
-                // Update the page.
-                outoflistwords_block.fadeOut("fast", function() {
-                    templates.replaceNodeContents(outoflistwords_block, html, js);
-                    outoflistwords_block.fadeIn("fast");
-                }.bind(this));
-
-            }.bind(this)).fail(notification.exception);
-
-            //out of level words block
-            outoflevelwords_block.show();
-            templates.render('mod_ogte/block_uncovered',
-                {words: ignoredAndOutOfData.outoflevel, haswords: ignoredAndOutOfData.outoflevel.length>0, haslevels: true, title: this.strings.outoflevel}).done(function(html, js) {
-
-                // Update the page.
-                outoflevelwords_block.fadeOut("fast", function() {
-                    templates.replaceNodeContents(outoflevelwords_block, html, js);
-                    outoflevelwords_block.fadeIn("fast");
-                }.bind(this));
-
-            }.bind(this)).fail(notification.exception);
-
-            //ignored words block
-            ignoredwords_block.show();
-            templates.render('mod_ogte/block_uncovered',
-                {words: ignoredAndOutOfData.ignored, haswords: ignoredAndOutOfData.ignored.length>0, haslevels: false,title: this.strings.ignored}).done(function(html, js) {
-
-                // Update the page.
-                ignoredwords_block.fadeOut("fast", function() {
-                    templates.replaceNodeContents(ignoredwords_block, html, js);
-                    ignoredwords_block.fadeIn("fast");
-                }.bind(this));
-
-            }.bind(this)).fail(notification.exception);
-
-            //out of level frequency block
-            var outOfLevelFreqData = utils.calc_outoflevel_frequencies(jsonrating.passage);
-            outoflevelfreq_block.show();
-            templates.render('mod_ogte/block_outoflevelfreq',
-                {levels: outOfLevelFreqData,haslevels: outOfLevelFreqData.length>0, title: this.strings.outoflevelfreq}).done(function(html, js) {
-
-                // Update the page.
-                outoflevelfreq_block.fadeOut("fast", function() {
-                    templates.replaceNodeContents(outoflevelfreq_block, html, js);
-                    outoflevelfreq_block.fadeIn("fast");
-                }.bind(this));
-
-            }.bind(this)).fail(notification.exception);
-
-        },
+                }.bind(this)).fail(notification.exception);
 
 
-        //is the string JSON?
-        isJSON:  function (str) {
-            try {
-                JSON.parse(str);
-                return true;
-            } catch (e) {
-                return false;
-            }
-        },
+                templates.render('mod_ogte/block_uncovered',
+                    { words: false, haswords: false, haslevels: false, title: this.strings.outoflist }).done(function (html, js) {
 
-        //Get selected text in the editable div
-        getSelectedText:  function () {
-            var selectedText = "";
-            if (window.getSelection) {
-                selectedText = window.getSelection().toString();
-            } else if (document.selection && document.selection.type !== "Control") {
-                selectedText = document.selection.createRange().text;
-            }
-            return selectedText;
-        },
+                        // Update the page.
+                        outoflistwords_block.fadeOut("fast", function () {
+                            templates.replaceNodeContents(outoflistwords_block, html, js);
+                            outoflistwords_block.fadeIn("fast");
+                        }.bind(this));
 
-        // Function to update the options in the second dropdown based on the selection in the first dropdown
-        updateLevelDropdown: function () {
-            const selectedList = listselect.val();
-            // Clear existing options
-            levelselect.empty();
+                    }.bind(this)).fail(notification.exception);
 
-            // Populate options based on the selected category
-            app.opts.listlevels[selectedList].forEach(function (option) {
-                levelselect.append($('<option value="' +option.key+'">' + option.label+ '</option>'));
-            });
-            levelselect.prop('selectedIndex', 0);
-            hiddenListIdBox.val(selectedList);
-            hiddenLevelIdBox.val(levelselect.val());
-        },
+                //out of level words block
+                outoflevelwords_block.show();
+                templates.render('mod_ogte/block_uncovered',
+                    { words: false, haswords: false, haslevels: true, title: this.strings.outoflevel }).done(function (html, js) {
 
-        setStatusMessage: function (message) {
-            statusmessage.text(message);
-            setTimeout(function () {
-                statusmessage.fadeOut();
-            },2000);
-        },
+                        // Update the page.
+                        outoflevelwords_block.fadeOut("fast", function () {
+                            templates.replaceNodeContents(outoflevelwords_block, html, js);
+                            outoflevelwords_block.fadeIn("fast");
+                        }.bind(this));
 
-        doPopover: function (that,e) {
-            if(e.target.tagName === "SPAN" || e.target.tagName === "DIV") {
-                var selectedText = $(that).text();
-            }else if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") {
-                var selectedText = that.getSelectedText();
-            }
-            //if its blank just return
-            if (selectedText === '') {
-                return;
-            }
+                    }.bind(this)).fail(notification.exception);
 
-            //if its two or more words just return
-            var word = selectedText.trim();
-            //we only single words
-            if (word.includes(" ")) {
-                addtoIgnoreButton.hide();
-                return;
-            }
+                //ignored words block
+                ignoredwords_block.show();
+                templates.render('mod_ogte/block_uncovered',
+                    { words: false, haswords: false, haslevels: false, title: this.strings.ignored }).done(function (html, js) {
 
-            //trim the word of punctuation
-            word = word.replace(punctuationRegex, '');
+                        // Update the page.
+                        ignoredwords_block.fadeOut("fast", function () {
+                            templates.replaceNodeContents(ignoredwords_block, html, js);
+                            ignoredwords_block.fadeIn("fast");
+                        }.bind(this));
 
-            //check if its ignoring already
-            var ignores = ignorelist.val();
-            var ignoring = ignores.toLowerCase().includes(word.toLowerCase());
+                    }.bind(this)).fail(notification.exception);
 
-            //show the popover
-            popoverhelper.doPopup(that,word,ignoring);
+                //out of level frequency block
+                templates.render('mod_ogte/block_outoflevelfreq',
+                    { levels: false, haslevels: false, title: this.strings.outoflevelfreq }).done(function (html, js) {
 
-        },
+                        // Update the page.
+                        outoflevelfreq_block.fadeOut("fast", function () {
+                            templates.replaceNodeContents(outoflevelfreq_block, html, js);
+                            outoflevelfreq_block.fadeIn("fast");
+                        }.bind(this));
 
-        doIgnore: function(word,ignore){
-            var ignores = ignorelist.val();
-            var ignoring = ignores.toLowerCase().includes(word.toLowerCase());
-            //if we want to ignore this word
-            if(ignore){
-                //if its already ignores, just return
-                if(ignoring){
-                    log.debug('already ignoring: ' + word);
-                    return;
-                //ignore it
-                }else{
-                    log.debug('ignoring: ' + word);
-                    var newignorelist = ignores + ' ' + word;
-                    ignorelist.val(newignorelist);
-                    hiddenIgnoresBox.val(newignorelist);
+                    }.bind(this)).fail(notification.exception);
+            },
 
-                    //find all spans in passagebox that contain the word and add the ignored class
-                    var wordRegex = new RegExp('\\b' + word + '\\b', 'gi'); // Match whole word, case-insensitive
-                    passagebox.find('span').filter(function() {
-                        return wordRegex.test($(this).text());
-                    }).addClass(ignoredClass);
+            //Update Stats and Analysis
+            updateAllFromJSONRating: function (jsonrating) {
+                themessage.text('');
+                passagebox.html(jsonrating.passage);
 
-                    //Add a refresh required class to the GO button
-                    thebutton.addClass(refreshRequiredClass);
+                // Add level stats to the page
+                jsonrating.listname = app.opts.listlevels[jsonrating.listid][jsonrating.levelid].listname;
+                jsonrating.levelname = app.opts.listlevels[jsonrating.listid][jsonrating.levelid].label;
+                templates.render('mod_ogte/levelstatstable', jsonrating).done(function (html, js) {
 
-                    //app.setStatusMessage(app.strings["alreadyignored"] + word);
-                    //addtoIgnoreButton.hide();
+                    // Update the page.
+                    levelstats.fadeOut("fast", function () {
+                        templates.replaceNodeContents(levelstats, html, js);
+                        levelstats.fadeIn("fast");
+                    }.bind(this));
+                }.bind(this)).fail(notification.exception);
+
+                //add text stats to the page
+                var textStatsData = utils.analyzeText(jsonrating.passage);
+                templates.render('mod_ogte/textstatstable', textStatsData).done(function (html, js) {
+
+                    // Update the page.
+                    articlestats.fadeOut("fast", function () {
+                        templates.replaceNodeContents(articlestats, html, js);
+                        articlestats.fadeIn("fast");
+                    }.bind(this));
+
+                }.bind(this)).fail(notification.exception);
+
+                //add more coverage stats to the page as blocks
+                var ignoredAndOutOfData = utils.analyzeOutListLevelsIgnored(jsonrating.passage);
+
+                //out of list words block
+                outoflistwords_block.show();
+                templates.render('mod_ogte/block_uncovered',
+                    { words: ignoredAndOutOfData.outoflist, haswords: ignoredAndOutOfData.outoflist.length > 0, haslevels: false, title: this.strings.outoflist }).done(function (html, js) {
+
+                        // Update the page.
+                        outoflistwords_block.fadeOut("fast", function () {
+                            templates.replaceNodeContents(outoflistwords_block, html, js);
+                            outoflistwords_block.fadeIn("fast");
+                        }.bind(this));
+
+                    }.bind(this)).fail(notification.exception);
+
+                //out of level words block
+                outoflevelwords_block.show();
+                templates.render('mod_ogte/block_uncovered',
+                    { words: ignoredAndOutOfData.outoflevel, haswords: ignoredAndOutOfData.outoflevel.length > 0, haslevels: true, title: this.strings.outoflevel }).done(function (html, js) {
+
+                        // Update the page.
+                        outoflevelwords_block.fadeOut("fast", function () {
+                            templates.replaceNodeContents(outoflevelwords_block, html, js);
+                            outoflevelwords_block.fadeIn("fast");
+                        }.bind(this));
+
+                    }.bind(this)).fail(notification.exception);
+
+                //ignored words block
+                ignoredwords_block.show();
+                templates.render('mod_ogte/block_uncovered',
+                    { words: ignoredAndOutOfData.ignored, haswords: ignoredAndOutOfData.ignored.length > 0, haslevels: false, title: this.strings.ignored }).done(function (html, js) {
+
+                        // Update the page.
+                        ignoredwords_block.fadeOut("fast", function () {
+                            templates.replaceNodeContents(ignoredwords_block, html, js);
+                            ignoredwords_block.fadeIn("fast");
+                        }.bind(this));
+
+                    }.bind(this)).fail(notification.exception);
+
+                //out of level frequency block
+                var outOfLevelFreqData = utils.calc_outoflevel_frequencies(jsonrating.passage);
+                outoflevelfreq_block.show();
+                templates.render('mod_ogte/block_outoflevelfreq',
+                    { levels: outOfLevelFreqData, haslevels: outOfLevelFreqData.length > 0, title: this.strings.outoflevelfreq }).done(function (html, js) {
+
+                        // Update the page.
+                        outoflevelfreq_block.fadeOut("fast", function () {
+                            templates.replaceNodeContents(outoflevelfreq_block, html, js);
+                            outoflevelfreq_block.fadeIn("fast");
+                        }.bind(this));
+
+                    }.bind(this)).fail(notification.exception);
+
+            },
+
+
+            //is the string JSON?
+            isJSON: function (str) {
+                try {
+                    JSON.parse(str);
+                    return true;
+                } catch (e) {
+                    return false;
                 }
-            //if we don't want to ignore this word
-            }else{
-                //un-ignore it
-                if(ignoring){
-                    log.debug('unignoring: ' + word);
-                    var newignorelist = ignores.replace(word, '');
-                    ignorelist.val(newignorelist);
-                    hiddenIgnoresBox.val(newignorelist);
+            },
 
+            //Get selected text in the editable div
+            getSelectedText: function () {
+                var selectedText = "";
+                if (window.getSelection) {
+                    selectedText = window.getSelection().toString();
+                } else if (document.selection && document.selection.type !== "Control") {
+                    selectedText = document.selection.createRange().text;
+                }
+                return selectedText;
+            },
 
-                    //find all spans in passagebox that contain the word and remove the ignored class
-                    var wordRegex = new RegExp('\\b' + word + '\\b', 'gi'); // Match whole word, case-insensitive
-                    passagebox.find('span').filter(function() {
-                        return wordRegex.test($(this).text());
-                    }).removeClass(ignoredClass);
+            // Function to update the options in the second dropdown based on the selection in the first dropdown
+            updateLevelDropdown: function () {
+                const selectedList = listselect.val();
+                // Clear existing options
+                levelselect.empty();
 
-                    //Add a refresh required class to the GO button
-                    thebutton.addClass(refreshRequiredClass);
+                // Populate options based on the selected category
+                app.opts.listlevels[selectedList].forEach(function (option) {
+                    levelselect.append($('<option value="' + option.key + '">' + option.label + '</option>'));
+                });
+                levelselect.prop('selectedIndex', 0);
+                hiddenListIdBox.val(selectedList);
+                hiddenLevelIdBox.val(levelselect.val());
+            },
 
-                    //app.setStatusMessage(app.strings["alreadyignored"] + word);
-                    //addtoIgnoreButton.hide();
-                //if its already not ignored, just return
-                }else{
-                    log.debug('already unignoring: ' + word);
+            setStatusMessage: function (message) {
+                statusmessage.text(message);
+                setTimeout(function () {
+                    statusmessage.fadeOut();
+                }, 2000);
+            },
+
+            doPopover: function (that, e) {
+                if (e.target.tagName === "SPAN" || e.target.tagName === "DIV") {
+                    var selectedText = $(that).text();
+                } else if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") {
+                    var selectedText = that.getSelectedText();
+                }
+                //if its blank just return
+                if (selectedText === '') {
                     return;
                 }
-            }
-        },
 
-        //Register Event Handlers
-        registerEvents: function () {
-            var that=this;
-            addtoIgnoreButton.on('click', function (e) {
-                var word = utils.getSelectedWord();
-                if (word !== '') {
-                    var newignorelist = ignorelist.val() + ' ' + word;
-                    ignorelist.val(newignorelist);
-                    hiddenIgnoresBox.val(newignorelist);
-                    app.setStatusMessage(app.strings["alreadyignored"] + word);
+                //if its two or more words just return
+                var word = selectedText.trim();
+                //we only single words
+                if (word.includes(" ")) {
                     addtoIgnoreButton.hide();
+                    return;
                 }
-            });
 
-            downloadButton.on('click', function (e) {
-                var target_selector = $(this).attr('data-download-target');
-                var text = $(target_selector).text();
+                //trim the word of punctuation
+                word = word.replace(punctuationRegex, '');
 
-                var filename='article.txt';
-                var filename_selector = $(this).attr('data-download-filename');
-                if(filename_selector!=='' && filename_selector!==undefined) {
-                    filename = $(filename_selector).val() + '.txt';
-                    filename=filename.trim().replace(/ /g,"_");
+                //check if its ignoring already
+                var ignores = ignorelist.val();
+                var ignoring = ignores.toLowerCase().includes(word.toLowerCase());
+
+                //show the popover
+                popoverhelper.doPopup(that, word, ignoring);
+
+            },
+
+            doIgnore: function (word, ignore) {
+                var ignores = ignorelist.val();
+                var ignoring = ignores.toLowerCase().includes(word.toLowerCase());
+                //if we want to ignore this word
+                if (ignore) {
+                    //if its already ignores, just return
+                    if (ignoring) {
+                        log.debug('already ignoring: ' + word);
+                        return;
+                        //ignore it
+                    } else {
+                        log.debug('ignoring: ' + word);
+                        var newignorelist = ignores + ' ' + word;
+                        ignorelist.val(newignorelist);
+                        hiddenIgnoresBox.val(newignorelist);
+
+                        //find all spans in passagebox that contain the word and add the ignored class
+                        var wordRegex = new RegExp('\\b' + word + '\\b', 'gi'); // Match whole word, case-insensitive
+                        passagebox.find('span').filter(function () {
+                            return wordRegex.test($(this).text());
+                        }).addClass(ignoredClass);
+
+                        //Add a refresh required class to the GO button
+                        thebutton.addClass(refreshRequiredClass);
+
+                        //app.setStatusMessage(app.strings["alreadyignored"] + word);
+                        //addtoIgnoreButton.hide();
+                    }
+                    //if we don't want to ignore this word
+                } else {
+                    //un-ignore it
+                    if (ignoring) {
+                        log.debug('unignoring: ' + word);
+                        var newignorelist = ignores.replace(word, '');
+                        ignorelist.val(newignorelist);
+                        hiddenIgnoresBox.val(newignorelist);
+
+
+                        //find all spans in passagebox that contain the word and remove the ignored class
+                        var wordRegex = new RegExp('\\b' + word + '\\b', 'gi'); // Match whole word, case-insensitive
+                        passagebox.find('span').filter(function () {
+                            return wordRegex.test($(this).text());
+                        }).removeClass(ignoredClass);
+
+                        //Add a refresh required class to the GO button
+                        thebutton.addClass(refreshRequiredClass);
+
+                        //app.setStatusMessage(app.strings["alreadyignored"] + word);
+                        //addtoIgnoreButton.hide();
+                        //if its already not ignored, just return
+                    } else {
+                        log.debug('already unignoring: ' + word);
+                        return;
+                    }
                 }
-                utils.downloadTextContent(text, filename);
-            });
+            },
 
-            //handle clear button clicks
-            clearButton.on('click', function (e) {
+            //Register Event Handlers
+            registerEvents: function () {
                 var that = this;
-                notification.confirm(app.strings.confirmcleartextarea, app.strings.reallycleartextarea,app.strings.cleartextarea,app.strings.cancel,function () {
+                addtoIgnoreButton.on('click', function (e) {
+                    var word = utils.getSelectedWord();
+                    if (word !== '') {
+                        var newignorelist = ignorelist.val() + ' ' + word;
+                        ignorelist.val(newignorelist);
+                        hiddenIgnoresBox.val(newignorelist);
+                        app.setStatusMessage(app.strings["alreadyignored"] + word);
+                        addtoIgnoreButton.hide();
+                    }
+                });
+
+                downloadButton.on('click', function (e) {
+                    var target_selector = $(this).attr('data-download-target');
+                    var text = $(target_selector).text();
+
+                    var filename = 'article.txt';
+                    var filename_selector = $(this).attr('data-download-filename');
+                    if (filename_selector !== '' && filename_selector !== undefined) {
+                        filename = $(filename_selector).val() + '.txt';
+                        filename = filename.trim().replace(/ /g, "_");
+                    }
+                    utils.downloadTextContent(text, filename);
+                });
+
+                //handle clear button clicks
+                clearButton.on('click', function (e) {
+                    var that = this;
+                    notification.confirm(app.strings.confirmcleartextarea, app.strings.reallycleartextarea, app.strings.cleartextarea, app.strings.cancel, function () {
                         var target_selector = $(that).attr('data-clear-target');
                         $(target_selector).html('');
                         //depending on the target, we want to do more than just clear the text
                         log.debug('clearing target: ' + target_selector);
-                        switch(target_selector){
+                        switch (target_selector) {
                             case '#the_al_passage':
                                 hiddenTextBox.val('');
                                 app.clearAllStats();
                                 break;
                             default:
                         }
+                    });
                 });
-            });
 
-            sendToEditorButton.on('click',function(){
+                sendToEditorButton.on('click', function () {
 
-                //get the article text to update
-                var target_selector = $(this).attr('data-send-target');
-                var text = $(target_selector).val();
+                    //get the article text to update
+                    var target_selector = $(this).attr('data-send-target');
+                    var text = $(target_selector).val();
 
-                //set the text to the article leveler and level it
-                passagebox.text(text);
-                hiddenTextBox.val(text);
-                thebutton.click();
+                    //set the text to the article leveler and level it
+                    passagebox.text(text);
+                    hiddenTextBox.val(text);
+                    thebutton.click();
 
-                //switch to the article leveler tab
-                $('.mod_ogte_tab-content .tab-pane').removeClass('active');
-                $('.mod_ogte_tab-content #articleleveler').addClass('active');
-                $('.mod_ogte_nav-pills .nav-link').removeClass('active');
-                $('.mod_ogte_nav-pills a[href="#articleleveler"]').addClass('active');
-                $('#articleleveler').tab('show');
+                    //switch to the article leveler tab
+                    $('.mod_ogte_tab-content .tab-pane').removeClass('active');
+                    $('.mod_ogte_tab-content #articleleveler').addClass('active');
+                    $('.mod_ogte_nav-pills .nav-link').removeClass('active');
+                    $('.mod_ogte_nav-pills a[href="#articleleveler"]').addClass('active');
+                    $('#articleleveler').tab('show');
 
-            });
+                });
 
-            //prevent the editable div from creating more divs on copy and paste
-            /*
-            passagebox.on('paste', function (e) {
-                e.preventDefault();
-                var text = (e.originalEvent || e).clipboardData.getData('text/plain');
-                // Insert plain text without additional divs
-                $(this).text(text);
-                //also update our hidden text box
-                hiddenTextBox.val($(this).text());
-            });
-            */
+                //prevent the editable div from creating more divs on copy and paste
+                /*
+                passagebox.on('paste', function (e) {
+                    e.preventDefault();
+                    var text = (e.originalEvent || e).clipboardData.getData('text/plain');
+                    // Insert plain text without additional divs
+                    $(this).text(text);
+                    //also update our hidden text box
+                    hiddenTextBox.val($(this).text());
+                });
+                */
 
-            passagebox.on('paste', function (e) {
-                e.preventDefault();
-                var text = (e.originalEvent || e).clipboardData.getData('text/plain');
+                passagebox.on('paste', function (e) {
+                    e.preventDefault();
+                    var text = (e.originalEvent || e).clipboardData.getData('text/plain');
 
-                //though execCommand is deprecated, it works better than all the other stuff I tried
-                //ie getting cursor positions, and offsets on window and getSelection and ranges and nodes
-                //don't bother with all that stuff. It's going to be much better to implement a proper right text editor like this one
-                //https://github.com/yabwe/medium-editor
-                document.execCommand('inserttext', false, text);
+                    // Instead of execCommand inserttext which is unpredictable,
+                    // securely encode the string to HTML and replace \n with <br>
+                    var encodedStr = $('<div>').text(text).html();
+                    var htmlText = encodedStr.replace(/\n/g, '<br>');
 
-                //also update our hidden text box
-                hiddenTextBox.val($(this).text());
-            });
+                    // Optional: Insert spaces around <br> tags so logic doesn't concatenate words
+                    htmlText = htmlText.replace(/<br>/g, ' <br> ');
 
-            //Add the text to the hidden text box used to submit the form when text is edited
-            passagebox.on('input', function (e) {
-                var thetext = $(this)[0].innerText;
-                hiddenTextBox.val(thetext);
-            });
-/*
-            passagebox.on('mouseup', function (e) {
-                that.doPopover(this,e);
-            });
-*/
-            passagebox.on('dblclick','span', function (e) {
-                that.doPopover(this,e);
-            });
+                    // Insert the HTML directly
+                    document.execCommand('insertHTML', false, htmlText);
 
-            //Add the ignores list to the hidden text box used to submit the form when text is edited
-            ignorelist.on('change', function (e) {
-                hiddenIgnoresBox.val($(this).val());
-            });
+                    //also update our hidden text box
+                    hiddenTextBox.val($(this)[0].innerText);
+                });
 
-            listselect.on('change', function (e) {
-                var listid =  $(this).val();
-                hiddenListIdBox.val(listid);
-                that.updateLevelDropdown();
-            });
+                //Add the text to the hidden text box used to submit the form when text is edited
+                passagebox.on('input', function (e) {
+                    var thetext = $(this)[0].innerText;
+                    hiddenTextBox.val(thetext);
+                });
+                /*
+                            passagebox.on('mouseup', function (e) {
+                                that.doPopover(this,e);
+                            });
+                */
+                passagebox.on('dblclick', 'span', function (e) {
+                    that.doPopover(this, e);
+                });
 
-            //Level select on change
-            levelselect.on('change', function (e) {
-                var levelid =  $(this).val();
-                hiddenLevelIdBox.val(levelid);
-            });
+                //Add the ignores list to the hidden text box used to submit the form when text is edited
+                ignorelist.on('change', function (e) {
+                    hiddenIgnoresBox.val($(this).val());
+                });
+
+                listselect.on('change', function (e) {
+                    var listid = $(this).val();
+                    hiddenListIdBox.val(listid);
+                    that.updateLevelDropdown();
+                });
+
+                //Level select on change
+                levelselect.on('change', function (e) {
+                    var levelid = $(this).val();
+                    hiddenLevelIdBox.val(levelid);
+                });
 
 
-            thebutton.on('click', function () {
-                //show a spinner
-                thebutton.html('<i class="fa fa-spinner fa-spin fa-sm"></i>');
-                themessage.text('');
+                thebutton.on('click', function () {
+                    //show a spinner
+                    thebutton.html('<i class="fa fa-spinner fa-spin fa-sm"></i>');
+                    themessage.text('');
 
-                //get text and clean it up
-                //TO DO there will be more cleaning to do.
-                var thepassage = passagebox[0].innerText;
+                    //get text and clean it up
+                    //TO DO there will be more cleaning to do.
+                    var thepassage = passagebox[0].innerText;
 
-                //no super long readings or empty ones
-                if (!thepassage || thepassage.trim() === '') {
-                    themessage.text(app.strings['entersomething']);
-                    return;
-                }
-                if (thepassage.length > 500000) {
-                    themessage.text(app.strings['texttoolong500000']);
-                    return;
-                }
-
-                var ignore = ignorelist.val();
-                var listid = listselect.val();
-                var listlevel = levelselect.val();
-                var ogteid=app.opts.ogteid;
-                utils.levelPassage(thepassage, ignore, listid, listlevel, ogteid).then(function (ajaxresult) {
-                    thebutton.text('GO');
-                    var theresponse = JSON.parse(ajaxresult);
-                    if (theresponse) {
-                        hiddenJSONRatingBox.val(ajaxresult);
-                        that.updateAllFromJSONRating(theresponse);
-                        //if we were showing that a refresh was required, we remove that now, it's been refreshed
-                        thebutton.removeClass(refreshRequiredClass);
-                    } else {
-                        themessage.text('Failed to level text. Sorry.');
-                        log.debug('ajax call to level coverage failed');
+                    //no super long readings or empty ones
+                    if (!thepassage || thepassage.trim() === '') {
+                        themessage.text(app.strings['entersomething']);
+                        return;
                     }
-                });//end of level passage
-            });//end of click
+                    if (thepassage.length > 500000) {
+                        themessage.text(app.strings['texttoolong500000']);
+                        return;
+                    }
 
-        },
+                    var ignore = ignorelist.val();
+                    var listid = listselect.val();
+                    var listlevel = levelselect.val();
+                    var ogteid = app.opts.ogteid;
+                    utils.levelPassage(thepassage, ignore, listid, listlevel, ogteid).then(function (ajaxresult) {
+                        thebutton.text('GO');
+                        var theresponse = JSON.parse(ajaxresult);
+                        if (theresponse) {
+                            hiddenJSONRatingBox.val(ajaxresult);
+                            that.updateAllFromJSONRating(theresponse);
+                            //if we were showing that a refresh was required, we remove that now, it's been refreshed
+                            thebutton.removeClass(refreshRequiredClass);
+                        } else {
+                            themessage.text('Failed to level text. Sorry.');
+                            log.debug('ajax call to level coverage failed');
+                        }
+                    });//end of level passage
+                });//end of click
 
-    };
-    return app;
+            },
 
-});
+        };
+        return app;
+
+    });

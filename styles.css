@@ -2,34 +2,41 @@
     width: 75%;
     border-collapse: separate;
 }
+
 #page-mod-ogte-view .entrycontent {
     padding: 3px;
 }
+
 #page-mod-ogte-view .picture {
     width: 35px;
 }
+
 #page-mod-ogte-view .info {
     margin-bottom: 5px;
     text-align: right;
 }
+
 #page-mod-ogte-view .ogtestart,
 #page-mod-ogte-report .feedbacksave {
     text-align: center;
 }
+
 /* #page-mod-ogte-view .lastedit, */
 /* #page-mod-ogte-view .editend { */
-    /* font-size: 0.7em; */
-    /* margin: 5px; */
-    /* text-align: center; */
+/* font-size: 0.7em; */
+/* margin: 5px; */
+/* text-align: center; */
 /* } */
 #page-mod-ogte-view .author {
     font-size: 1em;
     font-weight: bold;
 }
+
 #page-mod-ogte-view .time {
     font-size: 0.7em;
     font-style: italic;
 }
+
 #page-mod-ogte-view .grade {
     font-weight: bold;
     font-style: italic;
@@ -39,6 +46,7 @@
 #page-mod-ogte-index .cell {
     font-size: 0.8em;
 }
+
 #page-mod-ogte-view .feedbackbox .left,
 #page-mod-ogte-view .feedbackbox .entryheader {
     background-color: #ddd;
@@ -50,9 +58,11 @@
     border-spacing: 0;
     margin: 0 auto;
 }
+
 #page-mod-ogte-view .feedbackbox .side {
     -moz-border-radius-bottomleft: 15px;
 }
+
 #page-mod-ogte-view .feedbackbox .entrycontent {
     -moz-border-radius-bottomright: 15px;
 }
@@ -62,30 +72,41 @@
     border-collapse: collapse;
     border-spacing: 0;
 }
+
 #page-mod-ogte-report .ogteuserentry td {
     padding: 10px;
     vertical-align: top;
     width: 100%;
 }
+
 #page-mod-ogte-report .ogteuserentry td.userpix {
     width: 35px;
 }
+
 #page-mod-ogte-report .ogteuserentry td.userfullname {
     white-space: nowrap;
 }
+
 /* #page-mod-ogte-report .ogteuserentry td .lastedit { */
-    /* font-size: 0.76em; */
-    /* margin-left: 10px; */
+/* font-size: 0.76em; */
+/* margin-left: 10px; */
 /* } */
 #page-mod-ogte-report .mediaplugin {
     width: auto;
 }
-#page-mod-ogte-view table, th, td {
+
+#page-mod-ogte-view table,
+th,
+td {
     padding: 5px;
 }
-#page-mod-ogte-edit table, th, td {
+
+#page-mod-ogte-edit table,
+th,
+td {
     padding: 5px;
 }
+
 #page-mod-ogte-view td {
     vertical-align: top;
 }
@@ -104,10 +125,13 @@
     width: 100%;
 }
 
-.ogte-passageandstats th,.ogte-passageandstats  td,
-.mod-ogte-stats th,.mod-ogte-stats td {
+.ogte-passageandstats th,
+.ogte-passageandstats td,
+.mod-ogte-stats th,
+.mod-ogte-stats td {
     border: 1px solid black;
-    width: 20%; /* or width: 100px; */
+    width: 20%;
+    /* or width: 100px; */
     padding: 10px;
     text-align: left;
 }
@@ -134,9 +158,11 @@ span.mod_ogte_outoflevel:after {
     content: '';
     position: absolute;
     left: 0;
-    bottom: -2px; /* Adjust this value to change the distance between the lines */
+    bottom: -2px;
+    /* Adjust this value to change the distance between the lines */
     width: 100%;
-    height: 2px; /* Adjust this value to change the thickness of the lines */
+    height: 2px;
+    /* Adjust this value to change the thickness of the lines */
     background-color: red;
 }
 
@@ -144,11 +170,11 @@ span.mod_ogte_outoflevel:after {
     margin-bottom: 8px;
 }
 
-.mod_ogte_noentries{
+.mod_ogte_noentries {
     margin-bottom: 8px;
 }
 
-.mod_ogte_tab-content  {
+.mod_ogte_tab-content {
     margin-top: 8px;
     max-width: 1200px;
 }
@@ -157,6 +183,7 @@ span.mod_ogte_outoflevel:after {
 .ogte-main-title {
     max-width: 1200px;
 }
+
 .ogte-viewentries-panel-footer {
     margin-top: 8px;
     text-align: right;
@@ -166,48 +193,60 @@ div#mod_ogte_passages_table_wrapper {
     margin: 8px;
 }
 
-.ogte-passage-editor{
+.ogte-passage-editor {
     height: auto;
     min-height: 150px;
     padding: 10px;
+    white-space: pre-wrap;
 }
+
 .ogte-wide {
     width: 90%;
     max-width: 1200px;
     border: 1px black solid;
 }
+
 .ogte-status-message {
     font-style: italic;
 }
+
 .ogte_stats_td_hd {
     font-size: 11px;
 }
+
 .ogte_stats_td_sub {
     font-size: 11px;
     font-style: italic;
 }
+
 .mod_ogte_entryforminstructions {
     padding: 15px;
 }
+
 .ogte-leftright {
     display: flex;
     justify-content: space-between;
 }
+
 .ogte-passageandstats {
     flex: 1;
 }
+
 .ogte-blocks {
     width: 300px;
 }
+
 .ogte-block-uncovered-head {
     max-height: 279px;
     overflow-x: hidden;
     overflow-y: auto;
 }
+
 .ogte-block-title {
     background-color: #BAE7FA;
     padding: 4px 6px;
 }
+
 .ogte-outof_container {
     border: 1px solid #ddd;
     padding: 5px;
@@ -219,10 +258,12 @@ div#mod_ogte_passages_table_wrapper {
     display: table;
     width: 94%;
 }
+
 .ogte-outof_container tbody tr:nth-child(2n+1) {
-   background-color: #EEEEEE;
+    background-color: #EEEEEE;
 }
-.ogte-outof_container  {
+
+.ogte-outof_container {
     margin-top: 5px;
     min-height: 100px;
     /*
@@ -235,6 +276,7 @@ div#mod_ogte_passages_table_wrapper {
 .ogte-gopanel {
     margin: 10px;
 }
+
 .ogte-panel-instructions {
     margin-top: 10px;
     margin-bottom: 10px;
@@ -261,12 +303,15 @@ div#mod_ogte_passages_table_wrapper {
     border-color: #3384FF;
     font-weight: 500;
 }
+
 .ogte_article_copy_button,
 .ogte_article_download_button,
 .ogte_article_clear_button {
     width: 60px;
 }
-.ogte-ignore-opts,.ogte-spacer {
+
+.ogte-ignore-opts,
+.ogte-spacer {
     flex: 1;
 }
 
@@ -280,12 +325,15 @@ div#mod_ogte_passages_table_wrapper {
     display: flex;
     align-self: flex-start;
 }
+
 .ogte_article_download_button .btn {
     background-image: url([[pix:mod_ogte|ogte-download-icon]]);
 }
+
 .ogte_article_clear_button .btn {
     background-image: url([[pix:mod_ogte|ogte-clear-icon]]);
 }
+
 .ogte_article_copy_button .btn {
     background-image: url([[pix:mod_ogte|ogte-copy-icon]]);
 }
@@ -307,14 +355,15 @@ div#mod_ogte_passages_table_wrapper {
     margin-right: 5px;
     text-align: center;
 }
+
 span.ogte-smalltext {
     font-size: smaller;
 }
 
 .ogte-square-btn {
-        width: 150px;
-        height: 150px;
-        font-size: 16px;
+    width: 150px;
+    height: 150px;
+    font-size: 16px;
 }
 
 .mod_ogte_actionignorelabel {
@@ -327,18 +376,24 @@ button#the_al_button.mod_ogte_refreshrequired {
     border-color: red;
     border-width: 5px;
     border-style: dashed;
-    animation: borderAnimation 2s infinite alternate; /* Apply the animation */
+    animation: borderAnimation 2s infinite alternate;
+    /* Apply the animation */
 }
 
 @keyframes borderAnimation {
     0% {
-        border-style: solid; /* Start with solid border */
+        border-style: solid;
+        /* Start with solid border */
     }
+
     50% {
-        border-style: dotted; /* Transition to dotted border at 50% */
+        border-style: dotted;
+        /* Transition to dotted border at 50% */
     }
+
     100% {
-        border-style: solid; /* Back to solid border at 100% */
+        border-style: solid;
+        /* Back to solid border at 100% */
     }
 }
 
