@@ -280,7 +280,7 @@ define(['jquery', 'core/log', 'core/notification', 'core/str', 'core/templates',
                 //out of list words block
                 outoflistwords_block.show();
                 templates.render('mod_ogte/block_uncovered',
-                    { words: ignoredAndOutOfData.outoflist, haswords: ignoredAndOutOfData.outoflist.length > 0, haslevels: false, title: this.strings.outoflist }).done(function (html, js) {
+                    { words: ignoredAndOutOfData.outoflist, haswords: ignoredAndOutOfData.outoflist.length > 0, haslevels: false, title: this.strings.outoflist, hascheckboxes: true, checked: false, istoggleblock: false }).done(function (html, js) {
 
                         // Update the page.
                         outoflistwords_block.fadeOut("fast", function () {
@@ -293,7 +293,7 @@ define(['jquery', 'core/log', 'core/notification', 'core/str', 'core/templates',
                 //out of level words block
                 outoflevelwords_block.show();
                 templates.render('mod_ogte/block_uncovered',
-                    { words: ignoredAndOutOfData.outoflevel, haswords: ignoredAndOutOfData.outoflevel.length > 0, haslevels: true, title: this.strings.outoflevel }).done(function (html, js) {
+                    { words: ignoredAndOutOfData.outoflevel, haswords: ignoredAndOutOfData.outoflevel.length > 0, haslevels: true, title: this.strings.outoflevel, hascheckboxes: true, checked: false, istoggleblock: false }).done(function (html, js) {
 
                         // Update the page.
                         outoflevelwords_block.fadeOut("fast", function () {
@@ -306,7 +306,7 @@ define(['jquery', 'core/log', 'core/notification', 'core/str', 'core/templates',
                 //ignored words block
                 ignoredwords_block.show();
                 templates.render('mod_ogte/block_uncovered',
-                    { words: ignoredAndOutOfData.ignored, haswords: ignoredAndOutOfData.ignored.length > 0, haslevels: false, title: this.strings.ignored }).done(function (html, js) {
+                    { words: ignoredAndOutOfData.ignored, haswords: ignoredAndOutOfData.ignored.length > 0, haslevels: false, title: this.strings.ignored, hascheckboxes: true, checked: true, istoggleblock: true }).done(function (html, js) {
 
                         // Update the page.
                         ignoredwords_block.fadeOut("fast", function () {
@@ -468,9 +468,48 @@ define(['jquery', 'core/log', 'core/notification', 'core/str', 'core/templates',
                     }
                 });
 
+                // Ignore Word Toggle Switch Logic
+                $(document).on('change', '#ogte-ignore-toggle', function () {
+                    var isChecked = $(this).is(':checked');
+                    var blocks = $('#ogte-blocks');
+                    if (isChecked) {
+                        blocks.addClass('ogte-ignore-mode-active');
+                    } else {
+                        blocks.removeClass('ogte-ignore-mode-active');
+                    }
+                });
+
+                // Trigger refresh state immediately when a checkbox is toggled
+                $(document).on('change', '.ogte-ignore-checkbox', function () {
+                    var blocks = $('#ogte-blocks');
+                    var selectedWords = [];
+                    blocks.find('.ogte-ignore-checkbox:checked').each(function () {
+                        selectedWords.push($(this).val());
+                    });
+
+                    // Deduplicate and join
+                    var uniqueSelectedWords = selectedWords.filter(function (elem, index, self) {
+                        return index === self.indexOf(elem);
+                    });
+                    var newIgnoreString = uniqueSelectedWords.join(' ');
+
+                    // Only notify/pulse if the ignore list actually changed
+                    var oldIgnoreString = hiddenIgnoresBox.val();
+                    if (newIgnoreString !== oldIgnoreString) {
+                        hiddenIgnoresBox.val(newIgnoreString);
+                        ignorelist.val(newIgnoreString);
+                        thebutton.addClass(refreshRequiredClass);
+                    }
+                });
+
                 downloadButton.on('click', function (e) {
                     var target_selector = $(this).attr('data-download-target');
-                    var text = $(target_selector).text();
+                    var text;
+                    if (target_selector === '#the_al_passage' && app.editor) {
+                        text = app.editor.getValue();
+                    } else {
+                        text = $(target_selector).val();
+                    }
 
                     var filename = 'article.txt';
                     var filename_selector = $(this).attr('data-download-filename');
@@ -509,6 +548,9 @@ define(['jquery', 'core/log', 'core/notification', 'core/str', 'core/templates',
                     //set the text to the article leveler and level it
                     passagebox.text(text);
                     hiddenTextBox.val(text);
+                    if (app.editor) {
+                        app.editor.setValue(text);
+                    }
                     thebutton.click();
 
                     //switch to the article leveler tab
@@ -522,6 +564,7 @@ define(['jquery', 'core/log', 'core/notification', 'core/str', 'core/templates',
 
                 if (app.editor) {
                     app.editor.on('change', function (cm) {
+                        cm.save(); // Sync back to the textarea so clipboard.js can read it
                         hiddenTextBox.val(cm.getValue());
                     });
 
@@ -580,6 +623,11 @@ define(['jquery', 'core/log', 'core/notification', 'core/str', 'core/templates',
                             that.updateAllFromJSONRating(theresponse);
                             //if we were showing that a refresh was required, we remove that now, it's been refreshed
                             thebutton.removeClass(refreshRequiredClass);
+
+                            // Reset toggle and hide checkboxes
+                            var blocks = $('#ogte-blocks');
+                            blocks.removeClass('ogte-ignore-mode-active');
+                            $('#ogte-ignore-toggle').prop('checked', false);
                         } else {
                             themessage.text('Failed to level text. Sorry.');
                             log.debug('ajax call to level coverage failed');

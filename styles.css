@@ -423,3 +423,19 @@ button#the_al_button.mod_ogte_refreshrequired {
 body .fancybox__backdrop {
     opacity: .5;
 }
+
+/* Ignore Toggle Checkbox Styles */
+.ogte-ignore-cell {
+    display: none;
+    text-align: center;
+    vertical-align: middle;
+}
+
+#ogte-blocks.ogte-ignore-mode-active .ogte-ignore-cell {
+    display: table-cell;
+}
+
+.ogte-ignore-checkbox {
+    transform: scale(1.2);
+    cursor: pointer;
+}

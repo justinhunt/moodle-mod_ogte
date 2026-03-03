@@ -738,9 +738,15 @@ class utils{
                 }
                 
                 $cls = $wd['class'];
-                $w = $wd['word']; // We use the clean extracted word or the raw word based on your preference
+                $w = $wd['word']; 
+                // Clean the word using the same regex utils.js used to strip trailing punctuation
+                $clean_w = trim(preg_replace('/[^\'a-zA-Z0-9 ]/', '', strip_tags($w)));
+                if (empty($clean_w)) {
+                    continue;
+                }
+                
                 // Standardize the word to lower case for frequencies (except proper nouns if desired)
-                $w_lower = strtolower($w);
+                $w_lower = strtolower($clean_w);
                 
                 if (strpos($cls, 'mod_ogte_outoflist') !== false) {
                     if (!isset($outoflist_freq[$w_lower])) {
@@ -764,15 +770,21 @@ class utils{
                 }
 
                 if (strpos($cls, 'mod_ogte_propernoun') !== false) {
-                    if (!isset($propernoun_freq[$w])) { // keeping original casing for proper nouns
-                        $propernoun_freq[$w] = ['word' => $w, 'frequency' => 0];
+                    if (!isset($propernoun_freq[$clean_w])) { // keeping original casing for proper nouns
+                        $propernoun_freq[$clean_w] = ['word' => $clean_w, 'frequency' => 0];
                     }
-                    $propernoun_freq[$w]['frequency']++;
+                    $propernoun_freq[$clean_w]['frequency']++;
                 }
             }
 
-            // Sort arrays descending by frequency
-            $usort_desc = function($a, $b) { return $b['frequency'] <=> $a['frequency']; };
+            // Sort arrays descending by frequency, then alphabetically
+            $usort_desc = function($a, $b) { 
+                if ($a['frequency'] === $b['frequency']) {
+                    return strcmp($a['word'], $b['word']);
+                }
+                return $b['frequency'] <=> $a['frequency']; 
+            };
+            
             $outoflist_res = array_values($outoflist_freq);
             usort($outoflist_res, $usort_desc);
             
