@@ -27,6 +27,14 @@ define(['jquery', 'core/log', 'https://cdnjs.cloudflare.com/ajax/libs/codemirror
             var mergedOpts = $.extend(defaultOpts, opts || {});
 
             var editor = codemirror.fromTextArea(el, mergedOpts);
+
+            // CodeMirror occasionally fails to calculate its inner dimensions if instantiated 
+            // while its parent container is hidden (e.g., inside an inactive tab).
+            // A slight delay and a forced refresh resolves the "single x / no cursor" issue.
+            setTimeout(function () {
+                editor.refresh();
+            }, 200);
+
             return editor;
         },
 
@@ -45,31 +53,31 @@ define(['jquery', 'core/log', 'https://cdnjs.cloudflare.com/ajax/libs/codemirror
             var doc = editor.getDoc();
             // CodeMirror deals in {line, ch} coordinates. We scan line by line.
             var lineCount = doc.lineCount();
-            
+
             var dataIndex = 0;
-            
+
             for (var lineNo = 0; lineNo < lineCount; lineNo++) {
                 var lineText = doc.getLine(lineNo);
-                
+
                 // We use a regex to find all word tokens contiguous on this line
                 var regex = /\S+/g;
                 var match;
-                
+
                 while ((match = regex.exec(lineText)) !== null) {
                     if (dataIndex >= worddata.length) break;
-                    
+
                     var wd = worddata[dataIndex];
-                    
+
                     // Skip any newline markers the backend returned
-                    while(wd && wd.word === "\n") {
+                    while (wd && wd.word === "\n") {
                         dataIndex++;
                         if (dataIndex >= worddata.length) break;
                         wd = worddata[dataIndex];
                     }
                     if (!wd) break;
 
-                    var from = {line: lineNo, ch: match.index};
-                    var to = {line: lineNo, ch: match.index + match[0].length};
+                    var from = { line: lineNo, ch: match.index };
+                    var to = { line: lineNo, ch: match.index + match[0].length };
 
                     // Apply if there is a css class
                     if (wd.class) {

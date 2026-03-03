@@ -572,6 +572,13 @@ define(['jquery', 'core/log', 'core/notification', 'core/str', 'core/templates',
                     $(app.editor.getWrapperElement()).on('dblclick', 'span', function (e) {
                         that.doPopover(this, e);
                     });
+
+                    // Refresh editor when switching to the articleleveler tab
+                    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                        if ($(e.target).attr('href') === '#articleleveler') {
+                            app.editor.refresh();
+                        }
+                    });
                 }
 
                 //Add the ignores list to the hidden text box used to submit the form when text is edited
