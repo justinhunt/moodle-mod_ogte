@@ -1,6 +1,6 @@
 
-define(['jquery', 'core/log', 'core/notification', 'core/str', 'core/templates', 'mod_ogte/utils', 'mod_ogte/clipboardhelper', 'mod_ogte/popoverhelper'],
-    function ($, log, notification, str, templates, utils, clipboardhelper, popoverhelper) {
+define(['jquery', 'core/log', 'core/notification', 'core/str', 'core/templates', 'mod_ogte/utils', 'mod_ogte/clipboardhelper', 'mod_ogte/popoverhelper', 'mod_ogte/editorhelper'],
+    function ($, log, notification, str, templates, utils, clipboardhelper, popoverhelper, editorhelper) {
         "use strict"; // jshint ;_;
         /*
         This file combines with the articleleveler.mustache template to create the article leveler
@@ -39,10 +39,14 @@ define(['jquery', 'core/log', 'core/notification', 'core/str', 'core/templates',
 
             strings: {},
             opts: {},
+            editor: null,
 
             //initialize
             init: function (props) {
                 log.debug('initializing article leveler');
+
+                // Initialize CodeMirror editor instance first
+                this.editor = editorhelper.init('the_al_passage', {});
 
                 //pick up opts from html
                 var theid = '#' + props.optsid;
@@ -238,7 +242,13 @@ define(['jquery', 'core/log', 'core/notification', 'core/str', 'core/templates',
             //Update Stats and Analysis
             updateAllFromJSONRating: function (jsonrating) {
                 themessage.text('');
-                passagebox.html(jsonrating.passage);
+                // Set CodeMirror value
+                if (app.editor && jsonrating.passage) {
+                    app.editor.setValue(jsonrating.passage);
+                }
+                if (app.editor && jsonrating.worddata) {
+                    editorhelper.applyWordData(app.editor, jsonrating.worddata);
+                }
 
                 // Add level stats to the page
                 jsonrating.listname = app.opts.listlevels[jsonrating.listid][jsonrating.levelid].listname;
@@ -265,7 +275,7 @@ define(['jquery', 'core/log', 'core/notification', 'core/str', 'core/templates',
                 }.bind(this)).fail(notification.exception);
 
                 //add more coverage stats to the page as blocks
-                var ignoredAndOutOfData = utils.analyzeOutListLevelsIgnored(jsonrating.passage);
+                var ignoredAndOutOfData = utils.analyzeOutListLevelsIgnored(jsonrating);
 
                 //out of list words block
                 outoflistwords_block.show();
@@ -307,7 +317,7 @@ define(['jquery', 'core/log', 'core/notification', 'core/str', 'core/templates',
                     }.bind(this)).fail(notification.exception);
 
                 //out of level frequency block
-                var outOfLevelFreqData = utils.calc_outoflevel_frequencies(jsonrating.passage);
+                var outOfLevelFreqData = utils.calc_outoflevel_frequencies(jsonrating);
                 outoflevelfreq_block.show();
                 templates.render('mod_ogte/block_outoflevelfreq',
                     { levels: outOfLevelFreqData, haslevels: outOfLevelFreqData.length > 0, title: this.strings.outoflevelfreq }).done(function (html, js) {
@@ -335,13 +345,10 @@ define(['jquery', 'core/log', 'core/notification', 'core/str', 'core/templates',
 
             //Get selected text in the editable div
             getSelectedText: function () {
-                var selectedText = "";
-                if (window.getSelection) {
-                    selectedText = window.getSelection().toString();
-                } else if (document.selection && document.selection.type !== "Control") {
-                    selectedText = document.selection.createRange().text;
+                if (app.editor) {
+                    return app.editor.getSelection();
                 }
-                return selectedText;
+                return "";
             },
 
             // Function to update the options in the second dropdown based on the selection in the first dropdown
@@ -367,10 +374,11 @@ define(['jquery', 'core/log', 'core/notification', 'core/str', 'core/templates',
             },
 
             doPopover: function (that, e) {
+                var selectedText = "";
                 if (e.target.tagName === "SPAN" || e.target.tagName === "DIV") {
-                    var selectedText = $(that).text();
+                    selectedText = $(that).text();
                 } else if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") {
-                    var selectedText = that.getSelectedText();
+                    selectedText = app.getSelectedText();
                 }
                 //if its blank just return
                 if (selectedText === '') {
@@ -413,11 +421,7 @@ define(['jquery', 'core/log', 'core/notification', 'core/str', 'core/templates',
                         ignorelist.val(newignorelist);
                         hiddenIgnoresBox.val(newignorelist);
 
-                        //find all spans in passagebox that contain the word and add the ignored class
-                        var wordRegex = new RegExp('\\b' + word + '\\b', 'gi'); // Match whole word, case-insensitive
-                        passagebox.find('span').filter(function () {
-                            return wordRegex.test($(this).text());
-                        }).addClass(ignoredClass);
+                        // Spans are now managed by CodeMirror. We'll simply prompt a re-eval by putting the refresh class on the button.
 
                         //Add a refresh required class to the GO button
                         thebutton.addClass(refreshRequiredClass);
@@ -435,11 +439,7 @@ define(['jquery', 'core/log', 'core/notification', 'core/str', 'core/templates',
                         hiddenIgnoresBox.val(newignorelist);
 
 
-                        //find all spans in passagebox that contain the word and remove the ignored class
-                        var wordRegex = new RegExp('\\b' + word + '\\b', 'gi'); // Match whole word, case-insensitive
-                        passagebox.find('span').filter(function () {
-                            return wordRegex.test($(this).text());
-                        }).removeClass(ignoredClass);
+                        // Spans are now managed by CodeMirror. We'll simply prompt a re-eval by putting the refresh class on the button.
 
                         //Add a refresh required class to the GO button
                         thebutton.addClass(refreshRequiredClass);
@@ -492,6 +492,7 @@ define(['jquery', 'core/log', 'core/notification', 'core/str', 'core/templates',
                         switch (target_selector) {
                             case '#the_al_passage':
                                 hiddenTextBox.val('');
+                                if (app.editor) app.editor.setValue('');
                                 app.clearAllStats();
                                 break;
                             default:
@@ -519,50 +520,16 @@ define(['jquery', 'core/log', 'core/notification', 'core/str', 'core/templates',
 
                 });
 
-                //prevent the editable div from creating more divs on copy and paste
-                /*
-                passagebox.on('paste', function (e) {
-                    e.preventDefault();
-                    var text = (e.originalEvent || e).clipboardData.getData('text/plain');
-                    // Insert plain text without additional divs
-                    $(this).text(text);
-                    //also update our hidden text box
-                    hiddenTextBox.val($(this).text());
-                });
-                */
+                if (app.editor) {
+                    app.editor.on('change', function (cm) {
+                        hiddenTextBox.val(cm.getValue());
+                    });
 
-                passagebox.on('paste', function (e) {
-                    e.preventDefault();
-                    var text = (e.originalEvent || e).clipboardData.getData('text/plain');
-
-                    // Instead of execCommand inserttext which is unpredictable,
-                    // securely encode the string to HTML and replace \n with <br>
-                    var encodedStr = $('<div>').text(text).html();
-                    var htmlText = encodedStr.replace(/\n/g, '<br>');
-
-                    // Optional: Insert spaces around <br> tags so logic doesn't concatenate words
-                    htmlText = htmlText.replace(/<br>/g, ' <br> ');
-
-                    // Insert the HTML directly
-                    document.execCommand('insertHTML', false, htmlText);
-
-                    //also update our hidden text box
-                    hiddenTextBox.val($(this)[0].innerText);
-                });
-
-                //Add the text to the hidden text box used to submit the form when text is edited
-                passagebox.on('input', function (e) {
-                    var thetext = $(this)[0].innerText;
-                    hiddenTextBox.val(thetext);
-                });
-                /*
-                            passagebox.on('mouseup', function (e) {
-                                that.doPopover(this,e);
-                            });
-                */
-                passagebox.on('dblclick', 'span', function (e) {
-                    that.doPopover(this, e);
-                });
+                    // Use wrapper for double click popovers
+                    $(app.editor.getWrapperElement()).on('dblclick', 'span', function (e) {
+                        that.doPopover(this, e);
+                    });
+                }
 
                 //Add the ignores list to the hidden text box used to submit the form when text is edited
                 ignorelist.on('change', function (e) {
@@ -589,7 +556,7 @@ define(['jquery', 'core/log', 'core/notification', 'core/str', 'core/templates',
 
                     //get text and clean it up
                     //TO DO there will be more cleaning to do.
-                    var thepassage = passagebox[0].innerText;
+                    var thepassage = app.editor ? app.editor.getValue() : passagebox.val();
 
                     //no super long readings or empty ones
                     if (!thepassage || thepassage.trim() === '') {

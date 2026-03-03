@@ -529,6 +529,14 @@ class utils{
         $numbers=0;
         $newlines=0;
         $retwords = [];
+        $worddata = [];
+
+        // Initialize frequency arrays so array_values doesn't fail if empty
+        $propernoun_freq = [];
+        $outoflist_freq = [];
+        $outoflevel_freq = [];
+        $ignored_freq = [];
+
         $starttime= microtime(true);
         foreach($words as $word){
 
@@ -574,17 +582,20 @@ class utils{
                 //check if its being ignored
                 if (is_array($ignores) && in_array($cleanword, $ignores)) {
                     //for now we don't "ignore" multi-words, but it is easy to add if we decide to
-                    $retwords[] = \html_writer::span($word, 'mod_ogte_ignored', ['data-index' => $wordcount]);
+                    $retwords[] = $word;
+                    $worddata[] = ['word' => $word, 'class' => 'mod_ogte_ignored', 'data' => ['index' => $wordcount]];
                     $ignored+= $words_in_term_count;
                 }elseif(self::is_numeric_with_unit($cleanword)){
                     //for now we don't "ignore" numerics, but it is easy to add if we decide to
-                    $retwords[]=\html_writer::span($word, 'mod_ogte_number', ['data-index'=>$wordcount]);
+                    $retwords[] = $word;
+                    $worddata[] = ['word' => $word, 'class' => 'mod_ogte_number', 'data' => ['index' => $wordcount]];
                     $numbers+= $words_in_term_count;
 
                //restore new words and remove from calculation
                 }elseif($cleanword===constants::M_FAKENEWLINE){
-                    //return an html new line
-                    $retwords[]=\html_writer::empty_tag('br');
+                    //return an html new line (we keep \n for CodeMirror)
+                    $retwords[] = "\n";
+                    $worddata[] = ['word' => "\n", 'class' => '', 'data' => []];
                     $newlines+= $words_in_term_count;//always 1 right?
 
                 }else{
@@ -625,59 +636,59 @@ class utils{
                             }
                         }
                         if (!empty($propernounid)) {
-                            //for single word terms, just return. For multi-word terms, loop through each word in term and return them
                             if(!$ismultiwordterm) {
-                                $retwords[] = \html_writer::span($word, 'mod_ogte_propernoun', ['data-index' => $wordcount, 'data-listrank' => 0]);
+                                $retwords[] = $word;
+                                $worddata[] = ['word' => $word, 'class' => 'mod_ogte_propernoun', 'data' => ['index' => $wordcount, 'listrank' => 0]];
                             }else{
                                 for($i=0;$i<$words_in_term_count;$i++){
-                                    $retwords[] = \html_writer::span($words_in_term[$i], 'mod_ogte_propernoun', ['data-index' => $wordcount+$i, 'data-listrank' => 0]);
+                                    $retwords[] = $words_in_term[$i];
+                                    $worddata[] = ['word' => $words_in_term[$i], 'class' => 'mod_ogte_propernoun', 'data' => ['index' => $wordcount+$i, 'listrank' => 0]];
                                 }
                             }
                             $propernouns+= $words_in_term_count;
                         }else {
-                            //for single word terms, just return. For multi-word terms, loop through each word in term and return them
                             if(!$ismultiwordterm) {
-                                $retwords[] = \html_writer::span($word, 'mod_ogte_outoflist', ['data-index' => $wordcount, 'data-listrank' => 0]);
+                                $retwords[] = $word;
+                                $worddata[] = ['word' => $word, 'class' => 'mod_ogte_outoflist', 'data' => ['index' => $wordcount, 'listrank' => 0]];
                             }else{
                                 for($i=0;$i<$words_in_term_count;$i++){
-                                    $retwords[] = \html_writer::span($words_in_term[$i],'mod_ogte_outoflist', ['data-index' => $wordcount+$i, 'data-listrank' => 0]);
+                                    $retwords[] = $words_in_term[$i];
+                                    $worddata[] = ['word' => $words_in_term[$i], 'class' => 'mod_ogte_outoflist', 'data' => ['index' => $wordcount+$i, 'listrank' => 0]];
                                 }
-
                             }
                             $outoflist+= $words_in_term_count;
                         }
-
-                    //if its in the list, tag the word with level data, and check if its within or outside of the selected level
                     } else {
                         //tag the word with level data
-                        $atts = ['data-index' => $wordcount,'data-listrank'=>$listrank,'data-listlevel'=>'','data-listlevelname'=>''];
+                        $atts = ['index' => $wordcount, 'listrank' => $listrank, 'listlevel' => '', 'listlevelname' => ''];
                         foreach ($levels as $levelid=>$level){
                             if($listrank <= $level->top && $listrank >= $level->bottom){
-                                $atts['data-listlevel']=$levelid;
-                                $atts['data-listlevelname']=$level->name;
+                                $atts['listlevel'] = $levelid;
+                                $atts['listlevelname'] = $level->name;
                             }
                         }
                         //check if its within or outside the selected level
                         if ($listrank > $selectedlevel->top) {
-                            //for single word terms, just return. For multi-word terms, loop through each word in term and return them
                             if(!$ismultiwordterm) {
-                                $retwords[] = \html_writer::span($word, 'mod_ogte_outoflevel', $atts);
+                                $retwords[] = $word;
+                                $worddata[] = ['word' => $word, 'class' => 'mod_ogte_outoflevel', 'data' => $atts];
                             }else{
                                 for($i=0;$i<$words_in_term_count;$i++){
-                                    $atts['data-index'] = $wordcount+$i;
-                                    $retwords[] = \html_writer::span($words_in_term[$i], 'mod_ogte_outoflevel', $atts);
+                                    $atts['index'] = $wordcount+$i;
+                                    $retwords[] = $words_in_term[$i];
+                                    $worddata[] = ['word' => $words_in_term[$i], 'class' => 'mod_ogte_outoflevel', 'data' => $atts];
                                 }
-
                             }
                             $outoflevel+= $words_in_term_count;
                         }else{
-                            //for single word terms, just return. For multi-word terms, loop through each word in term and return them
                             if(!$ismultiwordterm) {
-                                $retwords[] = \html_writer::span($word, 'mod_ogte_inlevel', $atts);
+                                $retwords[] = $word;
+                                $worddata[] = ['word' => $word, 'class' => 'mod_ogte_inlevel', 'data' => $atts];
                             }else{
                                 for($i=0;$i<$words_in_term_count;$i++){
-                                    $atts['data-index'] = $wordcount+$i;
-                                    $retwords[] = \html_writer::span($words_in_term[$i], 'mod_ogte_inlevel', $atts);
+                                    $atts['index'] = $wordcount+$i;
+                                    $retwords[] = $words_in_term[$i];
+                                    $worddata[] = ['word' => $words_in_term[$i], 'class' => 'mod_ogte_inlevel', 'data' => $atts];
                                 }
                             }
                             $inlevel+= $words_in_term_count;
@@ -687,6 +698,7 @@ class utils{
                 $wordcount+= $words_in_term_count;
             }else{
                 $retwords[] = $word;
+                $worddata[] = ['word' => $word, 'class' => '', 'data' => []];
             }
         }
         //adjust for numbers
@@ -704,7 +716,95 @@ class utils{
                 $coverage = round(($inlevel + $ignored + $propernouns)/$wordcount *100);
             }
 
-            return ['passage'=>implode(' ',$retwords),
+            // We implode with spaces, but for newline characters, we want to NOT have a space before them
+            // because they represent continuous text flow.
+            $assembled_passage = '';
+            $is_first = true;
+            foreach ($retwords as $rw) {
+                if ($is_first) {
+                    $assembled_passage .= $rw;
+                    $is_first = false;
+                } else if ($rw === "\n" || str_ends_with($assembled_passage, "\n")) {
+                    $assembled_passage .= $rw;
+                } else {
+                    $assembled_passage .= ' ' . $rw;
+                }
+            }
+            
+            // Calculate word frequencies natively before returning
+            foreach ($worddata as $wd) {
+                if (empty($wd['class'])) {
+                    continue;
+                }
+                
+                $cls = $wd['class'];
+                $w = $wd['word']; // We use the clean extracted word or the raw word based on your preference
+                // Standardize the word to lower case for frequencies (except proper nouns if desired)
+                $w_lower = strtolower($w);
+                
+                if (strpos($cls, 'mod_ogte_outoflist') !== false) {
+                    if (!isset($outoflist_freq[$w_lower])) {
+                        $outoflist_freq[$w_lower] = ['word' => $w_lower, 'frequency' => 0];
+                    }
+                    $outoflist_freq[$w_lower]['frequency']++;
+                }
+                
+                if (strpos($cls, 'mod_ogte_outoflevel') !== false) {
+                    if (!isset($outoflevel_freq[$w_lower])) {
+                        $outoflevel_freq[$w_lower] = ['word' => $w_lower, 'frequency' => 0, 'level' => (int)$wd['data']['listlevel'] + 1];
+                    }
+                    $outoflevel_freq[$w_lower]['frequency']++;
+                }
+
+                if (strpos($cls, 'mod_ogte_ignored') !== false) {
+                    if (!isset($ignored_freq[$w_lower])) {
+                        $ignored_freq[$w_lower] = ['word' => $w_lower, 'frequency' => 0];
+                    }
+                    $ignored_freq[$w_lower]['frequency']++;
+                }
+
+                if (strpos($cls, 'mod_ogte_propernoun') !== false) {
+                    if (!isset($propernoun_freq[$w])) { // keeping original casing for proper nouns
+                        $propernoun_freq[$w] = ['word' => $w, 'frequency' => 0];
+                    }
+                    $propernoun_freq[$w]['frequency']++;
+                }
+            }
+
+            // Sort arrays descending by frequency
+            $usort_desc = function($a, $b) { return $b['frequency'] <=> $a['frequency']; };
+            $outoflist_res = array_values($outoflist_freq);
+            usort($outoflist_res, $usort_desc);
+            
+            $outoflevel_res = array_values($outoflevel_freq);
+            usort($outoflevel_res, $usort_desc);
+
+            $ignored_res = array_values($ignored_freq);
+            usort($ignored_res, $usort_desc);
+
+            $propernoun_res = array_values($propernoun_freq);
+            usort($propernoun_res, $usort_desc);
+            
+            // Calculate out of level summaries
+            $level_counts = [];
+            foreach ($outoflevel_res as $wd) {
+                $lvl = $wd['level'];
+                if (!isset($level_counts[$lvl])) {
+                    $level_counts[$lvl] = 0;
+                }
+                $level_counts[$lvl] += $wd['frequency'];
+            }
+            $level_summary = [];
+            foreach ($level_counts as $lvl => $count) {
+                $level_summary[] = [
+                    'level' => $lvl,
+                    'count' => $count,
+                    'frequency' => $outoflevel > 0 ? number_format(($count / $outoflevel) * 100, 2) : "0.00"
+                ];
+            }
+
+            return ['passage'=>$assembled_passage,
+                'worddata' => $worddata,
                 'status'=>'success',
                 'message'=>'coverage returned',
                 'listid'=>$listid,
@@ -717,6 +817,11 @@ class utils{
                 'propernouns'=>$propernouns,
                 'rawwordcount'=>$wordcount + $numbers,
                 'wordcount'=>$wordcount,
+                'outoflist_freq' => $outoflist_res,
+                'outoflevel_freq' => $outoflevel_res,
+                'ignored_freq' => $ignored_res,
+                'propernoun_freq' => $propernoun_res,
+                'outoflevel_summary' => $level_summary,
                 'propernouns_percent'=>self::makePercent($propernouns,$wordcount),
                 'inlevel_percent'=>self::makePercent($inlevel,$wordcount),
                 'outoflevel_percent'=>self::makePercent($outoflevel,$wordcount),

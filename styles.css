@@ -200,6 +200,29 @@ div#mod_ogte_passages_table_wrapper {
     white-space: pre-wrap;
 }
 
+/* CodeMirror specific styling to match the previous editable div */
+.ogte-passageandstats .CodeMirror {
+    height: auto;
+    min-height: 250px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    max-width: 1200px;
+    padding: 15px;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: 1.6;
+    background-color: #ffffff;
+}
+
+.ogte-passageandstats .CodeMirror-scroll {
+    min-height: 250px;
+    overflow-x: hidden !important;
+}
+
+.ogte-passageandstats .CodeMirror-lines {
+    padding: 0;
+}
+
 .ogte-wide {
     width: 90%;
     max-width: 1200px;

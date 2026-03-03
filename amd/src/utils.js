@@ -105,79 +105,21 @@ define(['jquery', 'core/log', 'core/ajax'], function ($, log, ajax) {
             return stats;
         },
 
-        analyzeOutListLevelsIgnored: function (jsonpassage) {
-            var that = this;
-            //put the html into a temp div so we can use jquery to query it
-            var tempElement = $('<div>').html(jsonpassage);
-            //for each of our stats categories we perform a loop
-            var categories = ['outoflist', 'outoflevel', 'ignored', 'propernoun'];
+        analyzeOutListLevelsIgnored: function (jsonrating) {
+            // We now receive pre-calculated arrays from PHP instead of parsing passage HTML
             var results = {};
-            for (var i = 0; i < categories.length; i++) {
-                var result = [];
-                var elements = tempElement.find('.mod_ogte_' + categories[i]);
+            // The JSON from PHP includes outoflist_freq, outoflevel_freq, ignored_freq, propernoun_freq
+            results['outoflist'] = jsonrating.outoflist_freq || [];
+            results['outoflevel'] = jsonrating.outoflevel_freq || [];
+            results['ignored'] = jsonrating.ignored_freq || [];
+            results['propernoun'] = jsonrating.propernoun_freq || [];
 
-                // Create an object to store word levels and frequencies
-                var wordFrequency = {};
-                //wordLevel is only used for listlevel (not for out of list or ignored
-                var wordLevel = {};
-
-                // Iterate through each element
-                elements.each(function () {
-                    // Get the text content of the element
-                    var word = that.cleanWord($(this).text());
-
-                    // Update the frequency in the wordFrequency object
-                    wordFrequency[word] = (wordFrequency[word] || 0) + 1;
-
-                    //update the level
-                    wordLevel[word] = $(this).data('listlevel') + 1;
-                });
-
-                for (var word in wordFrequency) {
-                    if (wordFrequency.hasOwnProperty(word)) {
-                        var worddata = {
-                            word: word,
-                            frequency: wordFrequency[word],
-                        };
-                        if (categories[i] == 'outoflevel') {
-                            worddata.level = wordLevel[word];
-                        }
-                        result.push(worddata);
-                    }
-                }
-                //sort array by frequency
-                result.sort(function (a, b) {
-                    return b.frequency - a.frequency;
-                });
-                //save results and return
-                results[categories[i]] = result;
-            }
             return results;
         },
 
-        calc_outoflevel_frequencies: function (jsonpassage) {
-            //put the html into a temp div so we can use jquery to query it
-            var tempElement = $('<div>').html(jsonpassage);
-            var elements = tempElement.find('.mod_ogte_outoflevel');
-            var result = [];
-            var levelCount = {};
-            // Iterate through each element
-            elements.each(function () {
-                var thelevel = $(this).data('listlevel') + 1;
-                // Update the frequency in the levelFrequency object
-                levelCount[thelevel] = (levelCount[thelevel] || 0) + 1;
-            });
-            for (var thelevel in levelCount) {
-                if (levelCount.hasOwnProperty(thelevel)) {
-                    var leveldata = {
-                        level: thelevel,
-                        count: levelCount[thelevel],
-                        frequency: ((levelCount[thelevel] / elements.length) * 100).toFixed(2),
-                    };
-                    result.push(leveldata);
-                }
-            }
-            return result;
+        calc_outoflevel_frequencies: function (jsonrating) {
+            // Retrieve pre-calculated level summaries from the JSON rating
+            return jsonrating.outoflevel_summary || [];
         },
 
         cleanWord: function (inputWord) {

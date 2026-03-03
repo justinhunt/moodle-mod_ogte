@@ -205,12 +205,12 @@ class renderer extends \plugin_renderer_base {
         $order[0] =array(1, "asc");
         $tableprops['order']=$order;
 
-        //here we set up any info we need to pass into javascript
         $opts =Array();
         $opts['tableid']=$tableid;
         $opts['tableprops']=$tableprops;
         $this->page->requires->js_call_amd("mod_ogte/datatables", 'init', array($opts));
         $this->page->requires->css( new \moodle_url('https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css'));
+        $this->page->requires->css( new \moodle_url('https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css'));
     }
 
     function embed_tabsandeditor($cmid,$token){
