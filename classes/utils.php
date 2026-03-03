@@ -389,18 +389,32 @@ class utils
     public static function fetch_word_family($word, $listid)
     {
         global $DB;
-        $headword = $DB->get_field(constants::M_WORDSTABLE, 'headword', ['word' => $word]);
-        if (!$headword) {
-            return [$word];
+        $cache = \cache::make_from_params(\cache_store::MODE_APPLICATION, constants::M_COMPONENT, 'wordfamily_' . $listid);
+
+        // Cache keys shouldn't have weird characters or spaces, so we md5 the word
+        $cachekey = md5(strtolower($word));
+        $family = $cache->get($cachekey);
+
+        if ($family !== false) {
+            return $family;
         }
-        ;
-        $words = $DB->get_fieldset_select(constants::M_WORDSTABLE, 'word', 'headword=:headword AND list=:listid', ['headword' => $headword, 'listid' => $listid]);
-        if ($words && is_array($words) && count($words) > 0) {
-            return $words;
+
+        $headword = $DB->get_field(constants::M_WORDSTABLE, 'headword', ['word' => $word, 'list' => $listid]);
+        if (!$headword) {
+            $family = [$word];
         }
         else {
-            return [$word];
+            $words = $DB->get_fieldset_select(constants::M_WORDSTABLE, 'word', 'headword=:headword AND list=:listid', ['headword' => $headword, 'listid' => $listid]);
+            if ($words && is_array($words) && count($words) > 0) {
+                $family = $words;
+            }
+            else {
+                $family = [$word];
+            }
         }
+
+        $cache->set($cachekey, $family);
+        return $family;
     }
 
     public static function get_lang_options()
@@ -474,39 +488,31 @@ class utils
         $alreadypropernoun = [];
         $alreadynotpropernoun = [];
 
-        // Do we have proper nouns?
-        $propernounlist = $DB->get_record(constants::M_LISTSTABLE, ['ispropernouns' => 1, 'lang' => $list->lang]);
+        // Fetch dictionary caches for entire lists.
+        $listwordscache = \cache::make_from_params(\cache_store::MODE_APPLICATION, constants::M_COMPONENT, 'listdictionary_' . $listid);
+        $dictionary = $listwordscache->get('dictionary');
+        if ($dictionary === false) {
+            // Load the entire list into memory once.
+            $dictionary = $DB->get_records_menu(constants::M_WORDSTABLE, ['list' => $listid], '', 'LOWER(word), listrank');
+            $listwordscache->set('dictionary', $dictionary);
+        }
 
-        // Fetch words caches for coverage requests on the same list.
-        $listwordscache = \cache::make_from_params(\cache_store::MODE_APPLICATION, constants::M_COMPONENT, 'listwords_' . $listid);
-        $properwordscache = null;
+        $propernounlist = $DB->get_record(constants::M_LISTSTABLE, ['ispropernouns' => 1, 'lang' => $list->lang]);
+        $propernoun_dictionary = [];
         if ($propernounlist) {
-            $properwordscache = \cache::make_from_params(\cache_store::MODE_APPLICATION,
-                constants::M_COMPONENT, 'listwords_' . $propernounlist->id);
+            $properwordscache = \cache::make_from_params(\cache_store::MODE_APPLICATION, constants::M_COMPONENT, 'listdictionary_' . $propernounlist->id);
+            $propernoun_dictionary = $properwordscache->get('dictionary');
+            if ($propernoun_dictionary === false) {
+                // Load the entire proper noun list into memory once.
+                $propernoun_dictionary = $DB->get_records_menu(constants::M_WORDSTABLE, ['list' => $propernounlist->id], '', 'LOWER(word), listrank');
+                $properwordscache->set('dictionary', $propernoun_dictionary);
+            }
         }
 
         // does the list have multi-word-terms
         // TO DO -  assume multiwordterms is true, because we will need it for propernouns, if "fetch_multiwordterms" is empty, it will still work
         // and the code will be simpler (fewer if statements)
         $hasmultiwordterms = $DB->get_record(constants::M_LISTSTABLE, ['hasmultiwordterms' => 1, 'lang' => $list->lang]);
-
-        $sql = 'SELECT listrank
-                   FROM {' . constants::M_WORDSTABLE . '} w
-                   WHERE
-                        LOWER(w.word) = :theword AND
-                        w.list = :listid';
-
-        // if we change the word column index type to fulltext
-        // we can use this SQL and get much faster results but we also need to clear the mysql stop words list
-        // thats a bit tricky in a plugin, but for a dedicated site its ok
-        /*
-         $sql = 'SELECT listrank
-         FROM {'. constants::M_WORDSTABLE .'} w
-         WHERE
-         MATCH (w.word) AGAINST (:theword IN BOOLEAN MODE)
-         AND
-         w.list = :listid';
-         */
 
         // rewrite new line markers to survive subsequent text clean up
         $passage = self::markup_newlines($passage);
@@ -652,27 +658,19 @@ class utils
                         $listrank = $alreadyfound[$cleanword];
                     }
                     else {
-                        // First check if its in the cache and if not, do an sql query.
-                        $listrank = $listwordscache->get($cleanword);
-                        if ($listrank === false) {
-                            // Cache miss: false is always returned by get() on miss.
-                            $listrank = $DB->get_field_sql($sql, ['theword' => $cleanword, 'listid' => $listid], IGNORE_MULTIPLE);
-                            // Store -1 instead of false to cache "not found" hits.
-                            $listwordscache->set($cleanword, $listrank !== false ? $listrank : -1);
-                        } else if ($listrank === -1) {
-                            // Cache hit, but explicitly stored as not found
-                            $listrank = false;
-                        }
-                        if ($listrank) {
+                        // fast in-memory dictionary lookup
+                        if (isset($dictionary[$cleanword])) {
+                            $listrank = $dictionary[$cleanword];
                             $alreadyfound[$cleanword] = $listrank;
                         }
                         else {
+                            $listrank = false;
                             $alreadynotfound[] = $cleanword;
                         }
                     }
 
                     // if its not there, its not in the list
-                    if (!$listrank) {
+                    if ($listrank === false) {
                         // It could be a proper noun
                         $propernounid = null;
                         if ($propernounlist) {
@@ -683,21 +681,13 @@ class utils
                                 $propernounid = $alreadypropernoun[$cleanword];
                             }
                             else {
-                                // First check if its in the cache and if not, do an sql query.
-                                $propernounid = $properwordscache->get($cleanword);
-                                if ($propernounid === false) {
-                                    // Cache miss: false is always returned by get() on miss.
-                                    $propernounid = $DB->get_field_sql($sql, ['theword' => $cleanword, 'listid' => $propernounlist->id], IGNORE_MULTIPLE);
-                                    // Store -1 instead of false to cache "not found" hits.
-                                    $properwordscache->set($cleanword, $propernounid !== false ? $propernounid : -1);
-                                } else if ($propernounid === -1) {
-                                    // Cache hit, but explicitly stored as not found.
-                                    $propernounid = false;
-                                }
-                                if ($propernounid) {
+                                // fast in-memory proper noun dictionary lookup
+                                if (isset($propernoun_dictionary[$cleanword])) {
+                                    $propernounid = $propernoun_dictionary[$cleanword];
                                     $alreadypropernoun[$cleanword] = $propernounid;
                                 }
                                 else {
+                                    $propernounid = false;
                                     $alreadynotpropernoun[] = $cleanword;
                                 }
                             }
@@ -1004,14 +994,22 @@ class utils
     public static function fetch_multiwordterms($list)
     {
         global $DB;
-        $sql = 'SELECT word
-            FROM {' . constants::M_WORDSTABLE . '} w
-            WHERE
-                 w.word LIKE "% %" AND
-                 w.list = :listid';
-        $multiwordterms = $DB->get_fieldset_sql($sql, ['listid' => $list]);
-        return $multiwordterms;
+        $cache = \cache::make_from_params(\cache_store::MODE_APPLICATION, constants::M_COMPONENT, 'multiwordterms');
+        $multiwordterms = $cache->get($list);
 
+        if ($multiwordterms === false) {
+            $sql = 'SELECT word
+                FROM {' . constants::M_WORDSTABLE . '} w
+                WHERE
+                     w.word LIKE "% %" AND
+                     w.list = :listid';
+            $multiwordterms = $DB->get_fieldset_sql($sql, ['listid' => $list]);
+            if (!is_array($multiwordterms)) {
+                $multiwordterms = [];
+            }
+            $cache->set($list, $multiwordterms);
+        }
+        return $multiwordterms;
     }
 
     public static function is_numeric_with_unit($str)
