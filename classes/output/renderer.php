@@ -247,6 +247,17 @@ class renderer extends \plugin_renderer_base {
         $ret .= $opts_html;
         $opts = array('optsid' => $optsid);
         $this->page->requires->js_call_amd("mod_ogte/articleleveler", 'init', array($opts));
+        
+        // Injecting CodeMirror CSS manually into the body.
+        // Because embed_tabsandeditor is often called after the page head has been sent,
+        // `$this->page->requires->css()` won't work in time.
+        $codemirror_css = \html_writer::empty_tag('link', array(
+            'rel' => 'stylesheet',
+            'type' => 'text/css',
+            'href' => 'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css'
+        ));
+        $ret .= $codemirror_css;
+        
         $ret .= $this->output->render_from_template('mod_ogte/tabsandeditor', $params) ;
         $this->page->requires->strings_for_js(['alreadyignored','selecttoignore','doignore',
             'entersomething','texttoolong5000','ignored','outoflist','outoflevel','outoflevelfreq'],constants::M_COMPONENT);
