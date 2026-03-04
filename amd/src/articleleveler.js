@@ -397,12 +397,29 @@ define(['jquery', 'core/log', 'core/notification', 'core/str', 'core/templates',
                 word = word.replace(punctuationRegex, '');
 
                 //check if its ignoring already
-                var ignores = ignorelist.val();
-                var ignoring = ignores.toLowerCase().includes(word.toLowerCase());
+                var wordLower = word.toLowerCase();
+                var checkbox = $('.ogte-ignore-checkbox').filter(function () {
+                    return this.value.toLowerCase() === wordLower;
+                });
 
-                //show the popover
-                popoverhelper.doPopup(that, word, ignoring);
+                if (checkbox.length > 0) {
+                    var newState = !checkbox.first().prop('checked');
+                    checkbox.prop('checked', newState);
+                    checkbox.first().trigger('change');
 
+                    // 1) Ensure the ignore toggle switch is turned on so the user sees the checkbox change
+                    var toggleSwitch = $('#ogte-ignore-toggle');
+                    if (!toggleSwitch.is(':checked')) {
+                        toggleSwitch.prop('checked', true).trigger('change');
+                    }
+
+                    // 2) Provide visual feedback on the word itself
+                    var $wordSpan = $(that);
+                    $wordSpan.addClass('mod_ogte_word_toggled');
+                    setTimeout(function () {
+                        $wordSpan.removeClass('mod_ogte_word_toggled');
+                    }, 500);
+                }
             },
 
             doIgnore: function (word, ignore) {

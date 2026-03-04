@@ -439,3 +439,13 @@ body .fancybox__backdrop {
     transform: scale(1.2);
     cursor: pointer;
 }
+/* Double click word toggle animation */
+.mod_ogte_word_toggled {
+    animation: ogte_pulse_word 0.5s ease-out;
+}
+
+@keyframes ogte_pulse_word {
+    0%   { background-color: transparent; }
+    50%  { background-color: #ffc107; color: #000; font-weight: bold; border-radius: 3px; padding: 0 2px;}
+    100% { background-color: transparent; }
+}
