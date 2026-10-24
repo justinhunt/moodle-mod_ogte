@@ -117,8 +117,6 @@ function ogte_supports($feature)
             return true;
         case FEATURE_GROUPINGS:
             return true;
-        case FEATURE_GROUPMEMBERSONLY:
-            return true;
         case FEATURE_COMPLETION_TRACKS_VIEWS:
             return true;
         case FEATURE_BACKUP_MOODLE2:
