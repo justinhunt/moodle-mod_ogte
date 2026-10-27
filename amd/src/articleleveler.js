@@ -358,7 +358,7 @@ define(['jquery', 'core/log', 'core/notification', 'core/str', 'core/templates',
                 levelselect.empty();
 
                 // Populate options based on the selected category
-                app.opts.listlevels[selectedList].forEach(function (option) {
+                (app.opts.listlevels[selectedList] || []).forEach(function (option) {
                     levelselect.append($('<option value="' + option.key + '">' + option.label + '</option>'));
                 });
                 levelselect.prop('selectedIndex', 0);
