@@ -1,3 +1,8 @@
+version 1.0.9 (Build: 2026102700)
+now requires Moodle 4.3
+use the core_external web service classes (Moodle 5.3 compatibility)
+fixed a PHP 8.4 deprecation in the test data generator
+
 version 1.0.5 (Build: 2024012200)
 guest access on front page
 
