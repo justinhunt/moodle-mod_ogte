@@ -114,13 +114,13 @@ if ($form->is_cancelled()) {
     if ($entry) {
         $newentry->id = $entry->id;
         if (!$DB->update_record("ogte_entries", $newentry)) {
-            print_error("Could not update your ogte");
+            throw new \moodle_exception("Could not update your ogte");
         }
     } else {
         $newentry->userid = $USER->id;
         $newentry->ogte = $ogte->id;
         if (!$newentry->id = $DB->insert_record("ogte_entries", $newentry)) {
-            print_error("Could not insert a new ogte entry");
+            throw new \moodle_exception("Could not insert a new ogte entry");
         }
     }
 

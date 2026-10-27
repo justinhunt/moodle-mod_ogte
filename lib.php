@@ -866,7 +866,7 @@ function ogte_print_feedback($course, $entry, $grades)
     require_once($CFG->dirroot . '/lib/gradelib.php');
 
     if (!$teacher = $DB->get_record('user', ['id' => $entry->teacher])) {
-        print_error('Weird ogte error');
+        throw new \moodle_exception('Weird ogte error');
     }
 
     echo '<table class="feedbackbox">';

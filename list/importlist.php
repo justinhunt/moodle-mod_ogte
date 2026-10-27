@@ -31,7 +31,7 @@ if ($cmid) {
     $course     = $DB->get_record('course', array('id' => $moduleinstance->course), '*', MUST_EXIST);
     $cm         = get_coursemodule_from_instance('ogte', $moduleinstance->id, $course->id, false, MUST_EXIST);
 } else {
-    print_error('You must specify a course_module ID or an instance ID');
+    throw new \moodle_exception('You must specify a course_module ID or an instance ID');
 }
 
 
@@ -42,7 +42,7 @@ require_capability('mod/ogte:manage',$modulecontext);
 //fetch the list
 $list = $DB->get_record(constants::M_LISTSTABLE,['id'=>$listid]);
 if(!$list){
-    print_error('Total disaster, that list does not exist! Or more likely the list id got lost (programming error)');
+    throw new \moodle_exception('Total disaster, that list does not exist! Or more likely the list id got lost (programming error)');
 }
 
 $pagetitle = format_string($moduleinstance->name, true, ['context'=>$modulecontext->id]);
@@ -79,7 +79,7 @@ if ($data = $form->get_data()) {
         unset($content);
 
         if (!is_null($csvloaderror)) {
-            print_error('csvloaderror', '', $baseurl, $csvloaderror);
+            throw new \moodle_exception('csvloaderror', '', $baseurl, $csvloaderror);
         }
 
     $theimport = new \mod_ogte\import($cir,$moduleinstance,$modulecontext,$course,$cm, $listid);
