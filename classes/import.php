@@ -33,6 +33,25 @@ namespace mod_ogte;
  */
 class import  {
 
+    /** @var import_csv_reader the CSV reader */
+    protected $cir;
+    /** @var \stdClass the ogte instance */
+    protected $moduleinstance;
+    /** @var \context_module the module context */
+    protected $modulecontext;
+    /** @var \stdClass the course */
+    protected $course;
+    /** @var \stdClass the course module */
+    protected $cm;
+    /** @var int number of rows with errors */
+    protected $errors;
+    /** @var int the word list being imported into */
+    protected $listid;
+    /** @var array the expected columns */
+    protected $keycolumns;
+    /** @var import_tracker the upload progress tracker */
+    protected $upt;
+
     /**
      * process constructor.
      *

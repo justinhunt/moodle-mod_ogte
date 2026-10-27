@@ -4,6 +4,7 @@ use the core_external web service classes (Moodle 5.3 compatibility)
 fixed a PHP 8.4 deprecation in the test data generator
 replaced calls to print_error(), which no longer exists in Moodle
 fixed a JavaScript error on the edit page when the site has no word lists yet
+declared the properties of the word list importer (PHP 8.2 dynamic property deprecations)
 
 version 1.0.5 (Build: 2024012200)
 guest access on front page
