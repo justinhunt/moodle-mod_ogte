@@ -25,6 +25,7 @@ const M_WORDSTABLE="ogte_listwords";
 const M_PLUGINSETTINGS ='/admin/settings.php?section=modsettingogte';
 const M_CLASS_LISTSCONTAINER='mod_ogte_listscontainer';
 const M_ID_LISTSTABLE='mod_ogte_liststable_opts_9999';
+const M_ID_ENTRIESTABLE='mod_ogte_passages_table';
 const M_ID_RESULTSTABLE='mod_ogte_resultstable_opts_9999';
 const M_LISTSTATUS_EMPTY=0;
 const M_LISTSTATUS_READY=1;
@@ -98,5 +99,6 @@ const M_UNITS = 'm|cm|mm|km|kmh|mph|C|F|K|N|g|kg|gm|L|ml|mLmin|gal|ft|in|lb|oz|H
 //because of cleaning, the units get a bit mangled, so we use the mangled ones here
 ////km/h => kmh and g/m² => gm2 and mL/min => mlmin and °C =>C and °F =>F
 
-
+const M_APOSTROPHES = "/[‘’‛´ʹʹʹʹˋˋʹ＇＇ʹ‘‘ʹ‛‛ʹ]/u";  # Unicode characters representing apostrophe-like marks
+const M_FAKENEWLINE="1newline";
 }

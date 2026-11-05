@@ -1,11 +1,18 @@
 <div class="ogte-block-uncovered">
-    <div class="ogte-block-title">
+    <div class="ogte-block-title d-flex justify-content-between align-items-center">
         <span>{{title}}</span>
+        {{#istoggleblock}}
+        <div class="custom-control custom-switch">
+            <input type="checkbox" class="custom-control-input" id="ogte-ignore-toggle">
+            <label class="custom-control-label" for="ogte-ignore-toggle"></label>
+        </div>
+        {{/istoggleblock}}
     </div>
     <div class="ogte-block-uncovered-head">
         <table cellspacing="0" cellpadding="0" width="100%" class="outof_table">
             <thead>
             <tr>
+                {{#hascheckboxes}}<th class="ogte-ignore-cell" style="width: 30px;"></th>{{/hascheckboxes}}
                 <th>{{#str}}word, mod_ogte{{/str}}</th>
                 {{#haslevels}}
                     <th>{{#str}}level, mod_ogte{{/str}}</th>
@@ -17,6 +24,7 @@
             {{#haswords}}
             {{#words}}
             <tr>
+                {{#hascheckboxes}}<td class="ogte-ignore-cell"><input type="checkbox" class="ogte-ignore-checkbox" value="{{word}}" {{#checked}}checked{{/checked}}></td>{{/hascheckboxes}}
                 <td>{{word}}</td>
                 {{#haslevels}}<td>{{level}}</td>{{/haslevels}}
                 <td>{{frequency}}</td>

@@ -63,4 +63,5 @@ $lists = $DB->get_records(constants::M_LISTSTABLE,[]);
 if($lists){
 	echo $renderer->show_lists_list($lists,$listtableid,$cm);
 }
+echo $renderer->back_to_viewpage_button($cm,get_string('backtoviewpage', constants::M_COMPONENT));
 echo $renderer->footer();

@@ -1,5 +1,5 @@
 /* jshint ignore:start */
-define(['jquery','core/log','mod_ogte/clipboard'], function($, log, clipboard) {
+define(['jquery', 'core/log', 'mod_ogte/clipboard'], function ($, log, clipboard) {
 
     "use strict";
     log.debug('clipboard helper: initialising');
@@ -7,16 +7,23 @@ define(['jquery','core/log','mod_ogte/clipboard'], function($, log, clipboard) {
     return {
 
         //pass in config, and register any events
-        init: function(props){
+        init: function (props) {
             this.registerevents();
         },
 
-        registerevents: function() {
+        registerevents: function () {
             var that = this;
             var cj = new clipboard('.ogte_clipboardbutton',
-                {text: function(trigger) {
-                    return  $(trigger.getAttribute('data-clipboard-target')).text();
-                }
+                {
+                    text: function (trigger) {
+                        var target = $(trigger.getAttribute('data-clipboard-target'));
+                        // If target is an input or textarea, we need to use .val(). Otherwise .text()
+                        if (target.is('input, textarea')) {
+                            return target.val();
+                        } else {
+                            return target.text();
+                        }
+                    }
                 }
             );
 
@@ -25,9 +32,9 @@ define(['jquery','core/log','mod_ogte/clipboard'], function($, log, clipboard) {
                 var copied = $(e.trigger).parent().parent().find('.ogte_copied');
                 copied.show();
                 e.clearSelection();
-                setTimeout(function(){
+                setTimeout(function () {
                     copied.fadeOut();
-                },2000);
+                }, 2000);
             });
 
 

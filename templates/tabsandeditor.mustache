@@ -1,13 +1,17 @@
+<h1 class="ogte-main-title"><span>{{#str}}ngslproject, mod_ogte{{/str}}</span>{{#str}}texteditor, mod_ogte{{/str}}</h1>
 
-<ul class="nav nav-pills mod_ogte_nav-pills ">
-    <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#articleleveler">{{#str}}articleleveler, mod_ogte{{/str}}</a></li>
-    <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#articlegenerator">{{#str}}articlegenerator, mod_ogte{{/str}}</a></li>
-    <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#articlerewriter">{{#str}}articlerewriter, mod_ogte{{/str}}</a></li>
-    <!--
-    <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#articlechecker">{{#str}}articlechecker, mod_ogte{{/str}}</a></li>
-    -->
+<div class="mod_ogte_nav-pills-container">
+    <ul class="nav nav-pills mod_ogte_nav-pills ">
+        <li class="nav-item"><a class="nav-link active article-leveler" data-toggle="tab" href="#articleleveler">{{#str}}articleleveler, mod_ogte{{/str}}</a></li>
+        <li class="nav-item"><a class="nav-link article-generator" data-toggle="tab" href="#articlegenerator">{{#str}}articlegenerator, mod_ogte{{/str}}</a></li>
+        <li class="nav-item"><a class="nav-link article-rewriter" data-toggle="tab" href="#articlerewriter">{{#str}}articlerewriter, mod_ogte{{/str}}</a></li>
+        <li class="nav-item"><a class="nav-link site-faq" data-toggle="tab" href="#sitefaq">{{#str}}sitefaq, mod_ogte{{/str}}</a></li>
+        <!--
+        <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#articlechecker">{{#str}}articlechecker, mod_ogte{{/str}}</a></li>
+        -->
+    </ul>
+</div>
 
-</ul>
 <div class="tab-content mod_ogte_tab-content">
     <div id="articleleveler" class="tab-pane active">
         {{> mod_ogte/articleleveler}}
@@ -18,4 +22,12 @@
     <div id="articlerewriter" class="tab-pane">
         {{> mod_ogte/articlerewriter}}
     </div>
+    <div id="sitefaq" class="tab-pane">
+        {{> mod_ogte/sitefaq}}
+    </div>
 </div>
+
+<footer class="ogte-footer">
+    <div class="ogte-logo"></div>
+    <p class="ogte-copyright">© 2024 <a href="https://newgeneralservicelist.com">New General Service List Project</a></p>
+</footer>

@@ -1,4 +1,4 @@
-define(['jquery', 'core/log','core/ajax'], function ($, log,ajax) {
+define(['jquery', 'core/log', 'core/ajax'], function ($, log, ajax) {
     "use strict"; // jshint ;_;
     /*
     This file helps you get Polly URLs at runtime
@@ -7,14 +7,15 @@ define(['jquery', 'core/log','core/ajax'], function ($, log,ajax) {
     log.debug('OGTE Utils: initialising');
 
     return {
-        token:  '',
+        token: '',
         region: '',
         owner: '',
 
-        setCloudPoodllToken: function(token){
-          this.token=token;
+        setCloudPoodllToken: function (token) {
+            this.token = token;
         },
-        countWords: function(sentence) {
+
+        countWords: function (sentence) {
             // Remove any leading or trailing spaces
             sentence = sentence.trim();
 
@@ -25,7 +26,7 @@ define(['jquery', 'core/log','core/ajax'], function ($, log,ajax) {
             return spaceCount + 1;
         },
 
-        levelPassage: function(thepassage,ignore,listid,listlevel, ogteid){
+        levelPassage: function (thepassage, ignore, listid, listlevel, ogteid) {
             var that = this;
             return ajax.call([{
                 methodname: 'mod_ogte_get_coverage',
@@ -41,8 +42,8 @@ define(['jquery', 'core/log','core/ajax'], function ($, log,ajax) {
         },
 
 
-        stripTags: function(input) {
-            if(typeof input === "undefined" || input == null) return "";
+        stripTags: function (input) {
+            if (typeof input === "undefined" || input == null) return "";
             return input.replace(/<[^>]*>/g, '');
         },
 
@@ -54,7 +55,7 @@ define(['jquery', 'core/log','core/ajax'], function ($, log,ajax) {
             } else if (document.selection && document.selection.type !== "Control") {
                 selectedText = document.selection.createRange().text;
             }
-            if (selectedText.length > 0){
+            if (selectedText.length > 0) {
                 var words = selectedText.split(/\s+/);
                 // Get the first word
                 if (words.length > 0) {
@@ -67,7 +68,7 @@ define(['jquery', 'core/log','core/ajax'], function ($, log,ajax) {
         analyzeText: function (text) {
 
             //tidy it up
-            text=this.stripTags(text);
+            text = this.stripTags(text);
 
             // Count the number of words
             const words = text.split(/\s+/);
@@ -80,15 +81,19 @@ define(['jquery', 'core/log','core/ajax'], function ($, log,ajax) {
 
             // Count the number of sentences
             const sentences = text.split(/[.!?]+/);
-            const sentenceCount = sentences.length - 1; // Ignore the last element
+            var sentenceCount = sentences.length - 1; // Ignore the last element
+            if (sentenceCount < 1 && wordCount > 0) { sentenceCount = 1; }//if no punctuation, then we have one sentence
 
             // Calculate the average sentence length
-            var totalSentenceLength =0;
-            for (var i =0; i<sentences.length;i++){
+            var totalSentenceLength = 0;
+            for (var i = 0; i < sentences.length; i++) {
                 totalSentenceLength += this.countWords(sentences[i]);
             }
             // const totalSentenceLength = sentences.reduce((acc, sentence) => acc + sentence.length, 0);
-            const averageSentenceLength = (totalSentenceLength / sentenceCount).toFixed(1);
+            var averageSentenceLength = 0;
+            if (sentenceCount > 0) {
+                averageSentenceLength = (totalSentenceLength / sentenceCount).toFixed(1);
+            }
 
             var stats = {
                 charCount: totalChars,
@@ -100,82 +105,24 @@ define(['jquery', 'core/log','core/ajax'], function ($, log,ajax) {
             return stats;
         },
 
-        analyzeOutListLevelsIgnored: function (jsonpassage) {
-            var that=this;
-            //put the html into a temp div so we can use jquery to query it
-            var tempElement = $('<div>').html(jsonpassage);
-            //for each of our stats categories we perform a loop
-            var categories = ['outoflist','outoflevel','ignored'];
+        analyzeOutListLevelsIgnored: function (jsonrating) {
+            // We now receive pre-calculated arrays from PHP instead of parsing passage HTML
             var results = {};
-            for (var i =0; i<categories.length;i++){
-                var result=[];
-                var elements = tempElement.find('.mod_ogte_' + categories[i]);
+            // The JSON from PHP includes outoflist_freq, outoflevel_freq, ignored_freq, propernoun_freq
+            results['outoflist'] = jsonrating.outoflist_freq || [];
+            results['outoflevel'] = jsonrating.outoflevel_freq || [];
+            results['ignored'] = jsonrating.ignored_freq || [];
+            results['propernoun'] = jsonrating.propernoun_freq || [];
 
-                // Create an object to store word levels and frequencies
-                var wordFrequency = {};
-                //wordLevel is only used for listlevel (not for out of list or ignored
-                var wordLevel = {};
-
-                // Iterate through each element
-                elements.each(function () {
-                    // Get the text content of the element
-                    var word = that.cleanWord($(this).text());
-
-                    // Update the frequency in the wordFrequency object
-                    wordFrequency[word] = (wordFrequency[word] || 0) + 1;
-
-                    //update the level
-                    wordLevel[word] = $(this).data('listlevel') + 1;
-                });
-
-                for (var word in wordFrequency) {
-                    if (wordFrequency.hasOwnProperty(word)) {
-                        var worddata={
-                            word: word,
-                            frequency: wordFrequency[word],
-                        };
-                        if(categories[i] == 'outoflevel'){
-                            worddata.level = wordLevel[word];
-                        }
-                        result.push(worddata);
-                    }
-                }
-                //sort array by frequency
-                result.sort(function(a, b) {
-                    return b.frequency - a.frequency;
-                });
-                //save results and return
-                results[categories[i]] = result;
-            }
             return results;
         },
 
-        calc_outoflevel_frequencies: function (jsonpassage) {
-            //put the html into a temp div so we can use jquery to query it
-            var tempElement = $('<div>').html(jsonpassage);
-            var elements = tempElement.find('.mod_ogte_outoflevel');
-            var result=[];
-            var levelCount = {};
-            // Iterate through each element
-            elements.each(function () {
-                var thelevel = $(this).data('listlevel') + 1;
-                // Update the frequency in the levelFrequency object
-                levelCount[thelevel] = (levelCount[thelevel] || 0) + 1;
-            });
-            for (var thelevel in levelCount) {
-                if (levelCount.hasOwnProperty(thelevel)) {
-                    var leveldata={
-                        level: thelevel,
-                        count: levelCount[thelevel],
-                        frequency: ((levelCount[thelevel] / elements.length) * 100).toFixed(2),
-                    };
-                    result.push(leveldata);
-                }
-            }
-            return result;
+        calc_outoflevel_frequencies: function (jsonrating) {
+            // Retrieve pre-calculated level summaries from the JSON rating
+            return jsonrating.outoflevel_summary || [];
         },
 
-       cleanWord: function(inputWord) {
+        cleanWord: function (inputWord) {
             // Convert to lowercase
             var lowercaseWord = inputWord.toLowerCase();
             // Remove leading and trailing whitespace and punctuation
@@ -183,7 +130,7 @@ define(['jquery', 'core/log','core/ajax'], function ($, log,ajax) {
             return cleanedWord;
         },
 
-        downloadTextContent: function(textcontent, fileName) {
+        downloadTextContent: function (textcontent, fileName) {
 
             var blob = new Blob([textcontent], { type: 'text/plain' });
             var link = document.createElement('a');
@@ -200,7 +147,7 @@ define(['jquery', 'core/log','core/ajax'], function ($, log,ajax) {
         },
 
         //FUNCTION rewrite article
-        call_ai: function(prompt, language,subject,action, callback) {
+        call_ai: function (prompt, language, subject, action, callback) {
 
             //The REST API we are calling
             var functionname = 'local_cpapi_call_ai';
@@ -224,7 +171,7 @@ define(['jquery', 'core/log','core/ajax'], function ($, log,ajax) {
                                 console.log(payloadobject.returnMessage);
                                 return false;
                                 //if all good, then lets do the embed
-                            } else if (payloadobject.returnCode === 0){
+                            } else if (payloadobject.returnCode === 0) {
                                 var pollyurl = payloadobject.returnMessage;
                                 callback(pollyurl);
                             } else {
@@ -259,33 +206,24 @@ define(['jquery', 'core/log','core/ajax'], function ($, log,ajax) {
             xhr.send(xhrparams);
         },
 
-
-
-
-
-
-
-
-
-
-    init: function(token, region, owner){
-            this.token =token;
-            this.region=region;
-            this.owner=owner;
+        init: function (token, region, owner) {
+            this.token = token;
+            this.region = region;
+            this.owner = owner;
         },
 
-        clean_ssml_chars: function(speaktext){
+        clean_ssml_chars: function (speaktext) {
             //deal with SSML reserved characters
-            speaktext =  speaktext.replace(/&/g,'&amp;');
-            speaktext = speaktext.replace(/'/g,'&apos;');
-            speaktext= speaktext.replace(/"/g,'&quot;');
-            speaktext = speaktext.replace(/</g,'&lt;');
-            speaktext =  speaktext.replace(/>/g,'&gt;');
+            speaktext = speaktext.replace(/&/g, '&amp;');
+            speaktext = speaktext.replace(/'/g, '&apos;');
+            speaktext = speaktext.replace(/"/g, '&quot;');
+            speaktext = speaktext.replace(/</g, '&lt;');
+            speaktext = speaktext.replace(/>/g, '&gt;');
             return speaktext;
         },
 
-        can_speak_neural: function(voice,region){
-            switch(region){
+        can_speak_neural: function (voice, region) {
+            switch (region) {
                 case "useast1":
                 case "tokyo":
                 case "sydney":
@@ -302,17 +240,17 @@ define(['jquery', 'core/log','core/ajax'], function ($, log,ajax) {
             }
 
             //check if the voice is supported
-            if(def.neural_voices.indexOf(voice) !== -1){
+            if (def.neural_voices.indexOf(voice) !== -1) {
                 return true;
-            }else{
+            } else {
                 return false;
             }
 
         },
 
-        fetch_polly_url: function(speaktext,voiceoption, voice) {
+        fetch_polly_url: function (speaktext, voiceoption, voice) {
             var that = this;
-            return new Promise(function(resolve,reject){
+            return new Promise(function (resolve, reject) {
                 //The REST API we are calling
                 var functionname = 'local_cpapi_fetch_polly_url';
 
@@ -335,7 +273,7 @@ define(['jquery', 'core/log','core/ajax'], function ($, log,ajax) {
                                     log.debug(payloadobject.returnMessage);
                                     return false;
                                     //if all good, then lets do the embed
-                                } else if (payloadobject.returnCode === 0){
+                                } else if (payloadobject.returnCode === 0) {
                                     var pollyurl = payloadobject.returnMessage;
                                     resolve(pollyurl);
                                 } else {
@@ -353,27 +291,27 @@ define(['jquery', 'core/log','core/ajax'], function ($, log,ajax) {
                         }
                     }
                 };
-                var texttype='ssml';
+                var texttype = 'ssml';
 
-                switch(parseInt(voiceoption)){
+                switch (parseInt(voiceoption)) {
 
                     //slow
                     case 1:
                         //fetch slightly slower version of speech
                         //rate = 'slow' or 'x-slow' or 'medium'
-                        speaktext =that.clean_ssml_chars(speaktext);
+                        speaktext = that.clean_ssml_chars(speaktext);
                         speaktext = '<speak><break time="1000ms"></break><prosody rate="slow">' + speaktext + '</prosody></speak>';
                         break;
                     //veryslow
                     case 2:
                         //fetch slightly slower version of speech
                         //rate = 'slow' or 'x-slow' or 'medium'
-                        speaktext =that.clean_ssml_chars(speaktext);
+                        speaktext = that.clean_ssml_chars(speaktext);
                         speaktext = '<speak><break time="1000ms"></break><prosody rate="x-slow">' + speaktext + '</prosody></speak>';
                         break;
                     //ssml
                     case 3:
-                        speaktext='<speak>' + speaktext + '</speak>';
+                        speaktext = '<speak>' + speaktext + '</speak>';
                         break;
 
                     //normal
@@ -381,26 +319,26 @@ define(['jquery', 'core/log','core/ajax'], function ($, log,ajax) {
                     default:
                         //fetch slightly slower version of speech
                         //rate = 'slow' or 'x-slow' or 'medium'
-                        speaktext =that.clean_ssml_chars(speaktext);
+                        speaktext = that.clean_ssml_chars(speaktext);
                         speaktext = '<speak><break time="1000ms"></break>' + speaktext + '</speak>';
                         break;
 
                 }
 
                 //to use the neural or standard synthesis engine
-                var engine = that.can_speak_neural(voice,that.region) ?'neural' : 'standard';
+                var engine = that.can_speak_neural(voice, that.region) ? 'neural' : 'standard';
 
                 //log.debug(params);
                 var xhrparams = "wstoken=" + that.token
-                + "&wsfunction=" + functionname
-                + "&moodlewsrestformat=" + 'json'
-                + "&text=" + encodeURIComponent(speaktext)
-                + '&texttype=' + texttype
-                + '&voice=' + voice
-                + '&appid=' + def.component
-                + '&owner=' + that.owner
-                + '&region=' + that.region
-                + '&engine=' + engine;
+                    + "&wsfunction=" + functionname
+                    + "&moodlewsrestformat=" + 'json'
+                    + "&text=" + encodeURIComponent(speaktext)
+                    + '&texttype=' + texttype
+                    + '&voice=' + voice
+                    + '&appid=' + def.component
+                    + '&owner=' + that.owner
+                    + '&region=' + that.region
+                    + '&engine=' + engine;
 
                 var serverurl = def.cloudpoodllurl + "/webservice/rest/server.php";
                 xhr.open("POST", serverurl, true);

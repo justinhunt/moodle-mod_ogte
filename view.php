@@ -64,25 +64,10 @@ if (! $cw = $DB->get_record("course_sections", array("id" => $cm->section))) {
     throw new \moodle_exception('invalidcoursemodule');
 }
 
+$renderer = $PAGE->get_renderer(constants::M_COMPONENT);
 $ogtename = format_string($ogte->name, true, array('context' => $context));
 
-//get token
-//first confirm we are authorised before we try to get the token
-$config = get_config(constants::M_COMPONENT);
-if(empty($config->apiuser) || empty($config->apisecret)){
-    $errormessage = get_string('nocredentials',constants::M_COMPONENT,
-        $CFG->wwwroot . constants::M_PLUGINSETTINGS);
-    return $this->show_problembox($errormessage);
-}else {
-    //fetch token
-    $token = utils::fetch_token($config->apiuser,$config->apisecret);
 
-    //check token authenticated and no errors in it
-    $errormessage = utils::fetch_token_error($token);
-    if(!empty($errormessage)){
-        return $this->show_problembox($errormessage);
-    }
-}
 
 // Header.
 $PAGE->set_url('/mod/ogte/view.php', array('id' => $id));
@@ -90,7 +75,9 @@ $PAGE->navbar->add($ogtename);
 $PAGE->set_title($ogtename);
 $PAGE->set_heading($course->fullname);
 
-$renderer = $PAGE->get_renderer(constants::M_COMPONENT);
+
+//prepare datatable(before header printed)
+$renderer->setup_datatables(constants::M_ID_ENTRIESTABLE);
 
 echo $renderer->header();
 
@@ -101,8 +88,26 @@ $currentgroup = groups_get_activity_group($cm, true);
 // groups_print_activity_menu($cm, $CFG->wwwroot . "/mod/ogte/view.php?id=$cm->id");
 
 
-$intro = format_module_intro('ogte', $ogte, $cm->id);
-echo $renderer->box($intro);
+//$intro = format_module_intro('ogte', $ogte, $cm->id);
+//echo $renderer->box($intro);
+
+//get token
+//first confirm we are authorised before we try to get the token
+$config = get_config(constants::M_COMPONENT);
+if(empty($config->apiuser) || empty($config->apisecret)){
+    $errormessage = get_string('nocredentials',constants::M_COMPONENT,
+        $CFG->wwwroot . constants::M_PLUGINSETTINGS);
+    echo $renderer->show_problembox($errormessage);
+}else {
+    //fetch token
+    $token = utils::fetch_token($config->apiuser,$config->apisecret);
+
+    //check token authenticated and no errors in it
+    $errormessage = utils::fetch_token_error($token);
+    if(!empty($errormessage)){
+        echo $renderer->show_problembox($errormessage);
+    }
+}
 
 //template data
 $tdata=[];
@@ -127,7 +132,7 @@ if ($ogte->mode == 1){
 */
 
 // Display entries
-$lists=utils::get_level_options();
+$lists=utils::get_level_options($course->id);
 $entries = $DB->get_records(constants::M_ENTRIESTABLE, array('userid' => $USER->id, 'ogte' => $ogte->id));
 if($entries) {
     $theentries =[];
@@ -136,11 +141,19 @@ if($entries) {
         $arrayitem = (Array)$entry;
         $arrayitem['index']=($i+1);
         //get list and level info
-        $thelevels=utils::get_level_options($entry->listid);
+        $thelevels=utils::get_level_options($course->id,$entry->listid);
         if(array_key_exists($entry->levelid, $thelevels)) {
             $arrayitem['listinfo'] = $thelevels[$entry->levelid]['listname'] . ' - ' . $thelevels[$entry->levelid]['label'];
         }else{
             $arrayitem['listinfo'] ='';
+        }
+        //get coverage
+        $arrayitem['coverage'] ='--';
+        if(!empty($entry->jsonrating) && utils::is_json($entry->jsonrating)){
+            $rating = json_decode($entry->jsonrating);
+            if(isset($rating->coverage)){
+             $arrayitem['coverage'] =$rating->coverage;
+            }
         }
 
         $editurl=new moodle_url('/mod/ogte/edit.php', array('id'=>$cm->id, 'entryid'=>$entry->id,'sesskey'=>$sesskey ,'action'=>'edit'));

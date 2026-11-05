@@ -138,6 +138,9 @@ if ($data = $mform->get_data()) {
 
     $thelist->timemodified=time();
 
+    //set course id or 0 depending on the setting
+    $thelist->courseid=$thelist->siteorcourse == 1 ? $course->id :0;
+
     //first insert a new list if we need to
     //that will give us a listid, we need that for saving files
     if(!$edit){
@@ -166,6 +169,12 @@ if ($data = $mform->get_data()) {
 //if edit mode load up the list into a data object
 if ($edit) {
     $data = $list;
+    //we create a fake siteorcourse field based on if the lists courseid is set
+    if($list->courseid>0){
+        $data->siteorcourse=1;
+    }else{
+        $data->siteorcourse=0;
+    }
 
 
 }else{
@@ -174,6 +183,9 @@ if ($edit) {
 }
 $data->courseid=$course->id;
 $data->moduleid = $moduleid;
+
+//we manage this
+
 
 
 //Set up the list type specific parts of the form data

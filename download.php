@@ -65,7 +65,7 @@ if($entryid) {
 }
 
 //get Level options
-$thelevels =utils::get_level_options();
+$thelevels =utils::get_level_options($course->id);
 
 //get the document title
 if($entryid && count($entries)==1 && array_key_exists($entryid, $entries)) {
@@ -116,7 +116,9 @@ if($format=='txt'){
 //If its a PDF document
 }else {
 
-    ob_clean();
+    if(ob_get_length() > 0) {
+        ob_clean();
+    }
     $doc = new pdf();
     $doc->setPrintHeader(false);
     $doc->setPrintFooter(false);
@@ -145,7 +147,11 @@ if($format=='txt'){
         $listandlevel = get_string('listlevel', 'ogte') . ": " . $listandlevel;
         if (utils::is_json($entry->jsonrating)) {
             $jsonrating = json_decode($entry->jsonrating);
-            $coverage = $jsonrating->coverage;
+            if(isset($jsonrating->coverage)) {
+                $coverage = $jsonrating->coverage;
+            }else{
+                $coverage = '';
+            }
         } else {
             $coverage = '';
         }

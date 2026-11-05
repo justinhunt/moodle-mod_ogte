@@ -26,6 +26,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+use mod_ogte\constants;
+use mod_ogte\utils;
+
 
 /**
  * Given an object containing all the necessary data,
@@ -83,15 +86,15 @@ function ogte_delete_instance($id)
 
     $result = true;
 
-    if (!$ogte = $DB->get_record("ogte", array("id" => $id))) {
+    if (!$ogte = $DB->get_record("ogte", ["id" => $id])) {
         return false;
     }
 
-    if (!$DB->delete_records("ogte_entries", array("ogte" => $ogte->id))) {
+    if (!$DB->delete_records("ogte_entries", ["ogte" => $ogte->id])) {
         $result = false;
     }
 
-    if (!$DB->delete_records("ogte", array("id" => $ogte->id))) {
+    if (!$DB->delete_records("ogte", ["id" => $ogte->id])) {
         $result = false;
     }
 
@@ -143,13 +146,13 @@ function ogte_supports($feature)
 
 function ogte_get_view_actions()
 {
-    return array('view', 'view all', 'view responses');
+    return ['view', 'view all', 'view responses'];
 }
 
 
 function ogte_get_post_actions()
 {
-    return array('add entry', 'update entry', 'update feedback');
+    return ['add entry', 'update entry', 'update feedback'];
 }
 
 
@@ -158,7 +161,7 @@ function ogte_user_outline($course, $user, $mod, $ogte)
 
     global $DB;
 
-    if ($entry = $DB->get_record("ogte_entries", array("userid" => $user->id, "ogte" => $ogte->id))) {
+    if ($entry = $DB->get_record("ogte_entries", ["userid" => $user->id, "ogte" => $ogte->id])) {
 
         $numwords = count(preg_split("/\w\b/", $entry->text)) - 1;
 
@@ -176,7 +179,7 @@ function ogte_user_complete($course, $user, $mod, $ogte)
 
     global $DB, $OUTPUT;
 
-    if ($entry = $DB->get_record("ogte_entries", array("userid" => $user->id, "ogte" => $ogte->id))) {
+    if ($entry = $DB->get_record("ogte_entries", ["userid" => $user->id, "ogte" => $ogte->id])) {
 
         echo $OUTPUT->box_start();
 
@@ -193,7 +196,8 @@ function ogte_user_complete($course, $user, $mod, $ogte)
 
         echo $OUTPUT->box_end();
 
-    } else {
+    }
+    else {
         print_string("noentry", "ogte");
     }
 }
@@ -219,7 +223,7 @@ function ogte_print_recent_activity($course, $viewfullnames, $timestart)
         return false;
     }
 
-    $dbparams = array($timestart, $course->id, 'ogte');
+    $dbparams = [$timestart, $course->id, 'ogte'];
     $namefields = user_picture::fields('u', null, 'userid');
     $sql = "SELECT je.id, je.modified, cm.id AS cmid, $namefields
          FROM {ogte_entries} je
@@ -236,7 +240,7 @@ function ogte_print_recent_activity($course, $viewfullnames, $timestart)
     $newentries = $DB->get_records_sql($sql, $dbparams);
 
     $modinfo = get_fast_modinfo($course);
-    $show = array();
+    $show = [];
 
     foreach ($newentries as $anentry) {
 
@@ -297,17 +301,16 @@ function ogte_print_recent_activity($course, $viewfullnames, $timestart)
         $context = context_module::instance($submission->cmid);
         if (has_capability('mod/ogte:manageentries', $context)) {
             $link = $CFG->wwwroot . '/mod/ogte/report.php?id=' . $cm->id;
-        } else {
+        }
+        else {
             $link = $CFG->wwwroot . '/mod/ogte/view.php?id=' . $cm->id;
         }
-        print_recent_activity_note(
-            $submission->modified,
+        print_recent_activity_note($submission->modified,
             $submission,
             $cm->name,
             $link,
             false,
-            $viewfullnames
-        );
+            $viewfullnames);
     }
     return true;
 }
@@ -327,13 +330,13 @@ function ogte_get_participants($ogteid)
                                       FROM {user} u,
                                       {ogte_entries} j
                                       WHERE j.ogte=? and
-                                      u.id = j.userid", array($ogteid));
+                                      u.id = j.userid", [$ogteid]);
     // Get teachers.
     $teachers = $DB->get_records_sql("SELECT DISTINCT u.id
                                       FROM {user} u,
                                       {ogte_entries} j
                                       WHERE j.ogte=? and
-                                      u.id = j.teacher", array($ogteid));
+                                      u.id = j.teacher", [$ogteid]);
 
     // Add teachers to students.
     if ($teachers) {
@@ -357,7 +360,7 @@ function ogte_scale_used($ogteid, $scaleid)
     global $DB;
     $return = false;
 
-    $rec = $DB->get_record("ogte", array("id" => $ogteid, "grade" => -$scaleid));
+    $rec = $DB->get_record("ogte", ["id" => $ogteid, "grade" => -$scaleid]);
 
     if (!empty($rec) && !empty($scaleid)) {
         $return = true;
@@ -377,9 +380,10 @@ function ogte_scale_used_anywhere($scaleid)
 {
     global $DB;
 
-    if ($scaleid and $DB->get_records('ogte', array('grade' => -$scaleid))) {
+    if ($scaleid and $DB->get_records('ogte', ['grade' => -$scaleid])) {
         return true;
-    } else {
+    }
+    else {
         return false;
     }
 }
@@ -404,7 +408,7 @@ function ogte_reset_course_form_definition(&$mform)
  */
 function ogte_reset_course_form_defaults($course)
 {
-    return array('reset_ogte' => 1);
+    return ['reset_ogte' => 1];
 }
 
 /**
@@ -417,21 +421,19 @@ function ogte_reset_userdata($data)
 
     global $CFG, $DB;
 
-    $status = array();
+    $status = [];
     if (!empty($data->reset_ogte)) {
 
         $sql = "SELECT j.id
                 FROM {ogte} j
                 WHERE j.course = ?";
-        $params = array($data->courseid);
+        $params = [$data->courseid];
 
         $DB->delete_records_select('ogte_entries', "ogte IN ($sql)", $params);
 
-        $status[] = array(
-            'component' => get_string('modulenameplural', 'ogte'),
+        $status[] = ['component' => get_string('modulenameplural', 'ogte'),
             'item' => get_string('removeentries', 'ogte'),
-            'error' => false
-        );
+            'error' => false];
     }
 
     return $status;
@@ -443,15 +445,15 @@ function ogte_print_overview($courses, &$htmlarray)
     global $USER, $CFG, $DB;
 
     if (!get_config('ogte', 'overview')) {
-        return array();
+        return [];
     }
 
     if (empty($courses) || !is_array($courses) || count($courses) == 0) {
-        return array();
+        return [];
     }
 
     if (!$ogtes = get_all_instances_in_courses('ogte', $courses)) {
-        return array();
+        return [];
     }
 
     $strogte = get_string('modulename', 'ogte');
@@ -460,7 +462,7 @@ function ogte_print_overview($courses, &$htmlarray)
     foreach ($ogtes as $ogte) {
 
         if (empty($courses[$ogte->course]->format)) {
-            $courses[$ogte->course]->format = $DB->get_field('course', 'format', array('id' => $ogte->course));
+            $courses[$ogte->course]->format = $DB->get_field('course', 'format', ['id' => $ogte->course]);
         }
 
         if ($courses[$ogte->course]->format == 'weeks' and $ogte->days) {
@@ -470,12 +472,14 @@ function ogte_print_overview($courses, &$htmlarray)
             $ogte->timestart = $coursestartdate + (($ogte->section - 1) * 608400);
             if (!empty($ogte->days)) {
                 $ogte->timefinish = $ogte->timestart + (3600 * 24 * $ogte->days);
-            } else {
+            }
+            else {
                 $ogte->timefinish = 9999999999;
             }
             $ogteopen = ($ogte->timestart < $timenow && $timenow < $ogte->timefinish);
 
-        } else {
+        }
+        else {
             $ogteopen = true;
         }
 
@@ -487,7 +491,8 @@ function ogte_print_overview($courses, &$htmlarray)
 
             if (empty($htmlarray[$ogte->course]['ogte'])) {
                 $htmlarray[$ogte->course]['ogte'] = $str;
-            } else {
+            }
+            else {
                 $htmlarray[$ogte->course]['ogte'] .= $str;
             }
         }
@@ -498,19 +503,21 @@ function ogte_get_user_grades($ogte, $userid = 0)
 {
     global $DB;
 
-    $params = array();
+    $params = [];
 
     if ($userid) {
         $userstr = 'AND userid = :uid';
         $params['uid'] = $userid;
-    } else {
+    }
+    else {
         $userstr = '';
     }
 
     if (!$ogte) {
         return false;
 
-    } else {
+    }
+    else {
 
         $sql = "SELECT userid, modified as datesubmitted, format as feedbackformat,
                 rating as rawgrade, entrycomment as feedback, teacher as usermodifier, timemarked as dategraded
@@ -527,7 +534,8 @@ function ogte_get_user_grades($ogte, $userid = 0)
                     $grades[$key]->rawgrade = null;
                 }
             }
-        } else {
+        }
+        else {
             return false;
         }
 
@@ -556,15 +564,18 @@ function ogte_update_grades($ogte = null, $userid = 0, $nullifnone = true)
     if ($ogte != null) {
         if ($grades = ogte_get_user_grades($ogte, $userid)) {
             ogte_grade_item_update($ogte, $grades);
-        } else if ($userid && $nullifnone) {
+        }
+        else if ($userid && $nullifnone) {
             $grade = new stdClass();
             $grade->userid = $userid;
             $grade->rawgrade = null;
             ogte_grade_item_update($ogte, $grade);
-        } else {
+        }
+        else {
             ogte_grade_item_update($ogte);
         }
-    } else {
+    }
+    else {
         $sql = "SELECT j.*, cm.idnumber as cmidnumber
                 FROM {course_modules} cm
                 JOIN {modules} m ON m.id = cm.module
@@ -574,7 +585,8 @@ function ogte_update_grades($ogte = null, $userid = 0, $nullifnone = true)
             foreach ($recordset as $ogte) {
                 if ($ogte->grade != false) {
                     ogte_update_grades($ogte);
-                } else {
+                }
+                else {
                     ogte_grade_item_update($ogte);
                 }
             }
@@ -598,9 +610,10 @@ function ogte_grade_item_update($ogte, $grades = null)
     }
 
     if (property_exists($ogte, 'cmidnumber')) {
-        $params = array('itemname' => $ogte->name, 'idnumber' => $ogte->cmidnumber);
-    } else {
-        $params = array('itemname' => $ogte->name);
+        $params = ['itemname' => $ogte->name, 'idnumber' => $ogte->cmidnumber];
+    }
+    else {
+        $params = ['itemname' => $ogte->name];
     }
 
     // if ($ogte->grade > 0) {
@@ -639,7 +652,7 @@ function ogte_grade_item_delete($ogte)
 
     require_once($CFG->libdir . '/gradelib.php');
 
-    return grade_update('mod/ogte', $ogte->course, 'mod', 'ogte', $ogte->id, 0, null, array('deleted' => 1));
+    return grade_update('mod/ogte', $ogte->course, 'mod', 'ogte', $ogte->id, 0, null, ['deleted' => 1]);
 }
 
 
@@ -648,7 +661,7 @@ function ogte_get_users_done($ogte, $currentgroup)
 {
     global $DB;
 
-    $params = array();
+    $params = [];
 
     $sql = "SELECT u.* FROM {ogte_entries} j
             JOIN {user} u ON j.userid = u.id ";
@@ -694,20 +707,21 @@ function ogte_count_entries($ogte, $groupid = 0)
     $cm = ogte_get_coursemodule($ogte->id);
     $context = context_module::instance($cm->id);
 
-    if ($groupid) {     // How many in a particular group?
+    if ($groupid) { // How many in a particular group?
 
         $sql = "SELECT DISTINCT u.id FROM {ogte_entries} j
                 JOIN {groups_members} g ON g.userid = j.userid
                 JOIN {user} u ON u.id = g.userid
                 WHERE j.ogte = ? AND g.groupid = ?";
-        $ogtes = $DB->get_records_sql($sql, array($ogte->id, $groupid));
+        $ogtes = $DB->get_records_sql($sql, [$ogte->id, $groupid]);
 
-    } else { // Count all the entries from the whole course.
+    }
+    else { // Count all the entries from the whole course.
 
         $sql = "SELECT DISTINCT u.id FROM {ogte_entries} j
                 JOIN {user} u ON u.id = j.userid
                 WHERE j.ogte = ?";
-        $ogtes = $DB->get_records_sql($sql, array($ogte->id));
+        $ogtes = $DB->get_records_sql($sql, [$ogte->id]);
     }
 
     if (!$ogtes) {
@@ -735,7 +749,7 @@ function ogte_get_unmailed_graded($cutofftime)
     $sql = "SELECT je.*, j.course, j.name FROM {ogte_entries} je
             JOIN {ogte} j ON je.ogte = j.id
             WHERE je.mailed = '0' AND je.timemarked < ? AND je.timemarked > 0";
-    return $DB->get_records_sql($sql, array($cutofftime));
+    return $DB->get_records_sql($sql, [$cutofftime]);
 }
 
 function ogte_log_info($log)
@@ -747,7 +761,7 @@ function ogte_log_info($log)
             JOIN {ogte_entries} je ON je.ogte = j.id
             JOIN {user} u ON u.id = je.userid
             WHERE je.id = ?";
-    return $DB->get_record_sql($sql, array($log->info));
+    return $DB->get_record_sql($sql, [$log->info]);
 }
 
 /**
@@ -763,7 +777,7 @@ function ogte_get_coursemodule($ogteid)
 
     return $DB->get_record_sql("SELECT cm.id FROM {course_modules} cm
                                 JOIN {modules} m ON m.id = cm.module
-                                WHERE cm.instance = ? AND m.name = 'ogte'", array($ogteid));
+                                WHERE cm.instance = ? AND m.name = 'ogte'", [$ogteid]);
 }
 
 
@@ -779,7 +793,7 @@ function ogte_print_user_entry($course, $user, $entry, $teachers, $grades)
 
     echo "\n<tr>";
     echo "\n<td class=\"userpix\" rowspan=\"2\">";
-    echo $OUTPUT->user_picture($user, array('courseid' => $course->id, 'alttext' => true));
+    echo $OUTPUT->user_picture($user, ['courseid' => $course->id, 'alttext' => true]);
     echo "</td>";
     echo "<td class=\"userfullname\">" . fullname($user);
     if ($entry) {
@@ -791,7 +805,8 @@ function ogte_print_user_entry($course, $user, $entry, $teachers, $grades)
     echo "\n<tr><td>";
     if ($entry) {
         echo ogte_format_entry_text($entry, $course);
-    } else {
+    }
+    else {
         print_string("noentry", "ogte");
     }
     echo "</td></tr>";
@@ -803,25 +818,23 @@ function ogte_print_user_entry($course, $user, $entry, $teachers, $grades)
             $entry->teacher = $USER->id;
         }
         if (empty($teachers[$entry->teacher])) {
-            $teachers[$entry->teacher] = $DB->get_record('user', array('id' => $entry->teacher));
+            $teachers[$entry->teacher] = $DB->get_record('user', ['id' => $entry->teacher]);
         }
-        echo $OUTPUT->user_picture($teachers[$entry->teacher], array('courseid' => $course->id, 'alttext' => true));
+        echo $OUTPUT->user_picture($teachers[$entry->teacher], ['courseid' => $course->id, 'alttext' => true]);
         echo "</td>";
         echo "<td>" . get_string("feedback") . ":";
 
-        $attrs = array();
+        $attrs = [];
         $hiddengradestr = '';
         $gradebookgradestr = '';
         $feedbackdisabledstr = '';
         $feedbacktext = $entry->entrycomment;
 
         // If the grade was modified from the gradebook disable edition also skip if ogte is not graded.
-        $gradinginfo = grade_get_grades($course->id, 'mod', 'ogte', $entry->ogte, array($user->id));
+        $gradinginfo = grade_get_grades($course->id, 'mod', 'ogte', $entry->ogte, [$user->id]);
         if (!empty($gradinginfo->items[0]->grades[$entry->userid]->str_long_grade)) {
-            if (
-                $gradingdisabled = $gradinginfo->items[0]->grades[$user->id]->locked
-                || $gradinginfo->items[0]->grades[$user->id]->overridden
-            ) {
+            if ($gradingdisabled = $gradinginfo->items[0]->grades[$user->id]->locked
+            || $gradinginfo->items[0]->grades[$user->id]->overridden) {
                 $attrs['disabled'] = 'disabled';
                 $hiddengradestr = '<input type="hidden" name="r' . $entry->id . '" value="' . $entry->rating . '"/>';
                 $gradebooklink = '<a href="' . $CFG->wwwroot . '/grade/report/grader/index.php?id=' . $course->id . '">';
@@ -835,19 +848,20 @@ function ogte_print_user_entry($course, $user, $entry, $teachers, $grades)
 
         // Grade selector.
         $attrs['id'] = 'r' . $entry->id;
-        echo html_writer::label(fullname($user) . " " . get_string('grade'), 'r' . $entry->id, true, array('class' => 'accesshide'));
+        echo html_writer::label(fullname($user) . " " . get_string('grade'), 'r' . $entry->id, true, ['class' => 'accesshide']);
         echo html_writer::select($grades, 'r' . $entry->id, $entry->rating, get_string("nograde") . '...', $attrs);
         echo $hiddengradestr;
         // Rewrote next three lines to show entry needs to be regraded due to resubmission.
         if (!empty($entry->timemarked) && $entry->modified > $entry->timemarked) {
             echo " <span class=\"lastedit\">" . get_string("needsregrade", "ogte") . "</span>";
-        } else if ($entry->timemarked) {
+        }
+        else if ($entry->timemarked) {
             echo " <span class=\"lastedit\">" . userdate($entry->timemarked) . "</span>";
         }
         echo $gradebookgradestr;
 
         // Feedback text.
-        echo html_writer::label(fullname($user) . " " . get_string('feedback'), 'c' . $entry->id, true, array('class' => 'accesshide'));
+        echo html_writer::label(fullname($user) . " " . get_string('feedback'), 'c' . $entry->id, true, ['class' => 'accesshide']);
         echo "<p><textarea id=\"c$entry->id\" name=\"c$entry->id\" rows=\"12\" cols=\"60\" $feedbackdisabledstr>";
         p($feedbacktext);
         echo "</textarea></p>";
@@ -868,15 +882,15 @@ function ogte_print_feedback($course, $entry, $grades)
 
     require_once($CFG->dirroot . '/lib/gradelib.php');
 
-    if (!$teacher = $DB->get_record('user', array('id' => $entry->teacher))) {
-        print_error('Weird ogte error');
+    if (!$teacher = $DB->get_record('user', ['id' => $entry->teacher])) {
+        throw new \moodle_exception('Weird ogte error');
     }
 
     echo '<table class="feedbackbox">';
 
     echo '<tr>';
     echo '<td class="left picture">';
-    echo $OUTPUT->user_picture($teacher, array('courseid' => $course->id, 'alttext' => true));
+    echo $OUTPUT->user_picture($teacher, ['courseid' => $course->id, 'alttext' => true]);
     echo '</td>';
     echo '<td class="entryheader">';
     echo '<span class="author">' . fullname($teacher) . '</span>';
@@ -891,11 +905,12 @@ function ogte_print_feedback($course, $entry, $grades)
     echo '<div class="grade">';
 
     // Gradebook preference.
-    $gradinginfo = grade_get_grades($course->id, 'mod', 'ogte', $entry->ogte, array($entry->userid));
+    $gradinginfo = grade_get_grades($course->id, 'mod', 'ogte', $entry->ogte, [$entry->userid]);
     if (!empty($gradinginfo->items[0]->grades[$entry->userid]->str_long_grade)) {
         echo get_string('grade') . ': ';
         echo $gradinginfo->items[0]->grades[$entry->userid]->str_long_grade;
-    } else {
+    }
+    else {
         print_string('nograde');
     }
     echo '</div>';
@@ -919,7 +934,7 @@ function ogte_print_feedback($course, $entry, $grades)
  * @param array $options additional options affecting the file serving
  * @return bool false if file not found, does not return if found - just send the file
  */
-function ogte_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = array())
+function ogte_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = [])
 {
     global $DB, $USER;
 
@@ -927,38 +942,89 @@ function ogte_pluginfile($course, $cm, $context, $filearea, $args, $forcedownloa
         return false;
     }
 
-    require_course_login($course, true, $cm);
+    switch ($filearea) {
+        case 'entry':
+            require_course_login($course, true, $cm);
+            if (!$course->visible && !has_capability('moodle/course:viewhiddencourses', $context)) {
+                return false;
+            }
+            // Args[0] should be the entry id.
+            $entryid = intval(array_shift($args));
+            $entry = $DB->get_record('ogte_entries', ['id' => $entryid], 'id, userid', MUST_EXIST);
 
-    if (!$course->visible && !has_capability('moodle/course:viewhiddencourses', $context)) {
-        return false;
+            $canmanage = has_capability('mod/ogte:manageentries', $context);
+            if (!$canmanage && !has_capability('mod/ogte:addentries', $context)) {
+                // Even if it is your own entry.
+                return false;
+            }
+
+            // Students can only see their own entry.
+            if (!$canmanage && $USER->id !== $entry->userid) {
+                return false;
+            }
+
+            if ($filearea !== 'entry') {
+                return false;
+            }
+
+            $fs = get_file_storage();
+            $relativepath = implode('/', $args);
+            $fullpath = "/$context->id/mod_ogte/$filearea/$entryid/$relativepath";
+            $file = $fs->get_file_by_hash(sha1($fullpath));
+
+            // Finally send the file.
+            send_stored_file($file, null, 0, $forcedownload, $options);
+
+            break;
+        case 'exportlist':
+
+            require_login($course, false, $cm);
+            require_capability('mod/ogte:manage', $context);
+            $listid = intval(array_shift($args));
+            $list = $DB->get_record(constants::M_LISTSTABLE, ['id' => $listid]);
+            if (!$list) {
+                return false;
+            }
+            $delim = ','; // csv delimiter
+            $filerows = [];
+
+            // make a nice filename
+            $filename = clean_filename(strip_tags(format_string($list->name)) . '.csv');
+            $filename = preg_replace('/\s+/', '_', $filename);
+
+            // make content
+            $headwords = $DB->get_records_sql("SELECT DISTINCT headword FROM {" . constants::M_WORDSTABLE . "} WHERE list = ?;", [$listid]);
+            foreach ($headwords as $headword) {
+                $words = $DB->get_records_sql("SELECT * FROM {" . constants::M_WORDSTABLE . "} WHERE list = ? AND headword = ?", [$listid, $headword->headword]);
+                $wordstring = [];
+                foreach ($words as $word) {
+                    if (count($wordstring) == 0) {
+                        $wordstring[] = $word->listrank;
+                        $wordstring[] = $word->headword;
+                    }
+                    if ($word->word !== $word->headword) {
+                        $wordstring[] = $word->word;
+                    }
+                }
+                if (count($wordstring) > 0) {
+                    $filerows[] = implode($delim, $wordstring);
+                }
+            }
+
+            // make the file to return
+            if (count($filerows) == 0) {
+                return false;
+            }
+            $filecontent = implode("\r\n", $filerows);
+
+            // return to the browser that called us
+            send_file($filecontent, $filename, 0, 0, true, true);
+            break;
+
+        default:
+            return false;
     }
 
-    // Args[0] should be the entry id.
-    $entryid = intval(array_shift($args));
-    $entry = $DB->get_record('ogte_entries', array('id' => $entryid), 'id, userid', MUST_EXIST);
-
-    $canmanage = has_capability('mod/ogte:manageentries', $context);
-    if (!$canmanage && !has_capability('mod/ogte:addentries', $context)) {
-        // Even if it is your own entry.
-        return false;
-    }
-
-    // Students can only see their own entry.
-    if (!$canmanage && $USER->id !== $entry->userid) {
-        return false;
-    }
-
-    if ($filearea !== 'entry') {
-        return false;
-    }
-
-    $fs = get_file_storage();
-    $relativepath = implode('/', $args);
-    $fullpath = "/$context->id/mod_ogte/$filearea/$entryid/$relativepath";
-    $file = $fs->get_file_by_hash(sha1($fullpath));
-
-    // Finally send the file.
-    send_stored_file($file, null, 0, $forcedownload, $options);
 }
 
 function ogte_format_entry_text($entry, $course = false, $cm = false)
@@ -967,7 +1033,8 @@ function ogte_format_entry_text($entry, $course = false, $cm = false)
     if (!$cm) {
         if ($course) {
             $courseid = $course->id;
-        } else {
+        }
+        else {
             $courseid = 0;
         }
         $cm = get_coursemodule_from_instance('ogte', $entry->ogte, $courseid);
@@ -976,11 +1043,11 @@ function ogte_format_entry_text($entry, $course = false, $cm = false)
     $context = context_module::instance($cm->id);
     $entrytext = file_rewrite_pluginfile_urls($entry->text, 'pluginfile.php', $context->id, 'mod_ogte', 'entry', $entry->id);
 
-    $formatoptions = array(
+    $formatoptions = [
         'context' => $context,
         'noclean' => false,
-        'trusted' => false
-    );
+        'trusted' => false,
+    ];
     return format_text($entrytext, $entry->format, $formatoptions);
 }
 
@@ -999,9 +1066,9 @@ function ogte_get_completion_state($course, $cm, $userid, $type)
     global $CFG, $DB;
 
     // Get ogte details
-    $ogte = $DB->get_record('ogte', array('id' => $cm->instance), '*', MUST_EXIST);
+    $ogte = $DB->get_record('ogte', ['id' => $cm->instance], '*', MUST_EXIST);
 
-    // If completion option is enabled, evaluate it and return true/false 
+    // If completion option is enabled, evaluate it and return true/false
     if ($ogte->completionanswer) {
         return $ogte->completionanswer <= $DB->get_field_sql("
 SELECT 
@@ -1011,11 +1078,10 @@ FROM
     INNER JOIN {ogte_entries} se ON s.id=se.ogte
 WHERE
     se.userid=:userid AND se.ogte=:ogteid",
-            array('userid' => $userid, 'ogteid' => $ogte->id)
-        );
-    } else {
+        ['userid' => $userid, 'ogteid' => $ogte->id]);
+    }
+    else {
         // Completion option is not enabled so just return $type
         return $type;
     }
 }
-

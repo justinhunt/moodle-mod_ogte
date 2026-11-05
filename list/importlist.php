@@ -31,7 +31,7 @@ if ($cmid) {
     $course     = $DB->get_record('course', array('id' => $moduleinstance->course), '*', MUST_EXIST);
     $cm         = get_coursemodule_from_instance('ogte', $moduleinstance->id, $course->id, false, MUST_EXIST);
 } else {
-    print_error('You must specify a course_module ID or an instance ID');
+    throw new \moodle_exception('You must specify a course_module ID or an instance ID');
 }
 
 
@@ -42,10 +42,10 @@ require_capability('mod/ogte:manage',$modulecontext);
 //fetch the list
 $list = $DB->get_record(constants::M_LISTSTABLE,['id'=>$listid]);
 if(!$list){
-    print_error('Total disaster, that list does not exist! Or more likely the list id got lost (programming error)');
+    throw new \moodle_exception('Total disaster, that list does not exist! Or more likely the list id got lost (programming error)');
 }
 
-$pagetitle = format_string($moduleinstance->name, true, $course);
+$pagetitle = format_string($moduleinstance->name, true, ['context'=>$modulecontext->id]);
 $pagetitle .= ': ' . get_string('import', constants::M_COMPONENT);
 $baseurl = new moodle_url('/mod/ogte/list/importlist.php', ['id' => $cm->id,'listid' => $listid]);
 $formurl = new moodle_url($baseurl);
@@ -53,7 +53,7 @@ $term = null;
 
 $PAGE->set_url($baseurl);
 $PAGE->navbar->add($pagetitle, $PAGE->url);
-$PAGE->set_heading(format_string($course->fullname, true, [context_course::instance($course->id)]));
+$PAGE->set_heading(format_string($course->fullname, true, ['context'=>$modulecontext->id]));
 $PAGE->set_title($pagetitle);
 $mode='import';
 
@@ -79,7 +79,7 @@ if ($data = $form->get_data()) {
         unset($content);
 
         if (!is_null($csvloaderror)) {
-            print_error('csvloaderror', '', $baseurl, $csvloaderror);
+            throw new \moodle_exception('csvloaderror', '', $baseurl, $csvloaderror);
         }
 
     $theimport = new \mod_ogte\import($cir,$moduleinstance,$modulecontext,$course,$cm, $listid);
