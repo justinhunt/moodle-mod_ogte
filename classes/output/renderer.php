@@ -213,7 +213,14 @@ class renderer extends \plugin_renderer_base {
         $this->page->requires->css( new \moodle_url('https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css'));
     }
 
-    function embed_tabsandeditor($cmid,$token){
+    /**
+     * The tools, for embedding on another page such as the site front page.
+     *
+     * @param int $cmid
+     * @param string $token Not used. Kept so callers written for the Cloud Poodll version still work.
+     * @return string
+     */
+    function embed_tabsandeditor($cmid, $token = ''){
         global $COURSE, $CFG, $DB;
         $ret ='';
         $cm = get_coursemodule_from_id('ogte', $cmid);
@@ -233,7 +240,7 @@ class renderer extends \plugin_renderer_base {
         $siteintro = format_module_intro('ogte', $ogte, $cm->id);
 
         //here there is no form. It is for display on top page of site
-        $params =['cloudpoodlltoken'=>$token,'ogteid'=>$ogteid,
+        $params =['aiavailable' => \mod_ogte\local\ai\generator::is_available(), 'ogteid'=>$ogteid,
             'listoptions'=>utils::get_list_options($cm->course),'leveloptions'=>[],
             'listlevels'=>utils::get_level_options($cm->course),'passage'=>'','sitefaq'=>$siteintro,'form'=>false];
 

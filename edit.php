@@ -175,25 +175,6 @@ if ($entryid && $entry) {
 }
 
 $data->id = $cm->id;
-//get token
-//first confirm we are authorised before we try to get the token
-$config = get_config(constants::M_COMPONENT);
-if(empty($config->apiuser) || empty($config->apisecret)){
-    $errormessage = get_string('nocredentials',constants::M_COMPONENT,
-        $CFG->wwwroot . constants::M_PLUGINSETTINGS);
-    return $this->show_problembox($errormessage);
-}else {
-    //fetch token
-    $token = utils::fetch_token($config->apiuser,$config->apisecret);
-
-    //check token authenticated and no errors in it
-    $errormessage = utils::fetch_token_error($token);
-    if(!empty($errormessage)){
-        return $this->show_problembox($errormessage);
-    }
-}
-
-
 $form->set_data($data);
 $renderer = $PAGE->get_renderer(constants::M_COMPONENT);
 $PAGE->requires->css(new \moodle_url('https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css'));
@@ -207,7 +188,7 @@ $leveloptions=isset($data->listid) && isset($listlevels[$data->listid]) ? $listl
 
 //here we sneakily add the form to the template data as well as list options
 //in the case where there is no form (for display on top page of site) then template gracefully ignores its absence
-$params =['cloudpoodlltoken'=>$token,'ogteid'=>$cm->instance,
+$params =['aiavailable' => \mod_ogte\local\ai\generator::is_available(), 'ogteid'=>$cm->instance,
     'listoptions'=>utils::get_list_options($course->id),'leveloptions'=>$leveloptions,
     'listlevels'=>$listlevels,'passage'=>$data->text,'form'=>$form->render()];
 

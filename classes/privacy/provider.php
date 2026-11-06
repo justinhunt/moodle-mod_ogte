@@ -64,6 +64,19 @@ class provider implements
              ],
             'privacy:metadata:ogte_entries'
         );
+        $collection->add_database_table(
+            'ogte_prompts',
+            [
+                'usermodified' => 'privacy:metadata:ogte_prompts:usermodified',
+                'timemodified' => 'privacy:metadata:ogte_prompts:timemodified',
+            ],
+            'privacy:metadata:ogte_prompts'
+        );
+        $collection->add_external_location_link(
+            'aiprovider',
+            ['text' => 'privacy:metadata:aiprovider:text'],
+            'privacy:metadata:aiprovider'
+        );
 
         return $collection;
     }

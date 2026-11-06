@@ -1,3 +1,12 @@
+version 1.1.0 (Build: 2026110600)
+now requires Moodle 4.5
+the AI tools call the site's own AI provider (OpenAI, Gemini or DeepSeek) instead of Cloud Poodll
+the AI prompts, token limits and reasoning effort can be edited on a new AI prompts admin page
+new capabilities mod/ogte:useai and mod/ogte:manageprompts
+removed the Cloud Poodll API user and secret settings
+restored the access checks on the coverage web service
+AI errors are now shown to the user instead of leaving the spinner running
+
 version 1.0.9 (Build: 2026102700)
 now requires Moodle 4.3
 use the core_external web service classes (Moodle 5.3 compatibility)

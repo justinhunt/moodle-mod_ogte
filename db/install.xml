@@ -91,5 +91,25 @@
         <INDEX NAME="word" UNIQUE="false" FIELDS="word"/>
       </INDEXES>
     </TABLE>
+    <TABLE NAME="ogte_prompts" COMMENT="The site wide AI prompts, editable by admins">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false" COMMENT="Prompt key used by the code, e.g. rewrite_article"/>
+        <FIELD NAME="systemprompt" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="prompttext" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="maxtokens" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="effort" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="" SEQUENCE="false" COMMENT="Reasoning effort: low, medium, high, or empty for the model default"/>
+        <FIELD NAME="temperature" TYPE="char" LENGTH="10" NOTNULL="true" DEFAULT="" SEQUENCE="false" COMMENT="Empty to leave at the model default"/>
+        <FIELD NAME="usermodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="usermodified" TYPE="foreign" FIELDS="usermodified" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="name" UNIQUE="true" FIELDS="name"/>
+      </INDEXES>
+    </TABLE>
   </TABLES>
 </XMLDB>

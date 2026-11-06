@@ -91,27 +91,8 @@ $currentgroup = groups_get_activity_group($cm, true);
 //$intro = format_module_intro('ogte', $ogte, $cm->id);
 //echo $renderer->box($intro);
 
-//get token
-//first confirm we are authorised before we try to get the token
-$config = get_config(constants::M_COMPONENT);
-if(empty($config->apiuser) || empty($config->apisecret)){
-    $errormessage = get_string('nocredentials',constants::M_COMPONENT,
-        $CFG->wwwroot . constants::M_PLUGINSETTINGS);
-    echo $renderer->show_problembox($errormessage);
-}else {
-    //fetch token
-    $token = utils::fetch_token($config->apiuser,$config->apisecret);
-
-    //check token authenticated and no errors in it
-    $errormessage = utils::fetch_token_error($token);
-    if(!empty($errormessage)){
-        echo $renderer->show_problembox($errormessage);
-    }
-}
-
 //template data
 $tdata=[];
-$tdata['cloudpoodlltoken']=$token;
 
 //intro
 if (!empty($ogte->intro)) {

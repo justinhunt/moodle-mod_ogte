@@ -3,7 +3,8 @@
     <span class="ogte-panel-instructions">{{#str}}articlegenerator_instructions, mod_ogte{{/str}}</span><br/>
     <input type="text" id="{{uniqid}}_ag_prompt" class="ogte-wide" placeholder="{{#str}}article-topic-here, mod_ogte{{/str}}"></input>
     <div id="{{uniqid}}_ag_message" style="text-align: center"></div>
-    <button id="{{uniqid}}_ag_button" type="button" class="btn btn-primary">{{#str}}generate-article, mod_ogte{{/str}}</button>
+    {{^aiavailable}}<div class="alert alert-warning">{{#str}}noaiprovider, mod_ogte{{/str}}</div>{{/aiavailable}}
+    <button id="{{uniqid}}_ag_button" type="button" class="btn btn-primary" {{^aiavailable}}disabled{{/aiavailable}}>{{#str}}generate-article, mod_ogte{{/str}}</button>
     <div><textarea id="the_ag_article" class="ogte-wide" style="overflow: auto; resize: auto; height: 150px; display: none"></textarea><br /></div>
     <div id="{{uniqid}}_ag_articlestats" style="display: none" class="mod-ogte-stats ogte_generator_stats"></div>
 
@@ -36,8 +37,6 @@
                 var sendtoeditor= $('#ogte_ag_sendtoeditor_button');
                 var themessage= $('#{{uniqid}}_ag_message');
 
-                utils.setCloudPoodllToken('{{cloudpoodlltoken}}');
-
                 $('#{{uniqid}}_ag_button').on('click',function(){
                     //show a spinner
                     themessage.html('<i class="fa fa-spinner fa-spin fa-sm"></i>');
@@ -54,7 +53,7 @@
                         return;
                     }
                     var language = 'en-US';
-                    utils.call_ai(theprompt,language,'','generate_article',function(thearticle){
+                    utils.call_ai({{ogteid}}, 'generate_article', theprompt, language).then(function(thearticle){
                         themessage.text('');
                         articlebox.val(thearticle);
                         articlebox.show();
@@ -70,6 +69,9 @@
 
                         }.bind(this)).fail(notification.exception);
 
+                    }).catch(function(error) {
+                        themessage.text('');
+                        notification.exception(error);
                     });
                 });
             });

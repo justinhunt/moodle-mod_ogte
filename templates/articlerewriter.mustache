@@ -29,7 +29,8 @@
                     </div>
                 </fieldset>
 
-                <button class="btn btn-primary" id="{{uniqid}}_ar_button" type="button" style="width: 100%; max-width: 800px">{{#str}}rewrite-article, mod_ogte{{/str}}</button>
+                {{^aiavailable}}<div class="alert alert-warning">{{#str}}noaiprovider, mod_ogte{{/str}}</div>{{/aiavailable}}
+                <button class="btn btn-primary" id="{{uniqid}}_ar_button" type="button" style="width: 100%; max-width: 800px" {{^aiavailable}}disabled{{/aiavailable}}>{{#str}}rewrite-article, mod_ogte{{/str}}</button>
 
             </div>
             <div class="column-initially-hidden">
@@ -83,8 +84,6 @@
                 var label_rewriting = '<i class="fa fa-spinner fa-spin fa-lg"></i><br />';
 
 
-                utils.setCloudPoodllToken('{{cloudpoodlltoken}}');
-
                 $('#{{uniqid}}_ar_button').on('click',function(){
 
                     var thebutton = $(this);
@@ -117,7 +116,7 @@
                     thebutton.html(label_rewriting);
 
 
-                    utils.call_ai(usetext,'en-US',difficulty,'rewrite_article',function(newarticle){
+                    utils.call_ai({{ogteid}}, 'rewrite_article', usetext, 'en-US', difficulty).then(function(newarticle){
                         //restore button caption
                         thebutton.text(label_rewrite);
 
@@ -140,6 +139,9 @@
                         actions.show();
                         sendtoeditor.show();
 
+                    }).catch(function(error) {
+                        thebutton.text(label_rewrite);
+                        notification.exception(error);
                     });
 
                 });

@@ -30,6 +30,7 @@ use core_external\external_function_parameters;
 use core_external\external_single_structure;
 use core_external\external_value;
 use \mod_ogte\utils;
+use \mod_ogte\local\ai\generator;
 
 class mod_ogte_external extends external_api {
 
@@ -64,9 +65,8 @@ class mod_ogte_external extends external_api {
 
         $context = context_module::instance($cm->id);
 
-        //disable these for now
-       //  self::validate_context($context);;
-       //  require_capability('mod/ogte:use', $context);
+        self::validate_context($context);
+        require_capability('mod/ogte:use', $context);
 
         //here we do the list comparison
         $result = utils::get_coverage($passage,$ignore,$listid,$listlevel);
@@ -207,5 +207,62 @@ class mod_ogte_external extends external_api {
         $event->trigger();
 
         return $newentry->text;
+    }
+
+    /**
+     * Parameters for call_ai.
+     *
+     * @return external_function_parameters
+     */
+    public static function call_ai_parameters() {
+        return new external_function_parameters([
+            'ogteid' => new external_value(PARAM_INT, 'id of the ogte activity'),
+            'action' => new external_value(PARAM_ALPHANUMEXT, 'generate_article, rewrite_article or grammar_correction'),
+            'text' => new external_value(PARAM_RAW, 'the topic or passage'),
+            'language' => new external_value(PARAM_ALPHANUMEXT, 'language code, e.g. en-US', VALUE_DEFAULT, 'en-US'),
+            'level' => new external_value(PARAM_INT, 'rewrite level, 1 to 5', VALUE_DEFAULT, 0),
+        ]);
+    }
+
+    /**
+     * Run one of the AI tools against the site's AI provider.
+     *
+     * @param int $ogteid
+     * @param string $action
+     * @param string $text
+     * @param string $language
+     * @param int $level
+     * @return array
+     */
+    public static function call_ai($ogteid, $action, $text, $language = 'en-US', $level = 0) {
+        global $DB;
+
+        $params = self::validate_parameters(self::call_ai_parameters(), [
+            'ogteid' => $ogteid, 'action' => $action, 'text' => $text, 'language' => $language, 'level' => $level,
+        ]);
+
+        $ogte = $DB->get_record('ogte', ['id' => $params['ogteid']], '*', MUST_EXIST);
+        $cm = get_coursemodule_from_instance('ogte', $ogte->id, $ogte->course, false, MUST_EXIST);
+        $context = context_module::instance($cm->id);
+        self::validate_context($context);
+        require_capability('mod/ogte:useai', $context);
+
+        $generator = generator::from_settings();
+        if (!$generator) {
+            throw new moodle_exception('noaiprovider', 'mod_ogte');
+        }
+        $passage = $generator->run($params['action'], $params['text'], $params['language'], $params['level']);
+        return ['text' => $passage];
+    }
+
+    /**
+     * Return structure for call_ai.
+     *
+     * @return external_single_structure
+     */
+    public static function call_ai_returns() {
+        return new external_single_structure([
+            'text' => new external_value(PARAM_RAW, 'the passage the AI wrote'),
+        ]);
     }
 }

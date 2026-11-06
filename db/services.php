@@ -48,8 +48,20 @@ $functions = array(
         'classname'   => 'mod_ogte_external',
         'methodname'  => 'get_coverage',
         'description' => 'see how a passage is covered by a list/level' ,
-       // 'capabilities'=> 'mod/ogte:use',
+        'classpath'   => 'mod/ogte/externallib.php',
+        'capabilities' => 'mod/ogte:use',
         'type'        => 'read',
         'ajax'        => true,
+    ),
+    'mod_ogte_call_ai' => array(
+        'classname'   => 'mod_ogte_external',
+        'methodname'  => 'call_ai',
+        'classpath'   => 'mod/ogte/externallib.php',
+        'description' => 'Write, rewrite or correct a passage with the site AI provider.',
+        'capabilities' => 'mod/ogte:useai',
+        'type'        => 'read',
+        'ajax'        => true,
+        // A call can take a minute, so do not hold the session lock while it runs.
+        'readonlysession' => true,
     ),
 );
