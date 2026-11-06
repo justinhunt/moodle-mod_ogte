@@ -591,7 +591,7 @@ define(['jquery', 'core/log', 'core/notification', 'core/str', 'core/templates',
                     });
 
                     // Refresh editor when switching to the articleleveler tab
-                    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                    $('a[data-toggle="tab"], a[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
                         if ($(e.target).attr('href') === '#articleleveler') {
                             app.editor.refresh();
                         }

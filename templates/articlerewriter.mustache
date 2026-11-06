@@ -10,7 +10,7 @@
 
                 <fieldset id="difficulty-choice">
                     <legend>{{#str}}rewritten-article-difficulty, mod_ogte{{/str}}</legend>
-                    <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                    <div class="btn-group btn-group-toggle mod_ogte_difficulty-group" id="{{uniqid}}_ar_difficulty" data-toggle="buttons">
                     <label class="btn btn-secondary active">
                         <input type="radio" name="difficulty" value="1" checked> One (simplest)
                     </label>
@@ -70,6 +70,12 @@
                 var rewritten= $('#{{uniqid}}_ar_rewritten');
                 var actions= $('#ogte_rewriter_actions');
                 var spinner= $('#{{uniqid}}_ar_spinner');
+
+                // Bootstrap 5 dropped the "buttons" plugin, so keep the active label in sync ourselves.
+                $('#{{uniqid}}_ar_difficulty').on('change', 'input[name="difficulty"]', function() {
+                    $(this).closest('.btn-group').find('label.btn').removeClass('active');
+                    $(this).closest('label.btn').addClass('active');
+                });
                 var sendtoeditor= $('#ogte_ar_sendtoeditor_button');
 
                 //labels

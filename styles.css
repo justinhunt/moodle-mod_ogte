@@ -449,3 +449,10 @@ body .fancybox__backdrop {
     50%  { background-color: #ffc107; color: #000; font-weight: bold; border-radius: 3px; padding: 0 2px;}
     100% { background-color: transparent; }
 }
+
+/* Rewriter difficulty buttons: hide the radios (Bootstrap 5 no longer does this for .btn-group-toggle). */
+.mod_ogte_difficulty-group > .btn input[type="radio"] {
+    position: absolute;
+    clip: rect(0, 0, 0, 0);
+    pointer-events: none;
+}
