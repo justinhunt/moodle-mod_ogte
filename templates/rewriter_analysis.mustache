@@ -1,0 +1,71 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template mod_ogte/rewriter_analysis
+
+    Text Rewriter step one: a passage's figures and its coverage at each level.
+
+    Context variables required for this template:
+    * stats, levels, currentlevellabel - From mod_ogte_analyse_text.
+    * aiavailable - Is an AI provider set up.
+
+    Example context (json):
+    {
+        "stats": {"words": 612, "sentences": 27, "avgsentence": 22.7, "longest": 41, "fkgrade": 12.4},
+        "currentlevellabel": "above Level 7",
+        "aiavailable": true,
+        "levels": [
+            {"index": 0, "number": 1, "name": "Level 1", "label": "Level 1 (A1)", "cefr": "A1",
+             "avgsentence": 6, "maxsentence": 10, "coverage": 71.2, "covered": false}
+        ]
+    }
+}}
+<h4>{{#str}}rw_analysis, mod_ogte{{/str}}</h4>
+<div class="ogte-rw-stats d-flex flex-wrap mb-3">
+    <div class="ogte-rw-stat"><span class="ogte-rw-statvalue">{{stats.words}}</span><span class="ogte-rw-statlabel">{{#str}}rw_words, mod_ogte{{/str}}</span></div>
+    <div class="ogte-rw-stat"><span class="ogte-rw-statvalue">{{stats.sentences}}</span><span class="ogte-rw-statlabel">{{#str}}rw_sentences, mod_ogte{{/str}}</span></div>
+    <div class="ogte-rw-stat"><span class="ogte-rw-statvalue">{{stats.avgsentence}}</span><span class="ogte-rw-statlabel">{{#str}}rw_avgsentence, mod_ogte{{/str}}</span></div>
+    <div class="ogte-rw-stat"><span class="ogte-rw-statvalue">{{stats.longest}}</span><span class="ogte-rw-statlabel">{{#str}}rw_longest, mod_ogte{{/str}}</span></div>
+    <div class="ogte-rw-stat"><span class="ogte-rw-statvalue">{{stats.fkgrade}}</span><span class="ogte-rw-statlabel">{{#str}}rw_fkgrade, mod_ogte{{/str}}</span></div>
+</div>
+<p class="h5">{{#str}}rw_currentlevel, mod_ogte, {{currentlevellabel}}{{/str}}
+    <small class="text-muted d-block">{{#str}}rw_currentlevel_help, mod_ogte{{/str}}</small></p>
+<div class="table-responsive">
+    <table class="table ogte-rw-levels">
+        <thead>
+            <tr>
+                <th scope="col">{{#str}}rw_level, mod_ogte{{/str}}</th>
+                <th scope="col" class="text-right text-end">{{#str}}rw_coverage, mod_ogte{{/str}}</th>
+                <th scope="col">{{#str}}rw_sentencetarget, mod_ogte{{/str}}</th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#levels}}
+            <tr class="{{#covered}}ogte-rw-covered{{/covered}}">
+                <th scope="row">{{label}}<small class="d-block text-muted font-weight-normal fw-normal">{{name}}</small></th>
+                <td class="text-right text-end">{{coverage}}%</td>
+                <td>{{#maxsentence}}{{#str}}rw_sentencetarget_value, mod_ogte, {"avg": {{avgsentence}}, "max": {{maxsentence}} }{{/str}}{{/maxsentence}}{{^maxsentence}}—{{/maxsentence}}</td>
+                <td class="text-right text-end">
+                    {{#covered}}<span class="text-success"><i class="fa fa-check mr-1 me-1"></i>{{#str}}rw_alreadyat, mod_ogte{{/str}}</span>{{/covered}}
+                    {{^covered}}<button type="button" class="btn btn-primary btn-sm ogte-rw-simplify" data-level="{{index}}" {{^aiavailable}}disabled{{/aiavailable}}>{{#str}}rw_simplifyto, mod_ogte{{/str}}</button>{{/covered}}
+                </td>
+            </tr>
+            {{/levels}}
+        </tbody>
+    </table>
+</div>

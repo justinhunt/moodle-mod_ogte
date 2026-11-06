@@ -147,6 +147,18 @@ function xmldb_ogte_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2026110600, 'ogte');
     }
 
+    if ($oldversion < 2026110601) {
+        // The new Text Rewriter replaces the five level rewrite prompts.
+        $DB->delete_records_list('ogte_prompts', 'name', ['rewrite_article', 'rewrite_level_1', 'rewrite_level_2',
+            'rewrite_level_3', 'rewrite_level_4', 'rewrite_level_5']);
+        \mod_ogte\local\ai\prompts::install_defaults();
+
+        // Its level targets, for the NGSL 1.2 list.
+        \mod_ogte\local\rewriter::add_ngsl_targets();
+
+        upgrade_mod_savepoint(true, 2026110601, 'ogte');
+    }
+
 
     return true;
 }

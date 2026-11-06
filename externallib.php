@@ -31,6 +31,8 @@ use core_external\external_single_structure;
 use core_external\external_value;
 use \mod_ogte\utils;
 use \mod_ogte\local\ai\generator;
+use \mod_ogte\local\rewriter;
+use core_external\external_multiple_structure;
 
 class mod_ogte_external extends external_api {
 
@@ -217,10 +219,9 @@ class mod_ogte_external extends external_api {
     public static function call_ai_parameters() {
         return new external_function_parameters([
             'ogteid' => new external_value(PARAM_INT, 'id of the ogte activity'),
-            'action' => new external_value(PARAM_ALPHANUMEXT, 'generate_article, rewrite_article or grammar_correction'),
+            'action' => new external_value(PARAM_ALPHANUMEXT, 'generate_article or grammar_correction'),
             'text' => new external_value(PARAM_RAW, 'the topic or passage'),
             'language' => new external_value(PARAM_ALPHANUMEXT, 'language code, e.g. en-US', VALUE_DEFAULT, 'en-US'),
-            'level' => new external_value(PARAM_INT, 'rewrite level, 1 to 5', VALUE_DEFAULT, 0),
         ]);
     }
 
@@ -231,28 +232,45 @@ class mod_ogte_external extends external_api {
      * @param string $action
      * @param string $text
      * @param string $language
-     * @param int $level
      * @return array
      */
-    public static function call_ai($ogteid, $action, $text, $language = 'en-US', $level = 0) {
-        global $DB;
-
+    public static function call_ai($ogteid, $action, $text, $language = 'en-US') {
         $params = self::validate_parameters(self::call_ai_parameters(), [
-            'ogteid' => $ogteid, 'action' => $action, 'text' => $text, 'language' => $language, 'level' => $level,
+            'ogteid' => $ogteid, 'action' => $action, 'text' => $text, 'language' => $language,
         ]);
+        self::activity_context($params['ogteid'], 'mod/ogte:useai');
+        $passage = self::ai_generator()->run($params['action'], $params['text'], $params['language']);
+        return ['text' => $passage];
+    }
 
-        $ogte = $DB->get_record('ogte', ['id' => $params['ogteid']], '*', MUST_EXIST);
+    /**
+     * Check the user can use an activity, and get its course id.
+     *
+     * @param int $ogteid
+     * @param string $capability
+     * @return int The course id.
+     */
+    protected static function activity_context(int $ogteid, string $capability): int {
+        global $DB;
+        $ogte = $DB->get_record('ogte', ['id' => $ogteid], '*', MUST_EXIST);
         $cm = get_coursemodule_from_instance('ogte', $ogte->id, $ogte->course, false, MUST_EXIST);
         $context = context_module::instance($cm->id);
         self::validate_context($context);
-        require_capability('mod/ogte:useai', $context);
+        require_capability($capability, $context);
+        return (int) $ogte->course;
+    }
 
+    /**
+     * The AI generator, or an error if no AI provider is set.
+     *
+     * @return generator
+     */
+    protected static function ai_generator(): generator {
         $generator = generator::from_settings();
         if (!$generator) {
             throw new moodle_exception('noaiprovider', 'mod_ogte');
         }
-        $passage = $generator->run($params['action'], $params['text'], $params['language'], $params['level']);
-        return ['text' => $passage];
+        return $generator;
     }
 
     /**
@@ -263,6 +281,146 @@ class mod_ogte_external extends external_api {
     public static function call_ai_returns() {
         return new external_single_structure([
             'text' => new external_value(PARAM_RAW, 'the passage the AI wrote'),
+        ]);
+    }
+
+    /**
+     * Parameters for analyse_text.
+     *
+     * @return external_function_parameters
+     */
+    public static function analyse_text_parameters() {
+        return new external_function_parameters([
+            'ogteid' => new external_value(PARAM_INT, 'id of the ogte activity'),
+            'listid' => new external_value(PARAM_INT, 'id of the word list'),
+            'passage' => new external_value(PARAM_RAW, 'the passage'),
+        ]);
+    }
+
+    /**
+     * Analyse a passage for the Text Rewriter: its sentence figures and its coverage at each level.
+     *
+     * @param int $ogteid
+     * @param int $listid
+     * @param string $passage
+     * @return array
+     */
+    public static function analyse_text($ogteid, $listid, $passage) {
+        $params = self::validate_parameters(self::analyse_text_parameters(),
+            ['ogteid' => $ogteid, 'listid' => $listid, 'passage' => $passage]);
+        $courseid = self::activity_context($params['ogteid'], 'mod/ogte:use');
+        return rewriter::for_course($params['listid'], $courseid)->analyse($params['passage']);
+    }
+
+    /**
+     * Return structure for analyse_text.
+     *
+     * @return external_single_structure
+     */
+    public static function analyse_text_returns() {
+        return new external_single_structure([
+            'stats' => new external_single_structure([
+                'words' => new external_value(PARAM_INT, 'words'),
+                'sentences' => new external_value(PARAM_INT, 'sentences'),
+                'avgsentence' => new external_value(PARAM_FLOAT, 'average words per sentence'),
+                'longest' => new external_value(PARAM_INT, 'words in the longest sentence'),
+                'fkgrade' => new external_value(PARAM_FLOAT, 'Flesch-Kincaid grade'),
+            ]),
+            'levels' => new external_multiple_structure(new external_single_structure([
+                'index' => new external_value(PARAM_INT, 'level index, from 0'),
+                'number' => new external_value(PARAM_INT, 'level number, from 1'),
+                'name' => new external_value(PARAM_TEXT, 'level name'),
+                'label' => new external_value(PARAM_TEXT, 'short label, e.g. Level 3 (A2)'),
+                'cefr' => new external_value(PARAM_TEXT, 'CEFR level, may be empty'),
+                'avgsentence' => new external_value(PARAM_INT, 'target average sentence, 0 if none'),
+                'maxsentence' => new external_value(PARAM_INT, 'sentence ceiling, 0 if none'),
+                'coverage' => new external_value(PARAM_FLOAT, 'coverage in percent, rounded down to 1 decimal place'),
+                'covered' => new external_value(PARAM_BOOL, 'is the passage at this level'),
+            ])),
+            'currentlevel' => new external_value(PARAM_INT, 'lowest level reached, or one more than the top level'),
+            'currentlevellabel' => new external_value(PARAM_TEXT, 'label of the current level'),
+        ]);
+    }
+
+    /**
+     * Parameters for simplify_text.
+     *
+     * @return external_function_parameters
+     */
+    public static function simplify_text_parameters() {
+        return new external_function_parameters([
+            'ogteid' => new external_value(PARAM_INT, 'id of the ogte activity'),
+            'listid' => new external_value(PARAM_INT, 'id of the word list'),
+            'level' => new external_value(PARAM_INT, 'target level index, from 0'),
+            'original' => new external_value(PARAM_RAW, 'the passage the user pasted'),
+            'current' => new external_value(PARAM_RAW, 'the last attempt to repair, or empty for the first rewrite',
+                VALUE_DEFAULT, ''),
+            'glossary' => new external_multiple_structure(self::glossary_structure(), 'the last attempt\'s glossary',
+                VALUE_DEFAULT, []),
+        ]);
+    }
+
+    /**
+     * One glossary entry.
+     *
+     * @return external_single_structure
+     */
+    protected static function glossary_structure() {
+        return new external_single_structure([
+            'word' => new external_value(PARAM_TEXT, 'the kept word'),
+            'explanation' => new external_value(PARAM_TEXT, 'what it means'),
+        ]);
+    }
+
+    /**
+     * Simplify a passage to a level, or repair the last attempt, with one AI call, and check the result.
+     *
+     * @param int $ogteid
+     * @param int $listid
+     * @param int $level
+     * @param string $original
+     * @param string $current
+     * @param array $glossary
+     * @return array
+     */
+    public static function simplify_text($ogteid, $listid, $level, $original, $current = '', $glossary = []) {
+        $params = self::validate_parameters(self::simplify_text_parameters(), ['ogteid' => $ogteid,
+            'listid' => $listid, 'level' => $level, 'original' => $original, 'current' => $current,
+            'glossary' => $glossary]);
+        $courseid = self::activity_context($params['ogteid'], 'mod/ogte:useai');
+        $rewriter = rewriter::for_course($params['listid'], $courseid);
+        return $rewriter->simplify(self::ai_generator(), $params['original'], $params['level'], $params['current'],
+            $params['glossary']);
+    }
+
+    /**
+     * Return structure for simplify_text.
+     *
+     * @return external_single_structure
+     */
+    public static function simplify_text_returns() {
+        return new external_single_structure([
+            'text' => new external_value(PARAM_RAW, 'the rewritten passage'),
+            'html' => new external_value(PARAM_RAW, 'the rewritten passage as HTML, glossary words marked'),
+            'glossary' => new external_multiple_structure(self::glossary_structure()),
+            'glossarymax' => new external_value(PARAM_INT, 'the most glossary words allowed'),
+            'met' => new external_value(PARAM_BOOL, 'are the coverage and sentence targets met'),
+            'score' => new external_value(PARAM_FLOAT, 'for choosing the best pass: higher is better'),
+            'title' => new external_value(PARAM_TEXT, 'e.g. Simplified from Level 7 to Level 3 (A2)'),
+            'levellabel' => new external_value(PARAM_TEXT, 'the target level label'),
+            'rows' => new external_multiple_structure(new external_single_structure([
+                'measure' => new external_value(PARAM_TEXT, 'what is measured'),
+                'original' => new external_value(PARAM_TEXT, 'the original figure'),
+                'rewritten' => new external_value(PARAM_TEXT, 'the rewritten figure'),
+                'target' => new external_value(PARAM_TEXT, 'the target'),
+                'status' => new external_value(PARAM_ALPHA, 'met, notmet, note or ref'),
+                'statuslabel' => new external_value(PARAM_TEXT, 'the result, in words'),
+                'ismet' => new external_value(PARAM_BOOL, 'target met'),
+                'isnotmet' => new external_value(PARAM_BOOL, 'target not met'),
+            ])),
+            'notes' => new external_multiple_structure(new external_single_structure([
+                'text' => new external_value(PARAM_TEXT, 'a note'),
+            ])),
         ]);
     }
 }

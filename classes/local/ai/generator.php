@@ -19,7 +19,7 @@ namespace mod_ogte\local\ai;
 use mod_ogte\constants;
 
 /**
- * The OGTE AI tools: write, rewrite and correct passages using the stored prompts.
+ * The OGTE AI tools: write and correct passages, and send the rewriter's prompts.
  *
  * @package    mod_ogte
  * @copyright  2026 Justin Hunt (poodllsupport@gmail.com)
@@ -29,21 +29,14 @@ class generator {
     /** @var string Write a passage on a topic. */
     const ACTION_GENERATE = 'generate_article';
 
-    /** @var string Rewrite a passage for a level. */
-    const ACTION_REWRITE = 'rewrite_article';
-
     /** @var string Correct a passage's grammar and spelling. */
     const ACTION_GRAMMAR = 'grammar_correction';
 
     /** @var int[] The longest input each action accepts, in characters. */
     const MAX_INPUT = [
         self::ACTION_GENERATE => 200,
-        self::ACTION_REWRITE => 15000,
         self::ACTION_GRAMMAR => 5000,
     ];
-
-    /** @var int Level used when the rewriter sends something other than 1 to 5. */
-    const DEFAULT_LEVEL = 3;
 
     /** @var provider_client */
     protected provider_client $client;
@@ -82,10 +75,9 @@ class generator {
      * @param string $action One of the ACTION_ constants.
      * @param string $text The topic or passage.
      * @param string $langcode E.g. en-US.
-     * @param int $level 1 to 5, for the rewriter.
      * @return string The passage.
      */
-    public function run(string $action, string $text, string $langcode, int $level = 0): string {
+    public function run(string $action, string $text, string $langcode): string {
         if (!isset(self::MAX_INPUT[$action])) {
             throw new \invalid_parameter_exception('Unknown AI action: ' . $action);
         }
@@ -102,10 +94,6 @@ class generator {
             case self::ACTION_GENERATE:
                 $vars['topic'] = $text;
                 break;
-            case self::ACTION_REWRITE:
-                $vars['passage'] = $text;
-                $vars['leveldescription'] = self::level_description($level);
-                break;
             case self::ACTION_GRAMMAR:
                 $vars['passage'] = $text;
                 break;
@@ -121,6 +109,17 @@ class generator {
      * @return string
      */
     protected function send(string $name, array $vars): string {
+        return self::passage_from_reply($this->complete($name, $vars));
+    }
+
+    /**
+     * Fill a stored prompt, send it, and return the reply as it is.
+     *
+     * @param string $name Prompt name.
+     * @param array $vars Placeholder values.
+     * @return string
+     */
+    public function complete(string $name, array $vars): string {
         $prompt = prompts::get($name);
         $userprompt = prompts::fill($name, $prompt->prompttext, $vars);
         $reply = $this->client->chat((string) $prompt->systemprompt, $userprompt, [
@@ -129,7 +128,7 @@ class generator {
             'temperature' => $prompt->temperature,
             'jsonmode' => self::wants_json($prompt->prompttext),
         ]);
-        return self::passage_from_reply($reply);
+        return $reply;
     }
 
     /**
@@ -156,9 +155,7 @@ class generator {
      */
     public static function passage_from_reply(string $reply): string {
         $reply = trim($reply);
-        // Some models wrap JSON in a markdown code fence even in JSON mode.
-        $unfenced = preg_replace('/^\x60{3}(?:json)?\s*(.*?)\s*\x60{3}$/s', '$1', $reply);
-        $decoded = json_decode($unfenced, true);
+        $decoded = self::decode_reply($reply);
         if (is_array($decoded)) {
             if (isset($decoded['article']) && is_string($decoded['article'])) {
                 return trim($decoded['article']);
@@ -175,16 +172,16 @@ class generator {
     }
 
     /**
-     * The level description for the rewriter.
+     * Decode a JSON reply.
      *
-     * @param int $level 1 to 5. Anything else is treated as DEFAULT_LEVEL.
-     * @return string
+     * @param string $reply
+     * @return array|null Null if the reply is not a JSON object.
      */
-    public static function level_description(int $level): string {
-        if ($level < 1 || $level > 5) {
-            $level = self::DEFAULT_LEVEL;
-        }
-        return prompts::get('rewrite_level_' . $level)->prompttext;
+    public static function decode_reply(string $reply): ?array {
+        // Some models wrap JSON in a markdown code fence even in JSON mode.
+        $unfenced = preg_replace('/^\x60{3}(?:json)?\s*(.*?)\s*\x60{3}$/s', '$1', trim($reply));
+        $decoded = json_decode($unfenced, true);
+        return is_array($decoded) ? $decoded : null;
     }
 
     /**

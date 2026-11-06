@@ -36,17 +36,17 @@ final class ai_test extends \advanced_testcase {
         $this->setAdminUser();
 
         $this->assertEquals(count(prompts::definitions()), $DB->count_records(prompts::TABLE));
-        $this->assertFalse(prompts::is_modified(prompts::get('rewrite_article')));
+        $this->assertFalse(prompts::is_modified(prompts::get('generate_article')));
 
-        prompts::save('rewrite_article', (object) ['prompttext' => 'Edited {passage} {leveldescription}']);
-        $DB->delete_records(prompts::TABLE, ['name' => 'generate_article']);
+        prompts::save('generate_article', (object) ['prompttext' => 'Edited {topic}']);
+        $DB->delete_records(prompts::TABLE, ['name' => 'grammar_correction']);
 
         $this->assertEquals(1, prompts::install_defaults());
-        $this->assertEquals('Edited {passage} {leveldescription}', prompts::get('rewrite_article')->prompttext);
-        $this->assertTrue(prompts::is_modified(prompts::get('rewrite_article')));
+        $this->assertEquals('Edited {topic}', prompts::get('generate_article')->prompttext);
+        $this->assertTrue(prompts::is_modified(prompts::get('generate_article')));
 
-        prompts::reset('rewrite_article');
-        $this->assertFalse(prompts::is_modified(prompts::get('rewrite_article')));
+        prompts::reset('generate_article');
+        $this->assertFalse(prompts::is_modified(prompts::get('generate_article')));
     }
 
     /**

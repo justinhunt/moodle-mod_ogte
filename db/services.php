@@ -64,4 +64,23 @@ $functions = array(
         // A call can take a minute, so do not hold the session lock while it runs.
         'readonlysession' => true,
     ),
+    'mod_ogte_analyse_text' => array(
+        'classname'   => 'mod_ogte_external',
+        'methodname'  => 'analyse_text',
+        'classpath'   => 'mod/ogte/externallib.php',
+        'description' => 'Text Rewriter: coverage of a passage at each level of a list, and its sentence figures.',
+        'capabilities' => 'mod/ogte:use',
+        'type'        => 'read',
+        'ajax'        => true,
+    ),
+    'mod_ogte_simplify_text' => array(
+        'classname'   => 'mod_ogte_external',
+        'methodname'  => 'simplify_text',
+        'classpath'   => 'mod/ogte/externallib.php',
+        'description' => 'Text Rewriter: simplify a passage to a level, or repair the last attempt, and check it.',
+        'capabilities' => 'mod/ogte:useai',
+        'type'        => 'read',
+        'ajax'        => true,
+        'readonlysession' => true,
+    ),
 );

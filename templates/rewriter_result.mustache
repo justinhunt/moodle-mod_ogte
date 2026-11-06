@@ -1,0 +1,117 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template mod_ogte/rewriter_result
+
+    Text Rewriter step two: the simplified passage and how it meets the level's targets.
+
+    Context variables required for this template:
+    * title, levellabel, html, glossary, rows, notes - From mod_ogte_simplify_text.
+    * originalparagraphs - The original passage, as paragraphs of plain text.
+    * glossarymax - The most glossary words allowed.
+
+    Example context (json):
+    {
+        "title": "Simplified from above Level 7 to Level 3 (A2)",
+        "levellabel": "Level 3 (A2)",
+        "html": "<p>Honeybees have a clever way to share news about food.</p>",
+        "originalparagraphs": ["Honeybees have developed a remarkable system."],
+        "glossary": [{"word": "hive", "explanation": "the home where a group of bees lives"}],
+        "glossarycount": 1,
+        "glossarymax": 5,
+        "rows": [{"measure": "Words", "original": "612", "rewritten": "452", "target": "up to 441",
+                  "statuslabel": "See note 1", "ismet": false, "isnotmet": true}],
+        "notes": [{"text": "The text is 11 words over the length limit."}]
+    }
+}}
+<div class="ogte-rw-resulthead d-flex flex-wrap align-items-center justify-content-between p-3 mb-4">
+    <div>
+        <div class="text-primary small">{{#str}}rw_stepcomplete, mod_ogte{{/str}}</div>
+        <h4 class="mb-0">{{title}}</h4>
+    </div>
+    <div class="mt-2 mt-md-0">
+        <button type="button" class="btn btn-outline-primary ogte-rw-tryanother mr-2 me-2">{{#str}}rw_tryanother, mod_ogte{{/str}}</button>
+        <button type="button" class="btn btn-primary ogte-rw-rewriteagain">{{#str}}rw_rewriteagain, mod_ogte{{/str}}</button>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-3">
+        <h5>{{#str}}rw_originaltext, mod_ogte{{/str}}</h5>
+        <div class="ogte-rw-textbox">{{#originalparagraphs}}<p>{{.}}</p>{{/originalparagraphs}}</div>
+    </div>
+    <div class="col-md-6 mb-3">
+        <h5>{{#str}}rw_rewrittentext, mod_ogte, {{levellabel}}{{/str}}</h5>
+        <div class="ogte-rw-textbox ogte-rw-rewrittenbox">{{{html}}}</div>
+    </div>
+</div>
+
+<h4 class="mt-3">{{#str}}rw_results, mod_ogte{{/str}}</h4>
+<div class="table-responsive">
+    <table class="table ogte-rw-resulttable">
+        <thead>
+            <tr>
+                <th scope="col">{{#str}}rw_measure, mod_ogte{{/str}}</th>
+                <th scope="col" class="text-right text-end">{{#str}}rw_original, mod_ogte{{/str}}</th>
+                <th scope="col" class="text-right text-end">{{#str}}rw_rewritten, mod_ogte{{/str}}</th>
+                <th scope="col" class="text-right text-end">{{#str}}rw_target, mod_ogte, {{levellabel}}{{/str}}</th>
+                <th scope="col">{{#str}}rw_result, mod_ogte{{/str}}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#rows}}
+            <tr>
+                <th scope="row">{{measure}}</th>
+                <td class="text-right text-end text-muted">{{original}}</td>
+                <td class="text-right text-end font-weight-bold fw-bold">{{rewritten}}</td>
+                <td class="text-right text-end text-muted">{{target}}</td>
+                <td>
+                    {{#ismet}}<span class="text-success"><i class="fa fa-check mr-1 me-1"></i>{{statuslabel}}</span>{{/ismet}}
+                    {{#isnotmet}}<span class="text-warning"><i class="fa fa-exclamation-circle mr-1 me-1"></i>{{statuslabel}}</span>{{/isnotmet}}
+                    {{^ismet}}{{^isnotmet}}<span class="text-muted">{{statuslabel}}</span>{{/isnotmet}}{{/ismet}}
+                </td>
+            </tr>
+            {{/rows}}
+        </tbody>
+    </table>
+</div>
+
+<div class="row">
+    {{#glossarycount}}
+    <div class="col-md-6 mb-3">
+        <div class="ogte-rw-glossary p-3">
+            <h5>{{#str}}rw_glossary, mod_ogte{{/str}} <small class="text-muted">· {{#str}}rw_glossarycount, mod_ogte, {"count": {{glossarycount}}, "max": {{glossarymax}} }{{/str}}</small></h5>
+            <dl class="row mb-0">
+                {{#glossary}}
+                <dt class="col-sm-4"><mark class="ogte-glossary-word">{{word}}</mark></dt>
+                <dd class="col-sm-8">{{explanation}}</dd>
+                {{/glossary}}
+            </dl>
+        </div>
+    </div>
+    {{/glossarycount}}
+    {{#hasnotes}}
+    <div class="col-md-6 mb-3">
+        <div class="alert alert-warning">
+            <h5>{{#str}}rw_notes, mod_ogte{{/str}}</h5>
+            <ol class="mb-0">
+                {{#notes}}<li>{{text}}</li>{{/notes}}
+            </ol>
+        </div>
+    </div>
+    {{/hasnotes}}
+</div>

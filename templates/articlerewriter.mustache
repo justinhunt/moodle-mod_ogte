@@ -1,151 +1,82 @@
-<div class="container">
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template mod_ogte/articlerewriter
+
+    The Text Rewriter: analyse a passage against a word list's levels, then simplify it to one.
+    The analysis and the result are rendered by mod_ogte/rewriter.
+
+    Context variables required for this template:
+    * ogteid - The activity id.
+    * aiavailable - Is an AI provider set up.
+    * listoptions - The word lists, each with key and label.
+
+    Example context (json):
+    {
+        "ogteid": 1,
+        "aiavailable": true,
+        "listoptions": [{"key": 1, "label": "NGSL 1.2 (General English)"}]
+    }
+}}
+<div class="container ogte-rewriter" id="{{uniqid}}_rewriter">
     <h3 class="ogte-section-title">{{#str}}articlerewriter, mod_ogte{{/str}}</h3>
-    <span class="ogte-panel-instructions">{{#str}}articlerewrite_instructions, mod_ogte{{/str}}</span><br/>
-    <div class="container">
-        <div class="row article-rewriter-row">
-            <div class="column-always-visible">
-                <h4>{{#str}}original-article, mod_ogte{{/str}}</h4>
-                <textarea id="{{uniqid}}_ar_originaltext" class="mod-ogte-textarea ogte-wide" placeholder="{{#str}}paste-text-here, mod_ogte{{/str}}">{{passage}}</textarea><br/>
-                <div id="{{uniqid}}_ar_originalstats" class="mod-ogte-stats ogte_rewriter_stats"></div>
+    <p class="ogte-panel-instructions">{{#str}}articlerewrite_instructions, mod_ogte{{/str}}</p>
 
-                <fieldset id="difficulty-choice">
-                    <legend>{{#str}}rewritten-article-difficulty, mod_ogte{{/str}}</legend>
-                    <div class="btn-group btn-group-toggle mod_ogte_difficulty-group" id="{{uniqid}}_ar_difficulty" data-toggle="buttons">
-                    <label class="btn btn-secondary active">
-                        <input type="radio" name="difficulty" value="1" checked> One (simplest)
-                    </label>
-                    <label class="btn btn-secondary">
-                        <input type="radio" name="difficulty" value="2"> Two
-                    </label>
-                    <label class="btn btn-secondary">
-                        <input type="radio" name="difficulty" value="3"> Three
-                    </label>
-                    <label class="btn btn-secondary">
-                        <input type="radio" name="difficulty" value="4"> Four
-                    </label>
-                    <label class="btn btn-secondary">
-                        <input type="radio" name="difficulty" value="5"> Five
-                    </label>
-                    </div>
-                </fieldset>
+    <ol class="ogte-rw-steps list-unstyled d-flex flex-wrap">
+        <li class="ogte-rw-step ogte-rw-step-active" data-step="1"><span class="ogte-rw-stepnumber">1</span>{{#str}}rw_step1, mod_ogte{{/str}}</li>
+        <li class="ogte-rw-step" data-step="2"><span class="ogte-rw-stepnumber">2</span>{{#str}}rw_step2, mod_ogte{{/str}}</li>
+    </ol>
 
-                {{^aiavailable}}<div class="alert alert-warning">{{#str}}noaiprovider, mod_ogte{{/str}}</div>{{/aiavailable}}
-                <button class="btn btn-primary" id="{{uniqid}}_ar_button" type="button" style="width: 100%; max-width: 800px" {{^aiavailable}}disabled{{/aiavailable}}>{{#str}}rewrite-article, mod_ogte{{/str}}</button>
+    {{^aiavailable}}<div class="alert alert-warning">{{#str}}noaiprovider, mod_ogte{{/str}}</div>{{/aiavailable}}
 
-            </div>
-            <div class="column-initially-hidden">
-
-                <div id="{{uniqid}}_ar_rewritten"  style="display: none">
-                    <h4>{{#str}}rewritten-article, mod_ogte{{/str}}</h4>
-                    <div id="{{uniqid}}_ar_spinner" style="text-align: center; width: 100%; display: none;"><i class="fa fa-spinner fa-spin fa-lg"></i></div>
-                    <textarea id="the_ar_result" class="mod-ogte-textarea ogte-wide" style="display: none;"></textarea>
-                    <div id="{{uniqid}}_ar_resultstats" class="mod-ogte-stats ogte_rewriter_stats" style="display: none;"></div>
-                    <!-- actions -->
-                    <div id="ogte_rewriter_actions" class="mod-ogte-passage-opts" style="display: none">
-                        <div class="ogte-spacer"></div>
-                        <div class="ogte_article_action_button ogte_article_download_button">
-                            <a class="btn btn-secondary ogte_downloadbutton" data-download-target="#the_ar_result"></a>
-                        </div>
-                        <div class="ogte_article_action_button ogte_article_copy_button">
-                            <a class="btn btn-secondary ogte_clipboardbutton" data-clipboard-action="copy" data-clipboard-target="#the_ar_result"></a>
-                            <span class="ogte_copied" style="display: none">{{#str}}copied, mod_ogte{{/str}}</span>
-                        </div>
-                    </div>
-                    <div class=" ogte_sendtoeditor_button text-center" id="ogte_ar_sendtoeditor_button" >
-                        <a class="btn btn-secondary ogte_ar_sendtoeditor_button" data-send-target="#the_ar_result">{{#str}}send-to-editor, mod_ogte{{/str}}</a>
-                    </div>
-                </div>
-
-            </div>
+    <div class="ogte-rw-input">
+        <div class="form-group mb-3">
+            <label for="{{uniqid}}_rw_list" class="font-weight-bold fw-bold">{{#str}}rw_wordlist, mod_ogte{{/str}}</label>
+            <select id="{{uniqid}}_rw_list" class="custom-select form-select ogte-rw-list">
+                {{#listoptions}}<option value="{{key}}">{{label}}</option>{{/listoptions}}
+            </select>
+            {{^listoptions}}<div class="alert alert-warning">{{#str}}rw_nolists, mod_ogte{{/str}}</div>{{/listoptions}}
         </div>
+        <label for="{{uniqid}}_rw_original" class="h4">{{#str}}rw_originaltext, mod_ogte{{/str}}</label>
+        <textarea id="{{uniqid}}_rw_original" class="mod-ogte-textarea ogte-wide ogte-rw-original" placeholder="{{#str}}rw_pastehere, mod_ogte{{/str}}">{{passage}}</textarea>
+        <div class="d-flex flex-wrap align-items-center mt-3">
+            <button type="button" class="btn btn-primary btn-lg ogte-rw-analyse mr-3 me-3" {{^listoptions}}disabled{{/listoptions}}>{{#str}}rw_analyse, mod_ogte{{/str}}</button>
+            <span class="text-muted">{{#str}}rw_analyse_help, mod_ogte{{/str}}</span>
+        </div>
+        <div class="ogte-rw-analysis mt-4" style="display: none;"></div>
     </div>
+
+    <div class="ogte-rw-progress alert alert-info mt-4" style="display: none;" role="status" aria-live="polite">
+        <i class="fa fa-spinner fa-spin mr-2 me-2"></i><span class="ogte-rw-progressmessage"></span>
+    </div>
+
+    <div class="ogte-rw-result mt-4" style="display: none;"></div>
+
+    {{! The result actions stay on the page, so the Text Profiler's send button handler finds them. }}
+    <div class="ogte-rw-actions" style="display: none;"><div class="d-flex flex-wrap mt-3">
+        <textarea id="the_ar_result" class="d-none" aria-hidden="true"></textarea>
+        <button type="button" class="btn btn-outline-secondary ogte-rw-copy mr-2 me-2 mb-2"><i class="fa fa-copy mr-1 me-1"></i>{{#str}}rw_copy, mod_ogte{{/str}}</button>
+        <span class="ogte-rw-copied text-success align-self-center mr-2 me-2 mb-2" style="display: none;">{{#str}}copied, mod_ogte{{/str}}</span>
+        <button type="button" class="btn btn-outline-secondary ogte-rw-download mr-2 me-2 mb-2"><i class="fa fa-download mr-1 me-1"></i>{{#str}}rw_download, mod_ogte{{/str}}</button>
+        <a class="btn btn-outline-primary ogte_ar_sendtoeditor_button ml-auto ms-auto mb-2" role="button" tabindex="0" data-send-target="#the_ar_result">{{#str}}rw_sendtoprofiler, mod_ogte{{/str}}</a>
+    </div></div>
 </div>
-{{^element.frozen}}
-    {{#js}}
-        // <script>
-            require(['jquery', 'core/templates','core/notification','mod_ogte/utils'], function($,templates,notification, utils) {
-
-                var theresult= $('#the_ar_result');
-                var originalstats= $('#{{uniqid}}_ar_originalstats');
-                var resultstats= $('#{{uniqid}}_ar_resultstats');
-                var rewritten= $('#{{uniqid}}_ar_rewritten');
-                var actions= $('#ogte_rewriter_actions');
-                var spinner= $('#{{uniqid}}_ar_spinner');
-
-                // Bootstrap 5 dropped the "buttons" plugin, so keep the active label in sync ourselves.
-                $('#{{uniqid}}_ar_difficulty').on('change', 'input[name="difficulty"]', function() {
-                    $(this).closest('.btn-group').find('label.btn').removeClass('active');
-                    $(this).closest('label.btn').addClass('active');
-                });
-                var sendtoeditor= $('#ogte_ar_sendtoeditor_button');
-
-                //labels
-                var label_rewrite = '{{#str}}rewrite-article, mod_ogte{{/str}}';
-                var label_rewriting = '<i class="fa fa-spinner fa-spin fa-lg"></i><br />';
-
-
-                $('#{{uniqid}}_ar_button').on('click',function(){
-
-                    var thebutton = $(this);
-                    var usetext = $('#{{uniqid}}_ar_originaltext').val();
-                    var difficulty = $('input[name="difficulty"]:checked').val();
-
-                    //no super long readings or empty ones
-                    if(!usetext || usetext.trim()==='') {
-                        notification.alert('{{#str}}textproblem, mod_ogte{{/str}}','{{#str}}entersomething, mod_ogte{{/str}}');
-                        return;
-                    }
-
-
-                    //add stats to original
-                    var textStatsData = utils.analyzeText(usetext);
-                    templates.render('mod_ogte/textstatstable', textStatsData).done(function(html, js) {
-                        originalstats.fadeOut("fast", function() {
-                            templates.replaceNodeContents(originalstats, html, js);
-                            originalstats.fadeIn("fast");
-                        }.bind(this));
-
-                    }.bind(this)).fail(notification.exception);
-
-                    if(usetext.length > 15000){
-                        notification.alert('{{#str}}textproblem, mod_ogte{{/str}}','{{#str}}texttoolong15000, mod_ogte{{/str}}');
-                        return;
-                    }
-
-                    //change button caption to a spinner
-                    thebutton.html(label_rewriting);
-
-
-                    utils.call_ai({{ogteid}}, 'rewrite_article', usetext, 'en-US', difficulty).then(function(newarticle){
-                        //restore button caption
-                        thebutton.text(label_rewrite);
-
-                        //show results panel
-                        rewritten.show();
-                        theresult.val(newarticle);
-                        theresult.show();
-
-                        //add stats to result
-                        var textStatsData = utils.analyzeText(newarticle);
-                        templates.render('mod_ogte/textstatstable', textStatsData).done(function(html, js) {
-                            resultstats.fadeOut("fast", function() {
-                                templates.replaceNodeContents(resultstats, html, js);
-                                resultstats.fadeIn("fast");
-                            }.bind(this));
-
-                        }.bind(this)).fail(notification.exception);
-
-                        //show actions and send to editor button
-                        actions.show();
-                        sendtoeditor.show();
-
-                    }).catch(function(error) {
-                        thebutton.text(label_rewrite);
-                        notification.exception(error);
-                    });
-
-                });
-
-            });
-    {{/js}}
-{{/element.frozen}}
+{{#js}}
+    require(['mod_ogte/rewriter'], function(rewriter) {
+        rewriter.init('{{uniqid}}_rewriter', {{ogteid}}, {{#aiavailable}}true{{/aiavailable}}{{^aiavailable}}false{{/aiavailable}});
+    });
+{{/js}}

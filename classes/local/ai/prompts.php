@@ -73,21 +73,6 @@ class prompts {
                 'userinput' => ['topic'],
                 'fragment' => false,
             ],
-            'rewrite_article' => [
-                'systemprompt' => self::PASSAGE_SYSTEM,
-                'prompttext' => "Rewrite the {language} passage below, between [[ and ]], for language learners at "
-                    . "this level: {leveldescription}\n"
-                    . "Write it in {language}. Keep the meaning, the facts and the order of ideas. Keep about the "
-                    . "same length as the original, though a simpler level may be shorter.\n"
-                    . self::FORMAT_RULES . "\n\n{passage}",
-                'maxtokens' => 8000,
-                'effort' => 'medium',
-                'temperature' => '',
-                'placeholders' => ['passage', 'language', 'leveldescription'],
-                'required' => ['passage', 'leveldescription'],
-                'userinput' => ['passage'],
-                'fragment' => false,
-            ],
             'grammar_correction' => [
                 'systemprompt' => 'You are a helpful assistant.',
                 'prompttext' => "Correct the grammar and spelling of the {language} passage below, between [[ and ]]. "
@@ -104,32 +89,62 @@ class prompts {
             ],
         ];
 
-        // The rewrite levels. The text rewriter sends 1 to 5, with 1 the simplest.
-        $levels = [
-            1 => 'CEFR A1 (beginner): very short, simple sentences; only the most common words; '
-                . 'the simple present, and the simple past for past events.',
-            2 => 'CEFR A2 (elementary): short sentences joined with simple words such as "and", "but" '
-                . 'and "because"; common everyday words; present, simple past and simple future tenses.',
-            3 => 'CEFR B1 (intermediate): clear sentences, some of them compound or complex; everyday '
-                . 'words plus the key words of the topic; the common tenses.',
-            4 => 'CEFR B2 (upper intermediate): varied sentences, including complex ones; a wider '
-                . 'vocabulary, including less common words for the topic; the full range of tenses.',
-            5 => 'CEFR C1 (advanced): natural, varied and complex sentences; precise and less common '
-                . 'vocabulary, and idioms where they are natural.',
+        $glossaryjson = 'Return a JSON object of the form {"article": "the passage", "glossary": [{"word": "a kept '
+            . 'word", "explanation": "what it means, in simple words"}]}. Use an empty glossary list if you keep no '
+            . 'hard words.';
+        $defs['simplify_to_level'] = [
+            'systemprompt' => self::PASSAGE_SYSTEM,
+            'prompttext' => "Simplify the {language} passage below, between [[ and ]], for language learners at "
+                . "{levelname}. {leveldescription}\n\n"
+                . "Follow these rules. When they conflict, the earlier rule wins.\n"
+                . "1. Keep the main ideas and key facts, and keep them accurate: names, numbers, dates, places, who "
+                . "did what, and cause and effect. Keep the names of people, places and organisations, and keep "
+                . "numbers and units as they are.\n"
+                . "2. Use only very common, everyday words. Replace each less common word with a common word or a "
+                . "short phrase. Up to {glossarymax} key words of the topic that have no simple replacement may "
+                . "stay: explain each one briefly in the passage, in simple words, and list it in the glossary.\n"
+                . "3. {sentencerule}\n"
+                . "4. {lengthrule}\n\n"
+                . "When you shorten, remove in this order: repetition and restatement, extra examples, background "
+                . "asides and minor detail. Always turn long direct quotations into short reported speech. Never "
+                . "add facts that are not in the original.\n"
+                . "Write in {language}. Write plain paragraphs separated by a blank line, with no title, headings, "
+                . "lists or markdown.\n"
+                . $glossaryjson . "\n\n{passage}",
+            'maxtokens' => 16000,
+            'effort' => 'medium',
+            'temperature' => '',
+            'placeholders' => ['passage', 'language', 'levelname', 'leveldescription', 'sentencerule',
+                'lengthrule', 'glossarymax'],
+            'required' => ['passage'],
+            'userinput' => ['passage'],
+            'fragment' => false,
         ];
-        foreach ($levels as $level => $description) {
-            $defs['rewrite_level_' . $level] = [
-                'systemprompt' => '',
-                'prompttext' => $description,
-                'maxtokens' => 0,
-                'effort' => '',
-                'temperature' => '',
-                'placeholders' => [],
-                'required' => [],
-                'userinput' => [],
-                'fragment' => true,
-            ];
-        }
+        $defs['revise_to_level'] = [
+            'systemprompt' => self::PASSAGE_SYSTEM,
+            'prompttext' => "The {language} passage below, between [[ and ]], was simplified for language learners "
+                . "at {levelname}, but parts of it are still too hard.\n\n"
+                . "{problems}\n\n"
+                . "Fix these problems. Replace each hard word with a common, everyday word or a short phrase, and "
+                . "rewrite the whole sentence it is in so the sentence stays natural and correct. Split long "
+                . "sentences into shorter ones. Do not bring in other uncommon words. Keep the meaning, the facts "
+                . "and the rest of the passage as they are, and do not make the passage longer. Never change "
+                . "names, numbers or units.\n"
+                . "If a listed word is a key word of the topic with no simple replacement, you may keep it instead: "
+                . "explain it briefly in the passage, in simple words, and add it to the glossary.\n"
+                . "These kept words may stay, with their explanations in the passage: {glossarywords}. Keep at most "
+                . "{glossarymax} such words in all.\n"
+                . "Write in {language}. Write plain paragraphs separated by a blank line, with no title, headings, "
+                . "lists or markdown.\n"
+                . $glossaryjson . "\n\n{passage}",
+            'maxtokens' => 16000,
+            'effort' => 'medium',
+            'temperature' => '',
+            'placeholders' => ['passage', 'language', 'levelname', 'problems', 'glossarywords', 'glossarymax'],
+            'required' => ['passage', 'problems'],
+            'userinput' => ['passage'],
+            'fragment' => false,
+        ];
         return $defs;
     }
 

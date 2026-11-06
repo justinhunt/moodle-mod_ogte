@@ -142,21 +142,19 @@ define(['jquery', 'core/log', 'core/ajax'], function ($, log, ajax) {
          * Run one of the AI tools on the server, using the site's AI provider.
          *
          * @param {Number} ogteid The activity instance id.
-         * @param {String} action generate_article, rewrite_article or grammar_correction.
+         * @param {String} action generate_article or grammar_correction.
          * @param {String} text The topic or passage.
          * @param {String} language The language code, e.g. en-US.
-         * @param {Number} level The rewrite level, 1 to 5. Only used by rewrite_article.
          * @return {Promise} Resolves to the passage the AI wrote.
          */
-        call_ai: function (ogteid, action, text, language, level) {
+        call_ai: function (ogteid, action, text, language) {
             return ajax.call([{
                 methodname: 'mod_ogte_call_ai',
                 args: {
                     ogteid: ogteid,
                     action: action,
                     text: text,
-                    language: language || 'en-US',
-                    level: level || 0
+                    language: language || 'en-US'
                 }
             }])[0].then(function (result) {
                 return result.text;
