@@ -137,6 +137,9 @@ final class rewriter_test extends \advanced_testcase {
         ]);
         $this->assertEquals([['word' => 'zebra', 'explanation' => 'a striped horse']], $check['glossary']);
         $this->assertEquals(['with'], $check['uncovered']);
+        // The Text Profiler is told to ignore the forms the glossary covers.
+        $this->assertEquals(['zebras'], $check['ignores']);
+        $this->assertEquals(['frisch'], $rewriter->profiler_ignores($profile, 1));
         $this->assertFalse($check['met']);
 
         $this->assertEquals(94.9, rewriter::display_coverage(94.99));

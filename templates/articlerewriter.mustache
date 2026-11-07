@@ -44,6 +44,10 @@
     {{^aiavailable}}<div class="alert alert-warning">{{#str}}noaiprovider, mod_ogte{{/str}}</div>{{/aiavailable}}
 
     <div class="ogte-rw-input">
+        {{! Shown once there is a rewrite to go back to. }}
+        <div class="ogte-rw-back mb-3" style="display: none;">
+            <button type="button" class="btn btn-outline-primary ogte-rw-backtoresult"><i class="fa fa-arrow-right mr-1 me-1"></i>{{#str}}rw_backtoresult, mod_ogte{{/str}}</button>
+        </div>
         <div class="form-group mb-3">
             <label for="{{uniqid}}_rw_list" class="font-weight-bold fw-bold">{{#str}}rw_wordlist, mod_ogte{{/str}}</label>
             <select id="{{uniqid}}_rw_list" class="custom-select form-select ogte-rw-list">

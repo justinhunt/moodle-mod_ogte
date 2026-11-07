@@ -358,6 +358,32 @@ class rewriter {
     }
 
     /**
+     * The words the Text Profiler must ignore to count a passage as the rewriter does: the
+     * names, and the words that only the glossary covers.
+     *
+     * @param array $profile
+     * @param int $index Level index.
+     * @param string[] $glossarywords
+     * @return string[] Clean single words, in the order they first appear.
+     */
+    public function profiler_ignores(array $profile, int $index, array $glossarywords = []): array {
+        $top = $this->levels[$index]['top'];
+        $ignores = [];
+        foreach (self::counted_words($profile) as $word) {
+            $byname = $word[1] === 0;
+            $byglossary = !self::is_covered($word, $top, []) && self::is_covered($word, $top, $glossarywords);
+            if ($byname || $byglossary) {
+                foreach (explode(' ', $word[0]) as $part) {
+                    if ($part !== '') {
+                        $ignores[$part] = true;
+                    }
+                }
+            }
+        }
+        return array_map('strval', array_keys($ignores));
+    }
+
+    /**
      * Coverage for display: one decimal place, rounded down, so 94.96% never shows as 95.0%.
      *
      * @param float $coverage
@@ -520,6 +546,7 @@ class rewriter {
         $sentences = self::sentence_check($stats, $this->levels[$index]);
         return [
             'text' => $text,
+            'ignores' => $this->profiler_ignores($profile, $index, $glossarywords),
             'stats' => $stats,
             'glossary' => array_values($kept),
             'coverage' => $coverage,
@@ -804,6 +831,7 @@ class rewriter {
             'html' => self::highlight($check['text'], array_column($check['glossary'], 'word')),
             'glossary' => $check['glossary'],
             'glossarymax' => self::glossary_max($stats->words),
+            'ignores' => $check['ignores'],
             'met' => $check['met'],
             // The browser keeps the best pass: met first, then coverage met, then sentences met,
             // then the higher coverage.

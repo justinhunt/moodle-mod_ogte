@@ -9,7 +9,7 @@
                 <!-- The word list select -->
                 <div>
                     {{#str}}wordlist, mod_ogte{{/str}}
-                    <select id="the_listselect" class="form-control" name="listselect">
+                    <select id="the_listselect" class="form-control form-select" name="listselect">
                         {{#listoptions}}
                         <option value="{{key}}">{{label}}</option>
                         {{/listoptions}}
@@ -18,7 +18,7 @@
                 <!-- The word list level select -->
                 <div>
                     {{#str}}wordlevel, mod_ogte{{/str}}
-                    <select id="the_levelselect" class="form-control"  name="levelselect">
+                    <select id="the_levelselect" class="form-control form-select"  name="levelselect">
                         {{#leveloptions}}
                         <option value="{{key}}">{{label}}</option>
                         {{/leveloptions}}

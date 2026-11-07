@@ -561,22 +561,52 @@ define(['jquery', 'core/log', 'core/notification', 'core/str', 'core/templates',
                     //get the article text to update
                     var target_selector = $(this).attr('data-send-target');
                     var text = $(target_selector).val();
+                    if (!text || text.trim() === '') {
+                        return;
+                    }
 
-                    //set the text to the article leveler and level it
-                    passagebox.text(text);
+                    //the rewriter also sends its list, level and the words it counts as covered (names
+                    //and glossary words), so the profiler's coverage matches the rewriter's
+                    var sendlistid = $(this).attr('data-send-listid');
+                    var sendlevelid = $(this).attr('data-send-levelid');
+                    var sendignores = $(this).attr('data-send-ignores');
+                    if (sendlistid !== undefined && listselect.find('option[value="' + sendlistid + '"]').length) {
+                        listselect.val(sendlistid);
+                        app.updateLevelDropdown();
+                        if (sendlevelid !== undefined && levelselect.find('option[value="' + sendlevelid + '"]').length) {
+                            levelselect.val(sendlevelid);
+                            hiddenLevelIdBox.val(sendlevelid);
+                        }
+                    }
+                    if (sendignores !== undefined) {
+                        ignorelist.val(sendignores);
+                        hiddenIgnoresBox.val(sendignores);
+                    }
+
+                    //set the text to the article leveler
+                    passagebox.val(text);
                     hiddenTextBox.val(text);
                     if (app.editor) {
                         app.editor.setValue(text);
                     }
-                    thebutton.click();
 
-                    //switch to the article leveler tab
-                    $('.mod_ogte_tab-content .tab-pane').removeClass('active');
-                    $('.mod_ogte_tab-content #articleleveler').addClass('active');
-                    $('.mod_ogte_nav-pills .nav-link').removeClass('active');
-                    $('.mod_ogte_nav-pills a[href="#articleleveler"]').addClass('active');
-                    $('#articleleveler').tab('show');
+                    //switch to the article leveler tab. Clicking the tab link lets Bootstrap 4 or 5 show it
+                    //and fire shown.bs.tab, which refreshes the editor (it cannot draw while hidden).
+                    var tablink = $('.mod_ogte_nav-pills a[href="#articleleveler"]');
+                    if (tablink.length) {
+                        tablink[0].click();
+                    } else {
+                        $('.mod_ogte_tab-content .tab-pane').removeClass('active show');
+                        $('.mod_ogte_tab-content #articleleveler').addClass('active show');
+                    }
 
+                    //level it once the editor is showing
+                    setTimeout(function () {
+                        if (app.editor) {
+                            app.editor.refresh();
+                        }
+                        thebutton.click();
+                    }, 50);
                 });
 
                 if (app.editor) {
@@ -627,10 +657,12 @@ define(['jquery', 'core/log', 'core/notification', 'core/str', 'core/templates',
 
                     //no super long readings or empty ones
                     if (!thepassage || thepassage.trim() === '') {
+                        thebutton.text('GO');
                         themessage.text(app.strings['entersomething']);
                         return;
                     }
                     if (thepassage.length > 500000) {
+                        thebutton.text('GO');
                         themessage.text(app.strings['texttoolong500000']);
                         return;
                     }
@@ -656,6 +688,9 @@ define(['jquery', 'core/log', 'core/notification', 'core/str', 'core/templates',
                             themessage.text('Failed to level text. Sorry.');
                             log.debug('ajax call to level coverage failed');
                         }
+                    }).fail(function (error) {
+                        thebutton.text('GO');
+                        notification.exception(error);
                     });//end of level passage
                 });//end of click
 

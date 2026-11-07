@@ -23,11 +23,13 @@
     * title, levellabel, html, glossary, rows, notes - From mod_ogte_simplify_text.
     * originalparagraphs - The original passage, as paragraphs of plain text.
     * glossarymax - The most glossary words allowed.
+    * listname - The word list the levels belong to.
 
     Example context (json):
     {
         "title": "Simplified from above Level 7 to Level 3 (A2)",
         "levellabel": "Level 3 (A2)",
+        "listname": "NGSL 1.2 (General English)",
         "html": "<p>Honeybees have a clever way to share news about food.</p>",
         "originalparagraphs": ["Honeybees have developed a remarkable system."],
         "glossary": [{"word": "hive", "explanation": "the home where a group of bees lives"}],
@@ -42,6 +44,7 @@
     <div>
         <div class="text-primary small">{{#str}}rw_stepcomplete, mod_ogte{{/str}}</div>
         <h4 class="mb-0">{{title}}</h4>
+        <div class="text-muted small mt-1">{{#str}}rw_listname, mod_ogte, {{listname}}{{/str}}</div>
     </div>
     <div class="mt-2 mt-md-0">
         <button type="button" class="btn btn-outline-primary ogte-rw-tryanother mr-2 me-2">{{#str}}rw_tryanother, mod_ogte{{/str}}</button>

@@ -82,6 +82,7 @@ function($, Ajax, Templates, Notification, Str, Utils) {
         // The passage, list and analysis that the level table was made for.
         this.original = '';
         this.listid = 0;
+        this.listname = '';
         this.analysis = null;
         this.level = null;
         this.result = null;
@@ -99,13 +100,27 @@ function($, Ajax, Templates, Notification, Str, Utils) {
             self.analyse();
         });
         this.root.on('click', '.ogte-rw-simplify', function() {
-            self.simplify(parseInt($(this).data('level'), 10));
+            var level = parseInt($(this).data('level'), 10);
+            self.confirmReplace(this).then(function() {
+                self.simplify(level, self.analysis.levels[level].label);
+                return null;
+            }).catch(function() {
+                // Cancelled.
+            });
         });
         this.root.on('click', '.ogte-rw-tryanother', function() {
             self.showStep(1);
         });
+        this.root.on('click', '.ogte-rw-backtoresult', function() {
+            self.showStep(2);
+        });
         this.root.on('click', '.ogte-rw-rewriteagain', function() {
-            self.simplify(self.level);
+            self.confirmReplace(this).then(function() {
+                self.simplify(self.level, self.result.levellabel);
+                return null;
+            }).catch(function() {
+                // Cancelled.
+            });
         });
         this.find('.ogte-rw-copy').on('click', function() {
             copyText(self.result.text).then(function() {
@@ -134,7 +149,26 @@ function($, Ajax, Templates, Notification, Str, Utils) {
         this.find('.ogte-rw-step').removeClass('ogte-rw-step-active');
         this.find('.ogte-rw-step[data-step="' + step + '"]').addClass('ogte-rw-step-active');
         this.find('.ogte-rw-input').toggle(step === 1);
+        this.find('.ogte-rw-back').toggle(step === 1 && this.result !== null);
         this.find('.ogte-rw-result, .ogte-rw-actions').toggle(step === 2);
+    };
+
+    /**
+     * Ask before a new rewrite replaces the one we have.
+     *
+     * @param {HTMLElement} trigger The button clicked, to return focus to.
+     * @returns {Promise} Resolved to go on, rejected if cancelled.
+     */
+    Rewriter.prototype.confirmReplace = function(trigger) {
+        if (!this.result) {
+            return Promise.resolve();
+        }
+        return Notification.saveCancelPromise(
+            Str.get_string('rw_replacetitle', 'mod_ogte'),
+            Str.get_string('rw_replacequestion', 'mod_ogte'),
+            Str.get_string('rw_replaceok', 'mod_ogte'),
+            {triggerElement: trigger}
+        );
     };
 
     Rewriter.prototype.setProgress = function(message) {
@@ -176,6 +210,7 @@ function($, Ajax, Templates, Notification, Str, Utils) {
         }])[0]).then(function(analysis) {
             self.original = text;
             self.listid = listid;
+            self.listname = self.find('.ogte-rw-list option:selected').text();
             self.analysis = analysis;
             analysis.aiavailable = self.aiavailable;
             return Templates.renderForPromise('mod_ogte/rewriter_analysis', analysis);
@@ -210,13 +245,18 @@ function($, Ajax, Templates, Notification, Str, Utils) {
         }])[0]);
     };
 
-    Rewriter.prototype.simplify = function(levelindex) {
+    /**
+     * Simplify the analysed passage to a level: a rewrite, then repairs.
+     *
+     * @param {Number} levelindex
+     * @param {String} levellabel
+     */
+    Rewriter.prototype.simplify = function(levelindex, levellabel) {
         var self = this;
-        if (this.busy || !this.analysis) {
+        if (this.busy || !this.original) {
             return;
         }
         this.level = levelindex;
-        var levellabel = this.analysis.levels[levelindex].label;
         var best = null;
 
         // Keep the best pass, and repair until the targets are met or we run out of passes.
@@ -227,7 +267,8 @@ function($, Ajax, Templates, Notification, Str, Utils) {
             if (result.met || repairs >= MAX_REPAIRS) {
                 return best;
             }
-            return Str.get_string('rw_checking', 'mod_ogte', {pass: repairs + 1, max: MAX_REPAIRS}).then(function(s) {
+            var message = Str.get_string('rw_checking', 'mod_ogte', {pass: repairs + 1, max: MAX_REPAIRS});
+            return Promise.resolve(message).then(function(s) {
                 self.setProgress(s);
                 return self.pass(result.text, result.glossary);
             }).then(function(repaired) {
@@ -235,15 +276,22 @@ function($, Ajax, Templates, Notification, Str, Utils) {
             });
         };
 
+        // While it works, the progress message takes the place of the text and the level table.
         this.setBusy(true);
-        Str.get_string('rw_rewriting', 'mod_ogte', levellabel).then(function(s) {
+        this.find('.ogte-rw-input, .ogte-rw-result, .ogte-rw-actions').hide();
+        // Str and Ajax give jQuery promises, which have no finally(): wrap them in native ones.
+        Promise.resolve(Str.get_string('rw_rewriting', 'mod_ogte', levellabel)).then(function(s) {
             self.setProgress(s);
             return self.pass('', []);
         }).then(function(result) {
             return next(result, 0);
         }).then(function(result) {
             return self.showResult(result);
-        }).catch(Notification.exception).finally(function() {
+        }).catch(function(error) {
+            // Go back to where we were, so another level or another try can be chosen.
+            self.showStep(self.result ? 2 : 1);
+            Notification.exception(error);
+        }).finally(function() {
             self.setProgress('');
             self.setBusy(false);
         });
@@ -253,12 +301,19 @@ function($, Ajax, Templates, Notification, Str, Utils) {
         var self = this;
         this.result = result;
         this.find('#the_ar_result').val(result.text);
+        // The Text Profiler reads these when the text is sent to it, so it counts the text as we do.
+        this.find('.ogte_ar_sendtoeditor_button').attr({
+            'data-send-listid': this.listid,
+            'data-send-levelid': this.level,
+            'data-send-ignores': result.ignores.join(' ')
+        });
         var context = $.extend({}, result, {
+            listname: this.listname,
             originalparagraphs: paragraphs(this.original),
             glossarycount: result.glossary.length,
             hasnotes: result.notes.length > 0
         });
-        return Templates.renderForPromise('mod_ogte/rewriter_result', context).then(function(rendered) {
+        return Promise.resolve(Templates.renderForPromise('mod_ogte/rewriter_result', context)).then(function(rendered) {
             Templates.replaceNodeContents(self.find('.ogte-rw-result'), rendered.html, rendered.js);
             self.showStep(2);
             self.root[0].scrollIntoView({behavior: 'smooth', block: 'start'});

@@ -404,6 +404,8 @@ class mod_ogte_external extends external_api {
             'html' => new external_value(PARAM_RAW, 'the rewritten passage as HTML, glossary words marked'),
             'glossary' => new external_multiple_structure(self::glossary_structure()),
             'glossarymax' => new external_value(PARAM_INT, 'the most glossary words allowed'),
+            'ignores' => new external_multiple_structure(new external_value(PARAM_RAW, 'a word'),
+                'names and glossary words, for the Text Profiler to ignore'),
             'met' => new external_value(PARAM_BOOL, 'are the coverage and sentence targets met'),
             'score' => new external_value(PARAM_FLOAT, 'for choosing the best pass: higher is better'),
             'title' => new external_value(PARAM_TEXT, 'e.g. Simplified from Level 7 to Level 3 (A2)'),

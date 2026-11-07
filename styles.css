@@ -296,8 +296,13 @@ div#mod_ogte_passages_table_wrapper {
      */
 }
 
+/* The list, level and GO on one line. Bootstrap 5 has no form-row, so lay it out here. */
 .ogte-gopanel {
     margin: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px;
 }
 
 .ogte-panel-instructions {
