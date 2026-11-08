@@ -83,4 +83,14 @@ $functions = array(
         'ajax'        => true,
         'readonlysession' => true,
     ),
+    'mod_ogte_preview_prompt' => array(
+        'classname'   => 'mod_ogte_external',
+        'methodname'  => 'preview_prompt',
+        'classpath'   => 'mod/ogte/externallib.php',
+        'description' => 'Show an AI prompt as it would be sent for a sample text and word list level. No AI call.',
+        'capabilities' => 'mod/ogte:manageprompts',
+        'type'        => 'read',
+        'ajax'        => true,
+        'readonlysession' => true,
+    ),
 );

@@ -556,3 +556,17 @@ body .fancybox__backdrop {
     background-color: #ffe58a;
     font-weight: bold;
 }
+
+/* Prompt preview on the prompt edit page. */
+.ogte-promptpreview .ogte-pp-text,
+.ogte-promptpreview .ogte-pp-value {
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.ogte-promptpreview .ogte-pp-text {
+    background-color: var(--bs-light, #f8f9fa);
+    font-size: 0.875rem;
+}

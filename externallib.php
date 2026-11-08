@@ -425,4 +425,66 @@ class mod_ogte_external extends external_api {
             ])),
         ]);
     }
+
+    /**
+     * Parameters for preview_prompt.
+     *
+     * @return external_function_parameters
+     */
+    public static function preview_prompt_parameters() {
+        return new external_function_parameters([
+            'name' => new external_value(PARAM_ALPHANUMEXT, 'prompt name'),
+            'systemprompt' => new external_value(PARAM_RAW, 'the system prompt, as edited'),
+            'prompttext' => new external_value(PARAM_RAW, 'the prompt text, as edited'),
+            'listid' => new external_value(PARAM_INT, 'id of the word list'),
+            'level' => new external_value(PARAM_INT, 'level index, from 0'),
+            'sample' => new external_value(PARAM_RAW, 'the sample text, or topic'),
+        ]);
+    }
+
+    /**
+     * Show a prompt, edited or not, as it would be sent for a sample text. No AI call is made.
+     *
+     * @param string $name
+     * @param string $systemprompt
+     * @param string $prompttext
+     * @param int $listid
+     * @param int $level
+     * @param string $sample
+     * @return array
+     */
+    public static function preview_prompt($name, $systemprompt, $prompttext, $listid, $level, $sample) {
+        $params = self::validate_parameters(self::preview_prompt_parameters(), compact('name', 'systemprompt',
+            'prompttext', 'listid', 'level', 'sample'));
+        $context = \context_system::instance();
+        self::validate_context($context);
+        require_capability('mod/ogte:manageprompts', $context);
+        if (!array_key_exists($params['name'], \mod_ogte\local\ai\prompts::definitions())) {
+            throw new invalid_parameter_exception('Unknown prompt');
+        }
+        return \mod_ogte\local\ai\preview::fill($params['name'], $params['systemprompt'], $params['prompttext'],
+            $params['listid'], $params['level'], $params['sample']);
+    }
+
+    /**
+     * Returns for preview_prompt.
+     *
+     * @return external_single_structure
+     */
+    public static function preview_prompt_returns() {
+        return new external_single_structure([
+            'systemprompt' => new external_value(PARAM_RAW, 'the system prompt'),
+            'userprompt' => new external_value(PARAM_RAW, 'the prompt with its placeholders filled'),
+            'jsonmode' => new external_value(PARAM_BOOL, 'is the reply requested in JSON mode'),
+            'values' => new external_multiple_structure(new external_single_structure([
+                'name' => new external_value(PARAM_ALPHANUMEXT, 'placeholder name'),
+                'value' => new external_value(PARAM_RAW, 'its value'),
+                'used' => new external_value(PARAM_BOOL, 'is it in the prompt text'),
+                'empty' => new external_value(PARAM_BOOL, 'is the value empty'),
+                'description' => new external_value(PARAM_TEXT, 'what it holds'),
+            ])),
+            'unknown' => new external_multiple_structure(new external_value(PARAM_ALPHANUMEXT, 'a name'),
+                'placeholder-like words in the text that this prompt does not fill'),
+        ]);
+    }
 }

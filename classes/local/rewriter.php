@@ -573,6 +573,29 @@ class rewriter {
         string $current = '',
         array $glossary = []
     ): array {
+        $prompt = $this->prompt_vars($original, $index, $current, $glossary);
+        [$before, $origstats, $maxwords] = [$prompt['before'], $prompt['origstats'], $prompt['maxwords']];
+        if ($prompt['last'] && $prompt['last']['met']) {
+            // Nothing to repair.
+            return $this->result($prompt['last'], $before, $origstats, $index, $maxwords);
+        }
+        $reply = $generator->complete($prompt['name'], $prompt['vars']);
+        [$text, $newglossary] = self::parse_reply($reply);
+        return $this->result($this->check($text, $index, $newglossary), $before, $origstats, $index, $maxwords);
+    }
+
+    /**
+     * The prompt for one pass and its placeholder values: simplify_to_level for the first
+     * rewrite, or revise_to_level to repair the last attempt.
+     *
+     * @param string $original The passage the user pasted.
+     * @param int $index Target level index.
+     * @param string $current The last attempt, or empty for the first rewrite.
+     * @param array $glossary The last attempt's glossary.
+     * @return array name, vars, and for the result: before (the analysis of the original),
+     *     origstats, maxwords, and last (the check of the last attempt, or null).
+     */
+    public function prompt_vars(string $original, int $index, string $current = '', array $glossary = []): array {
         self::check_input($original);
         if (!isset($this->levels[$index])) {
             throw new \invalid_parameter_exception('Unknown level');
@@ -581,42 +604,61 @@ class rewriter {
         $before = $this->analyse($original);
         $origstats = new text_stats($original);
         $maxwords = self::max_words($origstats->words, $before['currentlevel'], $level['number']);
-        $language = generator::language_name($this->list->lang);
-        $levelname = $this->prompt_level_name($level);
+        $ret = ['before' => $before, 'origstats' => $origstats, 'maxwords' => $maxwords, 'last' => null];
 
         if (trim($current) === '') {
-            $reply = $generator->complete('simplify_to_level', [
+            $ret['name'] = 'simplify_to_level';
+            $ret['vars'] = $this->level_vars($level) + [
                 'passage' => $original,
-                'language' => $language,
-                'levelname' => $levelname,
-                'leveldescription' => $level['description'],
+                'originallevel' => $before['currentlevellabel'],
+                'originalwords' => $origstats->words,
+                'maxwords' => $maxwords ?? '',
                 'sentencerule' => self::sentence_rule($level),
                 'lengthrule' => self::length_rule($origstats->words, $maxwords),
                 'glossarymax' => self::glossary_max($maxwords ?? $origstats->words),
-            ]);
-        } else {
-            self::check_input($current);
-            $last = $this->check($current, $index, $glossary);
-            if ($last['met']) {
-                // Nothing to repair.
-                return $this->result($last, $before, $origstats, $index, $maxwords);
-            }
-            $reply = $generator->complete('revise_to_level', [
-                'passage' => $current,
-                'language' => $language,
-                'levelname' => $levelname,
-                'problems' => self::problems($last, $level),
-                'glossarywords' => self::glossary_text($last['glossary']),
-                'glossarymax' => self::glossary_max($last['stats']->words),
-            ]);
+            ];
+            return $ret;
         }
 
-        [$text, $newglossary] = self::parse_reply($reply);
-        return $this->result($this->check($text, $index, $newglossary), $before, $origstats, $index, $maxwords);
+        self::check_input($current);
+        $last = $this->check($current, $index, $glossary);
+        $ret['last'] = $last;
+        $ret['name'] = 'revise_to_level';
+        $ret['vars'] = $this->level_vars($level) + [
+            'passage' => $current,
+            'hardwords' => self::hard_words($last),
+            'longsentences' => self::long_sentences($last),
+            'problems' => self::problems($last, $level),
+            'glossarywords' => self::glossary_text($last['glossary']),
+            'glossarymax' => self::glossary_max($last['stats']->words),
+        ];
+        return $ret;
     }
 
     /**
-     * The level as the prompts name it, e.g. "Level 3 (words 801 to 1200) of the NGSL word list, CEFR A2".
+     * The prompt placeholders that come from the list and the level. A target the level does
+     * not have is empty.
+     *
+     * @param array $level
+     * @return array Placeholder name => value.
+     */
+    protected function level_vars(array $level): array {
+        return [
+            'language' => generator::language_name($this->list->lang),
+            'listname' => $this->list->name,
+            'level' => $this->prompt_level_name($level),
+            'levelname' => $level['name'] !== '' ? $level['name'] : 'Level ' . $level['number'],
+            'levelnumber' => $level['number'],
+            'cefr' => $level['cefr'],
+            'toprank' => $level['top'] ?: '',
+            'avgsentence' => $level['avgsentence'] ?: '',
+            'maxsentence' => $level['maxsentence'] ?: '',
+            'leveldescription' => $level['description'],
+        ];
+    }
+
+    /**
+     * The level in full, e.g. "Level 3 (words 801 to 1200) of the NGSL 1.2 word list, CEFR A2".
      *
      * @param array $level
      * @return string
@@ -672,20 +714,47 @@ class rewriter {
      */
     protected static function problems(array $check, array $level): string {
         $problems = [];
-        if ($check['coverage'] < self::COVERED && $check['uncovered']) {
-            $words = array_slice($check['uncovered'], 0, self::MAX_PROBLEM_WORDS);
-            $problems[] = 'These words are too hard for this level. Replace every one of them: '
-                . implode(', ', $words) . '.';
+        $hardwords = self::hard_words($check);
+        if ($hardwords !== '') {
+            $problems[] = 'These words are too hard for this level. Replace every one of them: ' . $hardwords . '.';
         }
-        if (!$check['sentences']['ok']) {
-            $lines = [];
-            foreach ($check['sentences']['over'] as $sentenceindex => $length) {
-                $lines[] = '- ' . $check['stats']->sentences[$sentenceindex] . ' (' . $length . ' words)';
-            }
+        $longsentences = self::long_sentences($check);
+        if ($longsentences !== '') {
             $problems[] = 'These sentences are too long. Split or shorten each one to ' . $level['maxsentence']
-                . ' words or fewer:' . "\n" . implode("\n", $lines);
+                . ' words or fewer:' . "\n" . $longsentences;
         }
         return implode("\n\n", $problems);
+    }
+
+    /**
+     * The words a repair must replace, most frequent first, or empty if coverage is met.
+     *
+     * @param array $check From check().
+     * @return string Comma separated.
+     */
+    protected static function hard_words(array $check): string {
+        if ($check['coverage'] >= self::COVERED || !$check['uncovered']) {
+            return '';
+        }
+        return implode(', ', array_slice($check['uncovered'], 0, self::MAX_PROBLEM_WORDS));
+    }
+
+    /**
+     * The sentences a repair must split, one per line with its length, or empty if the sentence
+     * targets are met.
+     *
+     * @param array $check From check().
+     * @return string
+     */
+    protected static function long_sentences(array $check): string {
+        if ($check['sentences']['ok']) {
+            return '';
+        }
+        $lines = [];
+        foreach ($check['sentences']['over'] as $sentenceindex => $length) {
+            $lines[] = '- ' . $check['stats']->sentences[$sentenceindex] . ' (' . $length . ' words)';
+        }
+        return implode("\n", $lines);
     }
 
     /**

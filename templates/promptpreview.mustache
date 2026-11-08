@@ -1,0 +1,64 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template mod_ogte/promptpreview
+
+    The preview panel on the prompt edit page. The result is rendered by mod_ogte/promptpreview_result.
+
+    Context variables required for this template:
+    * name - The prompt name.
+    * listoptions - The word lists, each with key and label.
+    * levelsjson - JSON: list id => levels, each with key and label.
+    * sample - The default sample text.
+    * istopic - Is the sample a topic (generate_article).
+
+    Example context (json):
+    {
+        "name": "simplify_to_level",
+        "listoptions": [{"key": 1, "label": "NGSL 1.2 (General English)"}],
+        "levelsjson": "{\"1\": [{\"key\": 0, \"label\": \"Level 1\"}]}",
+        "sample": "Honeybees have developed a remarkable system.",
+        "istopic": false
+    }
+}}
+<div class="ogte-promptpreview mt-5" id="{{uniqid}}_promptpreview" data-name="{{name}}" data-levels="{{levelsjson}}">
+    <h3>{{#str}}promptpreview, mod_ogte{{/str}}</h3>
+    <p class="text-muted">{{#str}}promptpreview_desc, mod_ogte{{/str}}</p>
+    <div class="d-flex flex-wrap align-items-end mb-3" style="gap: 12px;">
+        <div>
+            <label for="{{uniqid}}_pp_list">{{#str}}promptpreview_list, mod_ogte{{/str}}</label>
+            <select id="{{uniqid}}_pp_list" class="custom-select form-select ogte-pp-list">
+                {{#listoptions}}<option value="{{key}}">{{label}}</option>{{/listoptions}}
+            </select>
+        </div>
+        <div>
+            <label for="{{uniqid}}_pp_level">{{#str}}promptpreview_level, mod_ogte{{/str}}</label>
+            <select id="{{uniqid}}_pp_level" class="custom-select form-select ogte-pp-level"></select>
+        </div>
+        <button type="button" class="btn btn-secondary ogte-pp-button">{{#str}}promptpreview_button, mod_ogte{{/str}}</button>
+    </div>
+    <div class="form-group mb-3">
+        <label for="{{uniqid}}_pp_sample">{{#istopic}}{{#str}}promptpreview_topic, mod_ogte{{/str}}{{/istopic}}{{^istopic}}{{#str}}promptpreview_sample, mod_ogte{{/str}}{{/istopic}}</label>
+        <textarea id="{{uniqid}}_pp_sample" class="form-control ogte-pp-sample" rows="{{#istopic}}1{{/istopic}}{{^istopic}}6{{/istopic}}">{{sample}}</textarea>
+    </div>
+    <div class="ogte-pp-result" aria-live="polite"></div>
+</div>
+{{#js}}
+    require(['mod_ogte/promptpreview'], function(preview) {
+        preview.init('{{uniqid}}_promptpreview');
+    });
+{{/js}}

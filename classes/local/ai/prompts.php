@@ -39,6 +39,10 @@ class prompts {
         . "markdown, or any comment before or after the passage.\n"
         . 'Return a JSON object of the form {"article": "the passage"}.';
 
+    /** @var string[] The placeholders that describe the target word list and level, for the rewriter prompts. */
+    const LEVEL_PLACEHOLDERS = ['language', 'listname', 'level', 'levelname', 'levelnumber', 'cefr', 'toprank',
+        'avgsentence', 'maxsentence', 'leveldescription'];
+
     /** @var string System prompt shared by the passage prompts. */
     const PASSAGE_SYSTEM = 'You write graded reading passages for language learners.';
 
@@ -95,7 +99,7 @@ class prompts {
         $defs['simplify_to_level'] = [
             'systemprompt' => self::PASSAGE_SYSTEM,
             'prompttext' => "Simplify the {language} passage below, between [[ and ]], for language learners at "
-                . "{levelname}. {leveldescription}\n\n"
+                . "{level}. {leveldescription}\n\n"
                 . "Follow these rules. When they conflict, the earlier rule wins.\n"
                 . "1. Keep the main ideas and key facts, and keep them accurate: names, numbers, dates, places, who "
                 . "did what, and cause and effect. Keep the names of people, places and organisations, and keep "
@@ -114,8 +118,8 @@ class prompts {
             'maxtokens' => 16000,
             'effort' => 'medium',
             'temperature' => '',
-            'placeholders' => ['passage', 'language', 'levelname', 'leveldescription', 'sentencerule',
-                'lengthrule', 'glossarymax'],
+            'placeholders' => array_merge(['passage'], self::LEVEL_PLACEHOLDERS, ['originallevel', 'originalwords',
+                'maxwords', 'glossarymax', 'sentencerule', 'lengthrule']),
             'required' => ['passage'],
             'userinput' => ['passage'],
             'fragment' => false,
@@ -123,7 +127,7 @@ class prompts {
         $defs['revise_to_level'] = [
             'systemprompt' => self::PASSAGE_SYSTEM,
             'prompttext' => "The {language} passage below, between [[ and ]], was simplified for language learners "
-                . "at {levelname}, but parts of it are still too hard.\n\n"
+                . "at {level}, but parts of it are still too hard.\n\n"
                 . "{problems}\n\n"
                 . "Fix these problems. Replace each hard word with a common, everyday word or a short phrase, and "
                 . "rewrite the whole sentence it is in so the sentence stays natural and correct. Split long "
@@ -140,12 +144,33 @@ class prompts {
             'maxtokens' => 16000,
             'effort' => 'medium',
             'temperature' => '',
-            'placeholders' => ['passage', 'language', 'levelname', 'problems', 'glossarywords', 'glossarymax'],
-            'required' => ['passage', 'problems'],
+            'placeholders' => array_merge(['passage'], self::LEVEL_PLACEHOLDERS, ['hardwords', 'longsentences',
+                'problems', 'glossarywords', 'glossarymax']),
+            'required' => ['passage'],
             'userinput' => ['passage'],
             'fragment' => false,
         ];
         return $defs;
+    }
+
+    /**
+     * Update a prompt to its new default, but only if it still holds an old default text, so an
+     * edited prompt is kept.
+     *
+     * @param string $name
+     * @param string[] $oldsha1s The SHA-1 hashes of the old default prompt texts.
+     * @return bool Was it updated.
+     */
+    public static function update_default(string $name, array $oldsha1s): bool {
+        global $DB;
+        $record = $DB->get_record(self::TABLE, ['name' => $name]);
+        if (!$record || !in_array(sha1($record->prompttext), $oldsha1s)) {
+            return false;
+        }
+        $record->prompttext = self::definition($name)['prompttext'];
+        $record->timemodified = time();
+        $DB->update_record(self::TABLE, $record);
+        return true;
     }
 
     /**

@@ -72,4 +72,17 @@ $PAGE->navbar->add(s($name));
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('editprompt', constants::M_COMPONENT, s($name)));
 $form->display();
+
+// The preview fills the prompt being edited, for a sample text and a word list level.
+$listoptions = \mod_ogte\utils::get_list_options(SITEID);
+if ($listoptions) {
+    $istopic = $name === 'generate_article';
+    echo $OUTPUT->render_from_template('mod_ogte/promptpreview', [
+        'name' => $name,
+        'listoptions' => $listoptions,
+        'levelsjson' => json_encode(\mod_ogte\utils::get_level_options(SITEID)),
+        'sample' => get_string($istopic ? 'promptpreview_sampletopic' : 'promptpreview_sampletext', constants::M_COMPONENT),
+        'istopic' => $istopic,
+    ]);
+}
 echo $OUTPUT->footer();

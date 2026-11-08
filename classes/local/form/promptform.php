@@ -73,9 +73,13 @@ class promptform extends \moodleform {
 
         if ($def['placeholders']) {
             $placeholders = array_map(function ($placeholder) use ($def) {
-                $label = '{' . $placeholder . '}';
+                $label = \html_writer::tag('code', '{' . $placeholder . '}');
                 if (in_array($placeholder, $def['required'])) {
                     $label .= ' (' . get_string('required') . ')';
+                }
+                $stringid = 'placeholder_' . $placeholder;
+                if (get_string_manager()->string_exists($stringid, constants::M_COMPONENT)) {
+                    $label .= ': ' . get_string($stringid, constants::M_COMPONENT);
                 }
                 return $label;
             }, $def['placeholders']);
@@ -83,7 +87,8 @@ class promptform extends \moodleform {
                 'static',
                 'placeholders',
                 get_string('placeholders', constants::M_COMPONENT),
-                implode(', ', $placeholders) . '<br>' . get_string('placeholders_desc', constants::M_COMPONENT)
+                \html_writer::alist($placeholders, ['class' => 'mb-1'])
+                    . get_string('placeholders_desc', constants::M_COMPONENT)
             );
         }
 

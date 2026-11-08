@@ -128,8 +128,8 @@ function xmldb_ogte_upgrade($oldversion=0) {
         $table->add_field('systemprompt', XMLDB_TYPE_TEXT, null, null, null, null, null);
         $table->add_field('prompttext', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL, null, null);
         $table->add_field('maxtokens', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
-        $table->add_field('effort', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, '');
-        $table->add_field('temperature', XMLDB_TYPE_CHAR, '10', null, XMLDB_NOTNULL, null, '');
+        $table->add_field('effort', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('temperature', XMLDB_TYPE_CHAR, '10', null, XMLDB_NOTNULL, null, null);
         $table->add_field('usermodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
         $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
         $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
@@ -157,6 +157,15 @@ function xmldb_ogte_upgrade($oldversion=0) {
         \mod_ogte\local\rewriter::add_ngsl_targets();
 
         upgrade_mod_savepoint(true, 2026110601, 'ogte');
+    }
+
+    if ($oldversion < 2026110800) {
+        // The rewriter prompts take the level's targets as placeholders. Prompts still holding the
+        // old default text get the new one; edited prompts are kept.
+        \mod_ogte\local\ai\prompts::update_default('simplify_to_level', ['9ec2b3d643b946dcdcb72d700412e292ca0fa611']);
+        \mod_ogte\local\ai\prompts::update_default('revise_to_level', ['bb3e6ff69cc55d87bf0a44cbd21805d6d36419e2']);
+
+        upgrade_mod_savepoint(true, 2026110800, 'ogte');
     }
 
 

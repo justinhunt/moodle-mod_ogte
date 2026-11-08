@@ -1,6 +1,8 @@
-version 1.1.0 (Build: 2026110601)
+version 1.1.0 (Build: 2026110801)
 new Text Rewriter: analyse a text against every level of a word list, then simplify it to a chosen level, with up to 3 automatic repair passes checked by the profiler
 word list levels can have targets for the rewriter (cefr, avgsentence, maxsentence, description); the NGSL 1.2 list gets them on upgrade
+the rewriter prompts can use each level's targets as placeholders ({cefr}, {maxsentence}, {avgsentence}, {toprank}, {maxwords} ...), listed with descriptions on the prompt edit page
+the prompt edit page has a live preview: pick a word list and level and see each placeholder's value and the exact prompt that would be sent, without calling the AI
 now requires Moodle 4.5
 the AI tools call the site's own AI provider (OpenAI, Gemini or DeepSeek) instead of Cloud Poodll
 the AI prompts, token limits and reasoning effort can be edited on a new AI prompts admin page

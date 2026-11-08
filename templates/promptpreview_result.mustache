@@ -1,0 +1,64 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template mod_ogte/promptpreview_result
+
+    A prompt as it would be sent, and its placeholder values. From mod_ogte_preview_prompt.
+
+    Example context (json):
+    {
+        "systemprompt": "You write graded reading passages for language learners.",
+        "userprompt": "Simplify the English passage below ...",
+        "jsonmode": true,
+        "values": [{"name": "cefr", "token": "{cefr}", "value": "A2", "used": true, "empty": false, "description": "the level's CEFR level"}],
+        "unknown": ["levle"],
+        "unknownlist": "{levle}",
+        "hasunknown": true
+    }
+}}
+{{#hasunknown}}<div class="alert alert-warning">{{#str}}promptpreview_unknown, mod_ogte, {{unknownlist}}{{/str}}</div>{{/hasunknown}}
+
+<h4 class="h5">{{#str}}promptpreview_values, mod_ogte{{/str}}</h4>
+<div class="table-responsive">
+    <table class="table table-sm table-bordered ogte-pp-values">
+        <thead>
+            <tr>
+                <th scope="col">{{#str}}promptpreview_placeholder, mod_ogte{{/str}}</th>
+                <th scope="col">{{#str}}promptpreview_value, mod_ogte{{/str}}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#values}}
+            <tr class="{{^used}}text-muted{{/used}}">
+                <td style="min-width: 12em; max-width: 24em;">
+                    <code>{{token}}</code>
+                    {{^used}}<div class="small">{{#str}}promptpreview_notused, mod_ogte{{/str}}</div>{{/used}}
+                    <div class="small text-muted">{{description}}</div>
+                </td>
+                <td>{{#empty}}<em class="text-muted">{{#str}}promptpreview_empty, mod_ogte{{/str}}</em>{{/empty}}{{^empty}}<div class="ogte-pp-value">{{value}}</div>{{/empty}}</td>
+            </tr>
+            {{/values}}
+        </tbody>
+    </table>
+</div>
+
+<h4 class="h5">{{#str}}systemprompt, mod_ogte{{/str}}</h4>
+<pre class="ogte-pp-text p-2 border rounded">{{systemprompt}}</pre>
+
+<h4 class="h5">{{#str}}promptpreview_userprompt, mod_ogte{{/str}}</h4>
+<pre class="ogte-pp-text p-2 border rounded">{{userprompt}}</pre>
+{{#jsonmode}}<p class="text-muted small">{{#str}}promptpreview_jsonmode, mod_ogte{{/str}}</p>{{/jsonmode}}

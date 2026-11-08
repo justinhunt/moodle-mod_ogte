@@ -98,8 +98,8 @@
         <FIELD NAME="systemprompt" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="prompttext" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="maxtokens" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-        <FIELD NAME="effort" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="" SEQUENCE="false" COMMENT="Reasoning effort: low, medium, high, or empty for the model default"/>
-        <FIELD NAME="temperature" TYPE="char" LENGTH="10" NOTNULL="true" DEFAULT="" SEQUENCE="false" COMMENT="Empty to leave at the model default"/>
+        <FIELD NAME="effort" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false" COMMENT="Reasoning effort: low, medium, high, or empty for the model default"/>
+        <FIELD NAME="temperature" TYPE="char" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Empty to leave at the model default"/>
         <FIELD NAME="usermodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
       </FIELDS>

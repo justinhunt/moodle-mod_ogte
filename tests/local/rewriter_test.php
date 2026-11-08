@@ -29,6 +29,7 @@ use mod_ogte\local\ai\provider_client;
  */
 #[\PHPUnit\Framework\Attributes\CoversClass(rewriter::class)]
 #[\PHPUnit\Framework\Attributes\CoversClass(text_stats::class)]
+#[\PHPUnit\Framework\Attributes\CoversClass(\mod_ogte\local\ai\preview::class)]
 final class rewriter_test extends \advanced_testcase {
     /**
      * Make a small three level word list.
@@ -192,18 +193,49 @@ final class rewriter_test extends \advanced_testcase {
         $first = $rewriter->simplify($generator, $original, 0);
         $this->assertEquals('simplify_to_level', $generator->calls[0][0]);
         $this->assertEquals($original, $generator->calls[0][1]['passage']);
-        $this->assertStringContainsString('One of the', $generator->calls[0][1]['levelname']);
-        $this->assertStringContainsString('4 words or fewer', $generator->calls[0][1]['sentencerule']);
+        $vars = $generator->calls[0][1];
+        $this->assertStringContainsString('One of the', $vars['level']);
+        $this->assertEquals('One', $vars['levelname']);
+        $this->assertEquals(['A1', 3, 4, 3, 'Tiny.', 7, ''],
+            [$vars['cefr'], $vars['toprank'], $vars['maxsentence'], $vars['avgsentence'], $vars['leveldescription'],
+                $vars['originalwords'], $vars['maxwords']]);
+        $this->assertEquals('Level 3', $vars['originallevel']);
+        $this->assertStringContainsString('4 words or fewer', $vars['sentencerule']);
         $this->assertFalse($first['met']);
         $this->assertEquals('Simplified from Level 3 to Level 1 (A1)', $first['title']);
 
         $second = $rewriter->simplify($generator, $original, 0, $first['text'], $first['glossary']);
         $this->assertEquals('revise_to_level', $generator->calls[1][0]);
         $this->assertStringContainsString('dog', $generator->calls[1][1]['problems']);
+        $this->assertEquals('dog', $generator->calls[1][1]['hardwords']);
+        $this->assertEquals('', $generator->calls[1][1]['longsentences']);
         $this->assertTrue($second['met']);
         $this->assertGreaterThan($first['score'], $second['score']);
         $this->assertEquals('100%', $second['rows'][1]['rewritten']);
         $this->assertEmpty($second['notes']);
+    }
+
+    /**
+     * The prompt preview fills an edited prompt with the level's values, without an AI call.
+     */
+    public function test_prompt_preview(): void {
+        $this->resetAfterTest();
+        $list = $this->make_list();
+        $preview = \mod_ogte\local\ai\preview::fill('simplify_to_level', 'System.',
+            'At {cefr}, sentences up to {maxsentence} words. Not {levle}. {"article": ""} {passage}', $list->id, 0,
+            'The dog ran fast.');
+        $this->assertEquals('At A1, sentences up to 4 words. Not {levle}. {"article": ""} [[The dog ran fast.]]',
+            $preview['userprompt']);
+        $this->assertEquals(['levle'], $preview['unknown']);
+        $this->assertTrue($preview['jsonmode'] === false);
+        $values = array_column($preview['values'], null, 'name');
+        $this->assertTrue($values['cefr']['used']);
+        $this->assertFalse($values['toprank']['used']);
+        $this->assertEquals('3', $values['toprank']['value']);
+        $this->assertTrue($values['maxwords']['empty']);
+
+        $repair = \mod_ogte\local\ai\preview::fill('revise_to_level', '', '{hardwords}', $list->id, 0, 'The dog ran.');
+        $this->assertEquals('dog, ran', $repair['userprompt']);
     }
 
     /**
