@@ -184,8 +184,11 @@ span.mod_ogte_outoflevel:after {
     max-width: 1200px;
 }
 
-/* On the site front page the tabs sit inside .course-content .section-item, where core gives lists bullets. */
-ul.nav.nav-pills.mod_ogte_nav-pills {
+/*
+ * On the site front page the tabs sit inside .course-content .section-item .activity-item, where core gives
+ * lists bullets with selectors up to (0,3,3) specificity, so this needs (0,4,1).
+ */
+.mod_ogte_nav-pills-container > ul.nav.nav-pills.mod_ogte_nav-pills {
     list-style: none;
 }
 

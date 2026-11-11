@@ -1,4 +1,5 @@
-version 1.1.0 (Build: 2026111101)
+version 1.1.0 (Build: 2026111102)
+guests can use the Text Profiler and the Text Rewriter's analysis again: mod/ogte:use is now a read capability, since Moodle never gives guests a write capability
 new setting to log front page visitors in as guest before the page loads, replacing the redirect from inside the embedded OGTE tools
 new Text Generator: choose a word list, level, length, fiction or non-fiction, a description and words to include; the text is written at the level and checked and repaired like the Text Rewriter's, with a keyword list and its figures
 only word lists whose levels have sentence targets are offered in the Text Generator

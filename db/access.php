@@ -49,7 +49,7 @@ $capabilities = array(
     ),
 
     'mod/ogte:use' => array(
-        'captype' => 'write',
+        'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
         'archetypes' => array(
             'student' => CAP_ALLOW,
