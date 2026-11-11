@@ -139,11 +139,33 @@ define(['jquery', 'core/log', 'core/ajax'], function ($, log, ajax) {
         },
 
         /**
+         * Copy text to the clipboard.
+         *
+         * @param {String} text
+         * @returns {Promise}
+         */
+        copyText: function(text) {
+            if (navigator.clipboard && window.isSecureContext) {
+                return navigator.clipboard.writeText(text);
+            }
+            // Plain http: fall back to a selected textarea.
+            var area = $('<textarea>').val(text).css({position: 'fixed', top: 0, left: 0, opacity: 0});
+            $('body').append(area);
+            area[0].select();
+            try {
+                document.execCommand('copy');
+            } finally {
+                area.remove();
+            }
+            return Promise.resolve();
+        },
+
+        /**
          * Run one of the AI tools on the server, using the site's AI provider.
          *
          * @param {Number} ogteid The activity instance id.
-         * @param {String} action generate_article or grammar_correction.
-         * @param {String} text The topic or passage.
+         * @param {String} action grammar_correction.
+         * @param {String} text The passage.
          * @param {String} language The language code, e.g. en-US.
          * @return {Promise} Resolves to the passage the AI wrote.
          */

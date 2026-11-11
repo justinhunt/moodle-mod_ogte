@@ -168,6 +168,16 @@ function xmldb_ogte_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2026110800, 'ogte');
     }
 
+    if ($oldversion < 2026111100) {
+        // The Text Generator writes at a word list level: generate_article takes the level's
+        // targets, and the repair prompt no longer says the passage was simplified. Prompts still
+        // holding an old default text get the new one; edited prompts are kept.
+        \mod_ogte\local\ai\prompts::update_default('generate_article', ['519d530fe6e2e8ef02e0093a0fd49c9c7fb9a51a']);
+        \mod_ogte\local\ai\prompts::update_default('revise_to_level', ['c6ad81c069cf9c1fc8fcd95a8e16fc67d65f4814',
+            'bb3e6ff69cc55d87bf0a44cbd21805d6d36419e2']);
+
+        upgrade_mod_savepoint(true, 2026111100, 'ogte');
+    }
 
     return true;
 }

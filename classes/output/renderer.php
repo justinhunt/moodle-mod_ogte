@@ -243,6 +243,7 @@ class renderer extends \plugin_renderer_base {
         $params =['aiavailable' => \mod_ogte\local\ai\generator::is_available(), 'ogteid'=>$ogteid,
             'listoptions'=>utils::get_list_options($cm->course),'leveloptions'=>[],
             'listlevels'=>utils::get_level_options($cm->course),'passage'=>'','sitefaq'=>$siteintro,'form'=>false];
+        $params += \mod_ogte\local\text_generator::template_context($cm->course);
 
 
 

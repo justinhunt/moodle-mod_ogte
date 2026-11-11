@@ -31,6 +31,7 @@ use core_external\external_single_structure;
 use core_external\external_value;
 use \mod_ogte\utils;
 use \mod_ogte\local\ai\generator;
+use \mod_ogte\local\text_generator;
 use \mod_ogte\local\rewriter;
 use core_external\external_multiple_structure;
 
@@ -219,8 +220,8 @@ class mod_ogte_external extends external_api {
     public static function call_ai_parameters() {
         return new external_function_parameters([
             'ogteid' => new external_value(PARAM_INT, 'id of the ogte activity'),
-            'action' => new external_value(PARAM_ALPHANUMEXT, 'generate_article or grammar_correction'),
-            'text' => new external_value(PARAM_RAW, 'the topic or passage'),
+            'action' => new external_value(PARAM_ALPHANUMEXT, 'grammar_correction'),
+            'text' => new external_value(PARAM_RAW, 'the passage'),
             'language' => new external_value(PARAM_ALPHANUMEXT, 'language code, e.g. en-US', VALUE_DEFAULT, 'en-US'),
         ]);
     }
@@ -417,6 +418,99 @@ class mod_ogte_external extends external_api {
                 'target' => new external_value(PARAM_TEXT, 'the target'),
                 'status' => new external_value(PARAM_ALPHA, 'met, notmet, note or ref'),
                 'statuslabel' => new external_value(PARAM_TEXT, 'the result, in words'),
+                'ismet' => new external_value(PARAM_BOOL, 'target met'),
+                'isnotmet' => new external_value(PARAM_BOOL, 'target not met'),
+            ])),
+            'notes' => new external_multiple_structure(new external_single_structure([
+                'text' => new external_value(PARAM_TEXT, 'a note'),
+            ])),
+        ]);
+    }
+
+    /**
+     * Parameters for generate_text.
+     *
+     * @return external_function_parameters
+     */
+    public static function generate_text_parameters() {
+        return new external_function_parameters([
+            'ogteid' => new external_value(PARAM_INT, 'id of the ogte activity'),
+            'listid' => new external_value(PARAM_INT, 'id of the word list'),
+            'level' => new external_value(PARAM_INT, 'target level index, from 0'),
+            'texttype' => new external_value(PARAM_ALPHA, 'fiction or nonfiction'),
+            'words' => new external_value(PARAM_INT, 'target length in words'),
+            'topic' => new external_value(PARAM_RAW, 'what the text should be about'),
+            'keywords' => new external_value(PARAM_RAW, 'words to include, comma separated', VALUE_DEFAULT, ''),
+            'current' => new external_value(PARAM_RAW, 'the last attempt, or empty for the first', VALUE_DEFAULT, ''),
+            'glossary' => new external_multiple_structure(self::glossary_structure(), 'its glossary', VALUE_DEFAULT, []),
+        ]);
+    }
+
+    /**
+     * Write a text at a level, or repair the last attempt, with one AI call, and check the result.
+     *
+     * @param int $ogteid
+     * @param int $listid
+     * @param int $level
+     * @param string $texttype
+     * @param int $words
+     * @param string $topic
+     * @param string $keywords
+     * @param string $current
+     * @param array $glossary
+     * @return array
+     */
+    public static function generate_text(
+        $ogteid,
+        $listid,
+        $level,
+        $texttype,
+        $words,
+        $topic,
+        $keywords = '',
+        $current = '',
+        $glossary = []
+    ) {
+        $params = self::validate_parameters(
+            self::generate_text_parameters(),
+            compact('ogteid', 'listid', 'level', 'texttype', 'words', 'topic', 'keywords', 'current', 'glossary')
+        );
+        $courseid = self::activity_context($params['ogteid'], 'mod/ogte:useai');
+        $generator = text_generator::for_course($params['listid'], $courseid);
+        return $generator->generate(
+            self::ai_generator(),
+            $params['level'],
+            $params['texttype'],
+            $params['words'],
+            $params['topic'],
+            $params['keywords'],
+            $params['current'],
+            $params['glossary']
+        );
+    }
+
+    /**
+     * Return structure for generate_text.
+     *
+     * @return external_single_structure
+     */
+    public static function generate_text_returns() {
+        return new external_single_structure([
+            'text' => new external_value(PARAM_RAW, 'the passage'),
+            'html' => new external_value(PARAM_RAW, 'the passage as HTML, glossary words marked'),
+            'title' => new external_value(PARAM_TEXT, 'the title the AI gave, empty for a repair'),
+            'glossary' => new external_multiple_structure(self::glossary_structure()),
+            'glossarymax' => new external_value(PARAM_INT, 'the most glossary words allowed'),
+            'ignores' => new external_multiple_structure(new external_value(PARAM_RAW, 'a word for the profiler to ignore')),
+            'met' => new external_value(PARAM_BOOL, 'are the coverage and sentence targets met'),
+            'score' => new external_value(PARAM_FLOAT, 'for choosing the best pass: higher is better'),
+            'words' => new external_value(PARAM_INT, 'words in the passage'),
+            'levellabel' => new external_value(PARAM_TEXT, 'the target level label'),
+            'rows' => new external_multiple_structure(new external_single_structure([
+                'measure' => new external_value(PARAM_TEXT, 'what is measured'),
+                'value' => new external_value(PARAM_TEXT, 'the figure for the passage'),
+                'target' => new external_value(PARAM_TEXT, 'the target'),
+                'status' => new external_value(PARAM_ALPHA, 'met, notmet or ref'),
                 'ismet' => new external_value(PARAM_BOOL, 'target met'),
                 'isnotmet' => new external_value(PARAM_BOOL, 'target not met'),
             ])),

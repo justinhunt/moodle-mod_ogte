@@ -47,28 +47,6 @@ function($, Ajax, Templates, Notification, Str, Utils) {
     };
 
     /**
-     * Copy text to the clipboard.
-     *
-     * @param {String} text
-     * @returns {Promise}
-     */
-    var copyText = function(text) {
-        if (navigator.clipboard && window.isSecureContext) {
-            return navigator.clipboard.writeText(text);
-        }
-        // Plain http: fall back to a selected textarea.
-        var area = $('<textarea>').val(text).css({position: 'fixed', top: 0, left: 0, opacity: 0});
-        $('body').append(area);
-        area[0].select();
-        try {
-            document.execCommand('copy');
-        } finally {
-            area.remove();
-        }
-        return Promise.resolve();
-    };
-
-    /**
      * Set up one rewriter.
      *
      * @param {String} rootid The id of the rewriter's container.
@@ -123,7 +101,7 @@ function($, Ajax, Templates, Notification, Str, Utils) {
             });
         });
         this.find('.ogte-rw-copy').on('click', function() {
-            copyText(self.result.text).then(function() {
+            Utils.copyText(self.result.text).then(function() {
                 self.find('.ogte-rw-copied').show().delay(2000).fadeOut();
                 return null;
             }).catch(Notification.exception);

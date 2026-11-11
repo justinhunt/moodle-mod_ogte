@@ -191,6 +191,7 @@ $leveloptions=isset($data->listid) && isset($listlevels[$data->listid]) ? $listl
 $params =['aiavailable' => \mod_ogte\local\ai\generator::is_available(), 'ogteid'=>$cm->instance,
     'listoptions'=>utils::get_list_options($course->id),'leveloptions'=>$leveloptions,
     'listlevels'=>$listlevels,'passage'=>$data->text,'form'=>$form->render()];
+$params += \mod_ogte\local\text_generator::template_context($course->id);
 
 
 //we put the opts in html on the page because moodle/AMD doesn't like lots of opts in js

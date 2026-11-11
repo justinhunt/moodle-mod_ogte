@@ -41,7 +41,7 @@ final class external_test extends \advanced_testcase {
 
         // The access checks pass, so the call gets as far as finding no AI provider.
         try {
-            \mod_ogte_external::call_ai($ogte->id, 'generate_article', 'Cats');
+            \mod_ogte_external::call_ai($ogte->id, 'grammar_correction', 'Cats');
             $this->fail('Expected an exception');
         } catch (\moodle_exception $e) {
             $this->assertEquals('noaiprovider', $e->errorcode);
@@ -61,7 +61,7 @@ final class external_test extends \advanced_testcase {
         $this->setGuestUser();
 
         $this->expectException(\required_capability_exception::class);
-        \mod_ogte_external::call_ai($ogte->id, 'generate_article', 'Cats');
+        \mod_ogte_external::call_ai($ogte->id, 'grammar_correction', 'Cats');
     }
 
     /**
@@ -74,6 +74,6 @@ final class external_test extends \advanced_testcase {
         $this->setUser($this->getDataGenerator()->create_user());
 
         $this->expectException(\require_login_exception::class);
-        \mod_ogte_external::call_ai($ogte->id, 'generate_article', 'Cats');
+        \mod_ogte_external::call_ai($ogte->id, 'grammar_correction', 'Cats');
     }
 }

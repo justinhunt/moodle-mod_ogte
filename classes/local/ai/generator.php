@@ -26,15 +26,11 @@ use mod_ogte\constants;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class generator {
-    /** @var string Write a passage on a topic. */
-    const ACTION_GENERATE = 'generate_article';
-
     /** @var string Correct a passage's grammar and spelling. */
     const ACTION_GRAMMAR = 'grammar_correction';
 
     /** @var int[] The longest input each action accepts, in characters. */
     const MAX_INPUT = [
-        self::ACTION_GENERATE => 200,
         self::ACTION_GRAMMAR => 5000,
     ];
 
@@ -73,7 +69,7 @@ class generator {
      * Run one of the tools.
      *
      * @param string $action One of the ACTION_ constants.
-     * @param string $text The topic or passage.
+     * @param string $text The passage.
      * @param string $langcode E.g. en-US.
      * @return string The passage.
      */
@@ -89,16 +85,7 @@ class generator {
             throw new \moodle_exception('aitexttoolong', constants::M_COMPONENT, '', self::MAX_INPUT[$action]);
         }
 
-        $vars = ['language' => self::language_name($langcode)];
-        switch ($action) {
-            case self::ACTION_GENERATE:
-                $vars['topic'] = $text;
-                break;
-            case self::ACTION_GRAMMAR:
-                $vars['passage'] = $text;
-                break;
-        }
-        return $this->send($action, $vars);
+        return $this->send($action, ['language' => self::language_name($langcode), 'passage' => $text]);
     }
 
     /**

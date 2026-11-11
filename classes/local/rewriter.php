@@ -620,19 +620,33 @@ class rewriter {
             return $ret;
         }
 
+        return $this->repair_vars($current, $index, $glossary) + $ret;
+    }
+
+    /**
+     * The revise_to_level prompt and its placeholder values, to repair an attempt at a level.
+     *
+     * @param string $current The attempt.
+     * @param int $index Target level index.
+     * @param array $glossary The attempt's glossary.
+     * @return array name, vars, and last (the check of the attempt).
+     */
+    protected function repair_vars(string $current, int $index, array $glossary): array {
         self::check_input($current);
+        $level = $this->levels[$index];
         $last = $this->check($current, $index, $glossary);
-        $ret['last'] = $last;
-        $ret['name'] = 'revise_to_level';
-        $ret['vars'] = $this->level_vars($level) + [
-            'passage' => $current,
-            'hardwords' => self::hard_words($last),
-            'longsentences' => self::long_sentences($last),
-            'problems' => self::problems($last, $level),
-            'glossarywords' => self::glossary_text($last['glossary']),
-            'glossarymax' => self::glossary_max($last['stats']->words),
+        return [
+            'name' => 'revise_to_level',
+            'last' => $last,
+            'vars' => $this->level_vars($level) + [
+                'passage' => $current,
+                'hardwords' => self::hard_words($last),
+                'longsentences' => self::long_sentences($last),
+                'problems' => self::problems($last, $level),
+                'glossarywords' => self::glossary_text($last['glossary']),
+                'glossarymax' => self::glossary_max($last['stats']->words),
+            ],
         ];
-        return $ret;
     }
 
     /**
@@ -673,9 +687,10 @@ class rewriter {
      * The sentence rule for the first prompt.
      *
      * @param array $level
+     * @param bool $original Is there an original text, whose sentences must not get longer.
      * @return string
      */
-    protected static function sentence_rule(array $level): string {
+    protected static function sentence_rule(array $level, bool $original = true): string {
         if (!$level['maxsentence']) {
             return 'Use short, clear sentences that suit this level.';
         }
@@ -683,7 +698,7 @@ class rewriter {
         if ($level['avgsentence']) {
             $rule .= ', with an average of about ' . $level['avgsentence'] . ' words per sentence';
         }
-        return $rule . '. Do not make sentences longer than they are in the original.';
+        return $rule . ($original ? '. Do not make sentences longer than they are in the original.' : '.');
     }
 
     /**

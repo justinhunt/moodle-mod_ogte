@@ -1,79 +1,139 @@
-<div class="container">
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template mod_ogte/articlegenerator
+
+    The Text Generator: write a text at a word list level. The result is rendered by
+    mod_ogte/generator_result.
+
+    Context variables required for this template:
+    * ogteid - The activity id.
+    * aiavailable - Is an AI provider set up.
+    * generatorlists, generatorlistsjson - The lists with level targets, with their levels.
+    * generatorlengths, generatorlengthsjson, generatorlaststop - The length slider's stops.
+    * generatorminwords, generatormaxwords, generatormaxtopic, generatormaxkeywords, generatorcoverage - Limits.
+
+    Example context (json):
+    {
+        "ogteid": 1,
+        "aiavailable": true,
+        "generatorlists": [{"key": 1, "label": "NGSL 1.2 (General English)"}],
+        "generatorlistsjson": "[{\"key\": 1, \"label\": \"NGSL 1.2\", \"levels\": []}]",
+        "generatorlengths": [{"stop": 0, "words": 300, "label": "Short"}],
+        "generatorlengthsjson": "[300]",
+        "generatorlaststop": 0,
+        "generatorminwords": 50,
+        "generatormaxwords": 1500,
+        "generatormaxtopic": 1000,
+        "generatormaxkeywords": 200,
+        "generatorcoverage": 95
+    }
+}}
+<div class="container ogte-generator" id="{{uniqid}}_generator" data-lists="{{generatorlistsjson}}" data-lengths="{{generatorlengthsjson}}">
     <h3 class="ogte-section-title">{{#str}}articlegenerator, mod_ogte{{/str}}</h3>
-    <span class="ogte-panel-instructions">{{#str}}articlegenerator_instructions, mod_ogte{{/str}}</span><br/>
-    <input type="text" id="{{uniqid}}_ag_prompt" class="ogte-wide" placeholder="{{#str}}article-topic-here, mod_ogte{{/str}}"></input>
-    <div id="{{uniqid}}_ag_message" style="text-align: center"></div>
+    <p class="ogte-panel-instructions">{{#str}}articlegenerator_instructions, mod_ogte{{/str}}</p>
+
     {{^aiavailable}}<div class="alert alert-warning">{{#str}}noaiprovider, mod_ogte{{/str}}</div>{{/aiavailable}}
-    <button id="{{uniqid}}_ag_button" type="button" class="btn btn-primary" {{^aiavailable}}disabled{{/aiavailable}}>{{#str}}generate-article, mod_ogte{{/str}}</button>
-    <div><textarea id="the_ag_article" class="ogte-wide" style="overflow: auto; resize: auto; height: 150px; display: none"></textarea><br /></div>
-    <div id="{{uniqid}}_ag_articlestats" style="display: none" class="mod-ogte-stats ogte_generator_stats"></div>
+    {{^generatorlists}}<div class="alert alert-warning">{{#str}}gen_nolists, mod_ogte{{/str}}</div>{{/generatorlists}}
 
-    <!-- actions -->
-    <div id="ogte_generator_actions" class="mod-ogte-passage-opts" style="display: none">
-        <div class="ogte-spacer"></div>
-        <div class="ogte_article_action_button ogte_article_download_button">
-            <a class="btn btn-secondary ogte_downloadbutton" data-download-filename="#{{uniqid}}_ag_prompt" data-download-target="#the_ag_article"></a>
+    <div class="ogte-gen-settings">
+        {{! Shown once there is a text to go back to. }}
+        <div class="ogte-gen-back mb-3" style="display: none;">
+            <button type="button" class="btn btn-outline-primary ogte-gen-backtoresult"><i class="fa fa-arrow-right mr-1 me-1"></i>{{#str}}gen_backtoresult, mod_ogte{{/str}}</button>
         </div>
-        <div class="ogte_article_action_button ogte_article_copy_button">
-            <a class="btn btn-secondary ogte_clipboardbutton" data-clipboard-action="copy" data-clipboard-target="#the_ag_article"></a>
-            <span class="ogte_copied" style="display: none">{{#str}}copied, mod_ogte{{/str}}</span>
+
+        <div class="form-group mb-3">
+            <label for="{{uniqid}}_gen_list" class="font-weight-bold fw-bold">{{#str}}rw_wordlist, mod_ogte{{/str}}</label>
+            <select id="{{uniqid}}_gen_list" class="custom-select form-select ogte-gen-list">
+                {{#generatorlists}}<option value="{{key}}">{{label}}</option>{{/generatorlists}}
+            </select>
+        </div>
+
+        <fieldset class="mb-3">
+            <legend class="ogte-gen-legend font-weight-bold fw-bold">{{#str}}gen_level, mod_ogte{{/str}}</legend>
+            <div class="ogte-gen-levels" role="radiogroup"></div>
+            <div class="ogte-gen-levelsummary text-muted small mt-2"></div>
+        </fieldset>
+
+        <div class="row">
+            <div class="col-lg-6 mb-3">
+                <label for="{{uniqid}}_gen_slider" class="font-weight-bold fw-bold">{{#str}}gen_length, mod_ogte{{/str}}</label>
+                <input type="range" id="{{uniqid}}_gen_slider" class="form-range custom-range ogte-gen-slider" min="0" max="{{generatorlaststop}}" step="1" value="0">
+                <div class="ogte-gen-stops d-flex justify-content-between small">
+                    {{#generatorlengths}}
+                    <button type="button" class="btn btn-link p-0 text-muted ogte-gen-stop" data-stop="{{stop}}">{{label}}<br>{{words}}</button>
+                    {{/generatorlengths}}
+                </div>
+                <div class="d-flex align-items-center mt-2">
+                    <input type="number" id="{{uniqid}}_gen_words" class="form-control ogte-gen-words mr-2 me-2" min="{{generatorminwords}}" max="{{generatormaxwords}}" step="10" value="300" aria-describedby="{{uniqid}}_gen_wordshelp">
+                    <span>{{#str}}gen_words, mod_ogte{{/str}}</span>
+                </div>
+                <div id="{{uniqid}}_gen_wordshelp" class="form-text text-muted small">{{#str}}gen_lengthhelp, mod_ogte, {"min": {{generatorminwords}}, "max": {{generatormaxwords}} }{{/str}}</div>
+            </div>
+            <div class="col-lg-6 mb-3">
+                <fieldset>
+                    <legend class="ogte-gen-legend font-weight-bold fw-bold">{{#str}}gen_texttype, mod_ogte{{/str}}</legend>
+                    <div class="form-check">
+                        <input class="form-check-input ogte-gen-texttype" type="radio" name="{{uniqid}}_gen_texttype" id="{{uniqid}}_gen_nonfiction" value="nonfiction" checked>
+                        <label class="form-check-label" for="{{uniqid}}_gen_nonfiction">{{#str}}gen_nonfiction, mod_ogte{{/str}}</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input ogte-gen-texttype" type="radio" name="{{uniqid}}_gen_texttype" id="{{uniqid}}_gen_fiction" value="fiction">
+                        <label class="form-check-label" for="{{uniqid}}_gen_fiction">{{#str}}gen_fiction, mod_ogte{{/str}}</label>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="{{uniqid}}_gen_topic" class="font-weight-bold fw-bold">{{#str}}gen_topic, mod_ogte{{/str}}</label>
+            <textarea id="{{uniqid}}_gen_topic" class="form-control ogte-gen-topic" rows="3" maxlength="{{generatormaxtopic}}" placeholder="{{#str}}gen_topic_placeholder, mod_ogte{{/str}}" aria-describedby="{{uniqid}}_gen_topichelp"></textarea>
+            <div id="{{uniqid}}_gen_topichelp" class="form-text text-muted small">{{#str}}gen_topic_help, mod_ogte, {{generatormaxtopic}}{{/str}}</div>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="{{uniqid}}_gen_keywords" class="font-weight-bold fw-bold">{{#str}}gen_keywordsinput, mod_ogte{{/str}}</label>
+            <input type="text" id="{{uniqid}}_gen_keywords" class="form-control ogte-gen-keywords" maxlength="{{generatormaxkeywords}}" aria-describedby="{{uniqid}}_gen_keywordshelp">
+            <div id="{{uniqid}}_gen_keywordshelp" class="form-text text-muted small">{{#str}}gen_keywordsinput_help, mod_ogte{{/str}}</div>
+        </div>
+
+        <div>
+            <button type="button" class="btn btn-primary btn-lg ogte-gen-generate" {{^aiavailable}}disabled{{/aiavailable}}{{^generatorlists}} disabled{{/generatorlists}}>{{#str}}gen_generate, mod_ogte{{/str}}</button>
+            <div class="text-muted small mt-2">{{#str}}gen_target, mod_ogte, {{generatorcoverage}}{{/str}}</div>
         </div>
     </div>
-    <div class="ogte_sendtoeditor_button text-center" id="ogte_ag_sendtoeditor_button"  style="display: none">
-        <a class="btn btn-secondary ogte_ar_sendtoeditor_button" data-send-target="#the_ag_article">{{#str}}send-to-editor, mod_ogte{{/str}}</a>
+
+    <div class="ogte-gen-progress alert alert-info mt-4" style="display: none;" role="status" aria-live="polite">
+        <i class="fa fa-spinner fa-spin mr-2 me-2"></i><span class="ogte-gen-progressmessage"></span>
     </div>
 
+    <div class="ogte-gen-result mt-4" style="display: none;"></div>
 
+    {{! The result actions stay on the page, so the Text Profiler's send button handler finds them. }}
+    <div class="ogte-gen-actions" style="display: none;"><div class="d-flex flex-wrap mt-3">
+        <textarea id="the_ag_article" class="d-none" aria-hidden="true"></textarea>
+        <button type="button" class="btn btn-outline-secondary ogte-gen-copy mr-2 me-2 mb-2"><i class="fa fa-copy mr-1 me-1"></i>{{#str}}gen_copy, mod_ogte{{/str}}</button>
+        <span class="ogte-gen-copied text-success align-self-center mr-2 me-2 mb-2" style="display: none;">{{#str}}copied, mod_ogte{{/str}}</span>
+        <button type="button" class="btn btn-outline-secondary ogte-gen-download mr-2 me-2 mb-2"><i class="fa fa-download mr-1 me-1"></i>{{#str}}gen_download, mod_ogte{{/str}}</button>
+        <a class="btn btn-outline-primary ogte_ar_sendtoeditor_button ml-auto ms-auto mb-2" role="button" tabindex="0" data-send-target="#the_ag_article">{{#str}}rw_sendtoprofiler, mod_ogte{{/str}}</a>
+    </div></div>
 </div>
-{{^element.frozen}}
-    {{#js}}
-        // <script>
-            require(['jquery','core/templates','core/notification','mod_ogte/utils'], function($,templates,notification, utils) {
-
-                var promptbox= $('#{{uniqid}}_ag_prompt');
-                var articlebox= $('#the_ag_article');
-                var articlestats= $('#{{uniqid}}_ag_articlestats');
-                var articleactions= $('#ogte_generator_actions');
-                var sendtoeditor= $('#ogte_ag_sendtoeditor_button');
-                var themessage= $('#{{uniqid}}_ag_message');
-
-                $('#{{uniqid}}_ag_button').on('click',function(){
-                    //show a spinner
-                    themessage.html('<i class="fa fa-spinner fa-spin fa-sm"></i>');
-
-
-                    var theprompt = promptbox.val();
-                    //no super long readings or empty ones
-                    if(!theprompt || theprompt.trim()==='') {
-                        themessage.text('{{#str}}entersomething, mod_ogte{{/str}}');
-                        return;
-                    }
-                    if(theprompt.length > 200){
-                        themessage.text('{{#str}}text-too-long-200, mod_ogte{{/str}}');
-                        return;
-                    }
-                    var language = 'en-US';
-                    utils.call_ai({{ogteid}}, 'generate_article', theprompt, language).then(function(thearticle){
-                        themessage.text('');
-                        articlebox.val(thearticle);
-                        articlebox.show();
-                        articleactions.show();
-                        sendtoeditor.show();
-
-                        var textStatsData = utils.analyzeText(thearticle);
-                        templates.render('mod_ogte/textstatstable', textStatsData).done(function(html, js) {
-                            articlestats.fadeOut("fast", function() {
-                                templates.replaceNodeContents(articlestats, html, js);
-                                articlestats.fadeIn("fast");
-                            }.bind(this));
-
-                        }.bind(this)).fail(notification.exception);
-
-                    }).catch(function(error) {
-                        themessage.text('');
-                        notification.exception(error);
-                    });
-                });
-            });
-    {{/js}}
-{{/element.frozen}}
+{{#js}}
+    require(['mod_ogte/textgenerator'], function(textgenerator) {
+        textgenerator.init('{{uniqid}}_generator', {{ogteid}}, {{#aiavailable}}true{{/aiavailable}}{{^aiavailable}}false{{/aiavailable}});
+    });
+{{/js}}

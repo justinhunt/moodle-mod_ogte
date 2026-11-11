@@ -18,6 +18,7 @@ namespace mod_ogte\local\ai;
 
 use mod_ogte\constants;
 use mod_ogte\local\rewriter;
+use mod_ogte\local\text_generator;
 
 /**
  * Preview a prompt as it would be sent, for a sample text and a word list level. No AI call is made.
@@ -31,7 +32,8 @@ class preview {
      * Fill a prompt, edited or not, with the values it would get for a sample text.
      *
      * The rewriter prompts get the values the rewriter would give them: for revise_to_level the
-     * sample is treated as a first rewrite that still has problems at the level.
+     * sample is treated as a first rewrite that still has problems at the level. generate_article
+     * gets a short fiction passage with sample words to include.
      *
      * @param string $name Prompt name.
      * @param string $systemprompt
@@ -62,7 +64,9 @@ class preview {
                 $vars = (new rewriter($list))->prompt_vars($sample, $level, $sample)['vars'];
                 break;
             case 'generate_article':
-                $vars = ['language' => generator::language_name($list->lang), 'topic' => $sample];
+                $keywords = get_string('promptpreview_samplekeywords', constants::M_COMPONENT);
+                $vars = (new text_generator($list))
+                    ->generate_vars($level, 'fiction', text_generator::LENGTHS[0], $sample, $keywords)['vars'];
                 break;
             default:
                 $vars = ['language' => generator::language_name($list->lang), 'passage' => $sample];

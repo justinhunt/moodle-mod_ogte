@@ -83,6 +83,16 @@ $functions = array(
         'ajax'        => true,
         'readonlysession' => true,
     ),
+    'mod_ogte_generate_text' => array(
+        'classname'   => 'mod_ogte_external',
+        'methodname'  => 'generate_text',
+        'classpath'   => 'mod/ogte/externallib.php',
+        'description' => 'Text Generator: write a text at a level, or repair the last attempt, and check it.',
+        'capabilities' => 'mod/ogte:useai',
+        'type'        => 'read',
+        'ajax'        => true,
+        'readonlysession' => true,
+    ),
     'mod_ogte_preview_prompt' => array(
         'classname'   => 'mod_ogte_external',
         'methodname'  => 'preview_prompt',
