@@ -691,7 +691,8 @@ body .fancybox__backdrop {
 }
 
 .ogte-passageandstats table,
-.ogte-passageandstats table * {
+.ogte-passageandstats table tr,
+.ogte-passageandstats table td {
     border: 0 !important;
     border-style: none !important;
     outline: none !important;
