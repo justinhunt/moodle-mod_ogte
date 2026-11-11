@@ -184,6 +184,11 @@ span.mod_ogte_outoflevel:after {
     max-width: 1200px;
 }
 
+/* On the site front page the tabs sit inside .course-content .section-item, where core gives lists bullets. */
+ul.nav.nav-pills.mod_ogte_nav-pills {
+    list-style: none;
+}
+
 .ogte-viewentries-panel-footer {
     margin-top: 8px;
     text-align: right;
@@ -676,4 +681,21 @@ body .fancybox__backdrop {
 .ogte-promptpreview .ogte-pp-text {
     background-color: var(--bs-light, #f8f9fa);
     font-size: 0.875rem;
+}
+
+.ogte-passageandstats table {
+    border-style: none;
+}
+
+.ogte-passageandstats table,
+.ogte-passageandstats table * {
+    border: 0 !important;
+    border-style: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.ogte-passageandstats table {
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
 }
