@@ -463,3 +463,5 @@ $string['gen_topic_placeholder'] = 'e.g. A girl called Mia finds an old map in h
 $string['gen_untitled'] = 'Generated text';
 $string['gen_wordcount'] = '{$a->words} words · {$a->level}';
 $string['gen_words'] = 'words';
+$string['frontpageguestlogin'] = 'Log front page visitors in as guest';
+$string['frontpageguestlogin_desc'] = 'Visitors who arrive at the site front page without logging in are logged in as guest straight away, so the OGTE tools embedded there work for them. This also needs "Auto-login guests" to be on and the guest login button to be shown, and the guest role needs the mod/ogte:use capability.';

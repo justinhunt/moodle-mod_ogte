@@ -70,6 +70,13 @@ if ($ADMIN->fulltree) {
         PARAM_TEXT
     ));
 
+    $settings->add(new admin_setting_configcheckbox(
+        constants::M_COMPONENT . '/frontpageguestlogin',
+        get_string('frontpageguestlogin', constants::M_COMPONENT),
+        get_string('frontpageguestlogin_desc', constants::M_COMPONENT),
+        0
+    ));
+
     $settings->add(new admin_setting_configselect(
         'ogte/showrecentactivity',
         get_string('showrecentactivity', 'ogte'),

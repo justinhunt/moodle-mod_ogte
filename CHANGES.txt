@@ -1,4 +1,5 @@
-version 1.1.0 (Build: 2026111100)
+version 1.1.0 (Build: 2026111101)
+new setting to log front page visitors in as guest before the page loads, replacing the redirect from inside the embedded OGTE tools
 new Text Generator: choose a word list, level, length, fiction or non-fiction, a description and words to include; the text is written at the level and checked and repaired like the Text Rewriter's, with a keyword list and its figures
 only word lists whose levels have sentence targets are offered in the Text Generator
 new Text Rewriter: analyse a text against every level of a word list, then simplify it to a chosen level, with up to 3 automatic repair passes checked by the profiler
